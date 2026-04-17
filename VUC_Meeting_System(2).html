@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VUC — Meeting System & Operating Framework</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a1a;font-size:14px;line-height:1.6}
+.hdr{background:#1A1A2E;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.hdr-left h1{color:#fff;font-size:22px;font-weight:700}.hdr-left p{color:#7aaccc;font-size:13px;margin-top:2px}
+.hdr-badge{background:rgba(255,255,255,0.1);color:#aaa;font-size:11px;padding:4px 10px;border-radius:20px}
+.nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 32px;display:flex;gap:2px;overflow-x:auto}
+.nav button{background:none;border:none;border-bottom:2px solid transparent;padding:14px 16px;font-size:13px;font-weight:500;color:#666;cursor:pointer;white-space:nowrap;transition:all .15s}
+.nav button:hover{color:#2C5F8A}.nav button.on{color:#2C5F8A;border-bottom-color:#2C5F8A}
+.main{max-width:1060px;margin:0 auto;padding:28px 20px}
+.tab{display:none}.tab.on{display:block}
+.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#999;margin-bottom:14px}
+.week{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:10px}
+.day-col{display:flex;flex-direction:column;gap:8px}
+.day-lbl{font-size:10px;font-weight:700;text-align:center;color:#999;text-transform:uppercase;letter-spacing:.06em;padding:4px 0}
+.mcard{background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:10px 11px;cursor:pointer;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.mcard:hover{border-color:#2C5F8A;transform:translateY(-1px);box-shadow:0 3px 8px rgba(44,95,138,0.12)}
+.mcard.sel{border-color:#2C5F8A;background:#EFF6FF;box-shadow:0 0 0 2px rgba(44,95,138,0.15)}
+.mtag{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.t-exec{background:#DCFCE7;color:#1E7B34}.t-vwc{background:#FEF3C7;color:#B45309}
+.t-pipe{background:#EFF6FF;color:#2C5F8A}.t-async{background:#f5f5f5;color:#666}
+.t-ideas{background:#FEE2E2;color:#B91C1C}.t-bi{background:#f5f5f5;color:#999;border:1px solid #ccc}
+.mtitle{font-size:12px;font-weight:700;color:#1a1a1a;line-height:1.3;margin-bottom:2px}.mmeta{font-size:11px;color:#666}
+.empty-day{background:#fff;border:1px dashed #ccc;border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:center;min-height:72px}
+.empty-day span{font-size:11px;color:#999;text-align:center;line-height:1.5}
+.periodic{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.periodic .mcard{flex:1;min-width:200px}
+.week-note{font-size:11px;color:#999;text-align:center;padding:6px 0}
+.dp{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,0.07)}
+.dp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #e8e8e8}
+.dp-title{font-size:16px;font-weight:700;color:#1A1A2E}.dp-meta{font-size:12px;color:#666;margin-top:3px}
+.dp-x{font-size:11px;color:#666;cursor:pointer;padding:4px 10px;border:1px solid #ccc;border-radius:20px;flex-shrink:0;background:#fff}
+.dp-x:hover{background:#f5f5f5}
+.dp-sl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#2C5F8A;margin:12px 0 6px}
+.dp-ul{list-style:none}.dp-ul li{font-size:13px;color:#1a1a1a;padding:4px 0 4px 16px;position:relative;line-height:1.5}
+.dp-ul li::before{content:"—";position:absolute;left:0;color:#ccc}
+.dp-out{background:#EFF6FF;border-left:3px solid #2C5F8A;border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:#1A1A2E;margin-top:6px}
+.pipe-wrap{display:flex;align-items:stretch;overflow-x:auto;margin-bottom:20px;border-radius:8px;overflow:hidden;border:1px solid #e8e8e8}
+.ps{flex:1;min-width:120px;padding:14px 10px;text-align:center;background:#f5f5f5;border-right:1px solid #e8e8e8}
+.ps:last-child{border-right:none}.ps.amber{background:#FEF3C7}.ps.blue{background:#EFF6FF}.ps.green{background:#DCFCE7}
+.ps-when{font-size:9px;font-weight:700;color:#2C5F8A;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.ps-name{font-size:12px;font-weight:700;color:#1A1A2E;margin-bottom:6px;line-height:1.2}.ps-desc{font-size:11px;color:#666;line-height:1.4}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.rc{background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.rl{font-size:10px;font-weight:700;color:#2C5F8A;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}.rv{font-size:12px;color:#333;line-height:1.5}
+.ch-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.ch{background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:12px 14px}
+.ch-name{font-size:12px;font-weight:700;color:#2C5F8A;font-family:monospace;margin-bottom:4px}.ch-desc{font-size:12px;color:#666;line-height:1.4}
+table.tt{width:100%;border-collapse:collapse;margin-bottom:20px}
+table.tt th{background:#1A1A2E;color:#fff;font-size:11px;font-weight:600;padding:10px 12px;text-align:left}
+table.tt td{font-size:12px;padding:10px 12px;border-bottom:1px solid #e8e8e8;vertical-align:top}
+table.tt tr:nth-child(even) td{background:#f5f5f5}
+table.tt td:first-child{font-weight:700;color:#2C5F8A;white-space:nowrap}
+table.ot{width:100%;border-collapse:collapse;margin-bottom:12px}
+table.ot td{padding:12px 14px;border-bottom:1px solid #e8e8e8;font-size:13px;vertical-align:top}
+table.ot tr:nth-child(odd) td{background:#f5f5f5}
+table.ot tr:nth-child(odd) td:first-child{background:#D6E8F5}
+table.ot td:first-child{font-weight:700;color:#2C5F8A;white-space:nowrap;width:210px;font-size:12px}
+.principle{background:#fff;border-left:4px solid #2C5F8A;border-radius:0 12px 12px 0;padding:16px 20px;font-size:14px;color:#1A1A2E;line-height:1.7;font-style:italic;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-top:12px}
+.ro-rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.ro-rule{border-radius:8px;padding:12px 14px;border:1px solid transparent}
+.ro-risk-box{background:#FEF2F2;border-color:#FCA5A5}.ro-opp-box{background:#F0FDF4;border-color:#86EFAC}
+.ro-rl{font-size:11px;font-weight:700;margin-bottom:4px}.ro-rv{font-size:12px;line-height:1.5}
+.ro-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+.ro-table th{font-size:11px;padding:10px 12px;text-align:left;font-weight:600;color:#fff;background:#1A1A2E}
+.ro-table td{font-size:12px;padding:8px 10px;border-bottom:1px solid #e8e8e8;vertical-align:middle}
+.ro-table tr:nth-child(even) td{background:#fafafa}
+.ro-type{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase}
+.type-risk{background:#FEE2E2;color:#7F1D1D}.type-opp{background:#DCFCE7;color:#14532D}
+.prob-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.ph{background:#FEE2E2;color:#7F1D1D}.pm{background:#FEF9C3;color:#78350F}.pl{background:#DCFCE7;color:#14532D}
+.status-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.s-open{background:#DBEAFE;color:#1E40AF}.s-mon{background:#F3F4F6;color:#555}
+.s-esc{background:#FEE2E2;color:#7F1D1D}.s-act{background:#DCFCE7;color:#14532D}.s-closed{background:#F0FDF4;color:#166534}
+.matrix-wrap{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:16px;margin-bottom:16px}
+.matrix-title{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px}.matrix-sub{font-size:11px;color:#888;margin-bottom:14px}
+.matrix-grid{display:grid;grid-template-columns:60px repeat(3,1fr);gap:2px}
+.mx{padding:10px 8px;border-radius:4px;text-align:center;font-size:11px;cursor:pointer;transition:all .15s;border:2px solid transparent}
+.mx:hover{transform:scale(1.03);z-index:1;position:relative}.mx.sel{border-color:#1a1a1a!important;transform:scale(1.05);z-index:2;position:relative}
+.mx-hdr{background:#f5f5f5;font-weight:700;color:#666;font-size:10px;text-transform:uppercase;letter-spacing:.04em;cursor:default}
+.mx-hdr:hover{transform:none}
+.mx-prob{background:#1A1A2E;color:#fff;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.04em;cursor:default;border-radius:4px}
+.mx-prob:hover{transform:none}
+.mx-low{background:#DCFCE7;color:#166534}.mx-med{background:#FEF9C3;color:#854D0E}
+.mx-high{background:#FEE2E2;color:#991B1B}.mx-crit{background:#450A0A;color:#FCA5A5;font-weight:700}
+.mx-label{font-weight:700;font-size:12px;margin-bottom:2px}.mx-action{font-size:10px;opacity:.8;line-height:1.3}
+.matrix-detail{border-radius:8px;padding:14px 16px;margin-top:10px;font-size:13px;line-height:1.6;display:none;color:#fff}
+.matrix-detail.show{display:block}
+.md-level{font-size:16px;font-weight:700;margin-bottom:6px}.md-action{font-size:13px;margin-bottom:4px;opacity:.9}.md-jira{font-size:12px;opacity:.7}
+@media(max-width:640px){.week{grid-template-columns:1fr 1fr}.rgrid,.ch-grid,.ro-rule-grid{grid-template-columns:1fr}.hdr{padding:16px}.main{padding:16px 12px}.nav{padding:0 12px}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-left"><h1>VUC</h1><p>Meeting System &amp; Operating Framework</p></div>
+  <div class="hdr-badge">v1.1 &mdash; April 2026</div>
+</div>
+<nav class="nav">
+  <button class="on" onclick="sw('cal',this)">Weekly Calendar</button>
+  <button onclick="sw('pipe',this)">Idea Pipeline</button>
+  <button onclick="sw('ro',this)">Risks &amp; Opportunities</button>
+  <button onclick="sw('tools',this)">Jira + Teams</button>
+  <button onclick="sw('rules',this)">Operating Rules</button>
+</nav>
+<div class="main">
+
+<!-- CALENDAR -->
+<div class="tab on" id="tab-cal">
+  <div id="dp" style="display:none" class="dp">
+    <div class="dp-head"><div><div class="dp-title" id="dp-t"></div><div class="dp-meta" id="dp-m"></div></div><div class="dp-x" onclick="closeDP()">close &times;</div></div>
+    <div id="dp-b"></div>
+  </div>
+  <p class="sec-label">Weekly cadence &mdash; click any meeting for full detail</p>
+  <div class="week">
+    <div class="day-col"><div class="day-lbl">Monday</div>
+      <div class="mcard" id="c-mon1" onclick="show('mon1')"><span class="mtag t-exec">Execution</span><div class="mtitle">Weekly Execution</div><div class="mmeta">45 min &middot; Louis, Yasin, Lucas</div></div>
+    </div>
+    <div class="day-col"><div class="day-lbl">Tuesday</div>
+      <div class="mcard" id="c-tue1" onclick="show('tue1')"><span class="mtag t-vwc">VWC</span><div class="mtitle">VWC Weekly Objectives</div><div class="mmeta">30 min &middot; morning</div></div>
+      <div class="mcard" id="c-tue2" onclick="show('tue2')"><span class="mtag t-pipe">Pipeline</span><div class="mtitle">Pipeline Review</div><div class="mmeta">45 min &middot; afternoon</div></div>
+    </div>
+    <div class="day-col"><div class="day-lbl">Wednesday</div><div class="empty-day"><span>No meetings<br>Deep work day</span></div></div>
+    <div class="day-col"><div class="day-lbl">Thursday</div>
+      <div class="mcard" id="c-thu1" onclick="show('thu1')"><span class="mtag t-async">Async</span><div class="mtitle">Status Update</div><div class="mmeta">No meeting &middot; owners post</div></div>
+    </div>
+    <div class="day-col"><div class="day-lbl">Friday</div>
+      <div class="mcard" id="c-fri1" onclick="show('fri1')"><span class="mtag t-ideas">Ideas</span><div class="mtitle">Ideas Session</div><div class="mmeta">30 min &middot; Louis, Yasin, Lucas</div></div>
+    </div>
+  </div>
+  <div class="periodic">
+    <div class="mcard" id="c-biw1" onclick="show('biw1')"><span class="mtag t-bi">Bi-weekly</span><div class="mtitle">Incubation Review</div><div class="mmeta">45 min &middot; alternating Tuesdays</div></div>
+    <div class="mcard" id="c-monthly" onclick="show('monthly')"><span class="mtag t-bi">Monthly</span><div class="mtitle">Strategic Review + Matrix Update</div><div class="mmeta">90 min &middot; last Monday of month</div></div>
+  </div>
+  <p class="week-note">Thursday is an intentional buffer &mdash; follow-ups, deep work, or rescheduling only</p>
+</div>
+
+<!-- PIPELINE -->
+<div class="tab" id="tab-pipe">
+  <p class="sec-label">Idea-to-execution pipeline &mdash; 6 stages in Jira</p>
+  <div class="pipe-wrap">
+    <div class="ps amber"><div class="ps-when">Friday</div><div class="ps-name">Idea Pool</div><div class="ps-desc">Jira ticket created before session closes. Provisional owner assigned.</div></div>
+    <div class="ps"><div class="ps-when">Tuesday PM</div><div class="ps-name">Under Review</div><div class="ps-desc">Pipeline Review. Owner confirmed. Urgency written in ticket.</div></div>
+    <div class="ps blue"><div class="ps-when">Bi-weekly</div><div class="ps-name">Incubation</div><div class="ps-desc">Owner presents 5-min case. Scored in Evaluation Matrix.</div></div>
+    <div class="ps blue"><div class="ps-when">Bi-weekly</div><div class="ps-name">Approved</div><div class="ps-desc">Score qualifies + resources confirmed. Jira subtasks with deadlines.</div></div>
+    <div class="ps green"><div class="ps-when">Monday</div><div class="ps-name">Active Execution</div><div class="ps-desc">Reports every Monday. Owner accountable for weekly progress.</div></div>
+  </div>
+  <p class="sec-label">Pipeline rules</p>
+  <div class="rgrid">
+    <div class="rc"><div class="rl">No Jira ticket</div><div class="rv">The idea does not exist. Ticket created before the Ideas Session closes &mdash; no exceptions.</div></div>
+    <div class="rc"><div class="rl">No owner</div><div class="rv">Cannot pass Under Review. Owner = whoever proposed it or actively champions it.</div></div>
+    <div class="rc"><div class="rl">MVP exists</div><div class="rv">Skip Idea Pool. Enter Incubation directly. Still requires a Jira ticket and a named owner on day one.</div></div>
+    <div class="rc"><div class="rl">Fast-track</div><div class="rv">Any founder can escalate to Approved &mdash; but must create ticket + owner + Jira subtasks in the same act.</div></div>
+    <div class="rc"><div class="rl">Urgency unwritten</div><div class="rv">Urgency stated verbally does not count. It must be written in the Jira ticket. Unwritten urgency is not urgency.</div></div>
+    <div class="rc"><div class="rl">Killed / Parked</div><div class="rv">Reason documented in Jira. Never deleted. Parked ideas reviewed every 90 days in Strategic Review.</div></div>
+  </div>
+</div>
+
+<!-- R&O -->
+<div class="tab" id="tab-ro">
+  <div class="ro-rule-grid">
+    <div class="ro-rule ro-risk-box">
+      <div class="ro-rl" style="color:#7F1D1D">When does it enter the Weekly Execution?</div>
+      <div class="ro-rv" style="color:#450A0A">Only if its Jira status changed this week &mdash; new, escalated, or closed. No change = not discussed. The section is skipped entirely if nothing changed.</div>
+    </div>
+    <div class="ro-rule ro-opp-box">
+      <div class="ro-rl" style="color:#14532D">What happens when it enters?</div>
+      <div class="ro-rv" style="color:#14532D">Owner presents in 60 seconds: what changed, what is the action. Action becomes a child Jira ticket linked to the R&amp;O ticket.</div>
+    </div>
+  </div>
+  <p class="sec-label" style="margin-bottom:8px">Priority matrix &mdash; click any cell to see required action</p>
+  <div class="matrix-wrap">
+    <div class="matrix-title">Probability &times; Impact</div>
+    <div class="matrix-sub">Click a cell to understand what action it requires and how it enters the Monday meeting</div>
+    <div class="matrix-grid">
+      <div class="mx mx-hdr"></div>
+      <div class="mx mx-hdr">Low impact</div>
+      <div class="mx mx-hdr">Medium impact</div>
+      <div class="mx mx-hdr">High impact</div>
+      <div class="mx mx-prob">High prob.</div>
+      <div class="mx mx-med" onclick="showMatrix('HM','vuc')" id="vuc-HM"><div class="mx-label">Medium</div><div class="mx-action">Flag in meeting</div></div>
+      <div class="mx mx-high" onclick="showMatrix('HH2','vuc')" id="vuc-HH2"><div class="mx-label">High</div><div class="mx-action">Discuss + action</div></div>
+      <div class="mx mx-crit" onclick="showMatrix('HHH','vuc')" id="vuc-HHH"><div class="mx-label">Critical</div><div class="mx-action">Escalate now</div></div>
+      <div class="mx mx-prob">Med prob.</div>
+      <div class="mx mx-low" onclick="showMatrix('ML','vuc')" id="vuc-ML"><div class="mx-label">Low</div><div class="mx-action">Monitor monthly</div></div>
+      <div class="mx mx-med" onclick="showMatrix('MM','vuc')" id="vuc-MM"><div class="mx-label">Medium</div><div class="mx-action">Flag in meeting</div></div>
+      <div class="mx mx-high" onclick="showMatrix('MH','vuc')" id="vuc-MH"><div class="mx-label">High</div><div class="mx-action">Discuss + action</div></div>
+      <div class="mx mx-prob">Low prob.</div>
+      <div class="mx mx-low" onclick="showMatrix('LL','vuc')" id="vuc-LL"><div class="mx-label">Low</div><div class="mx-action">Monitor quietly</div></div>
+      <div class="mx mx-low" onclick="showMatrix('LM','vuc')" id="vuc-LM"><div class="mx-label">Low</div><div class="mx-action">Monitor monthly</div></div>
+      <div class="mx mx-med" onclick="showMatrix('LH','vuc')" id="vuc-LH"><div class="mx-label">Medium</div><div class="mx-action">Flag in meeting</div></div>
+    </div>
+    <div class="matrix-detail" id="vuc-detail"></div>
+  </div>
+  <p class="sec-label" style="margin-top:20px;margin-bottom:8px">Open register &mdash; update in Jira before every Monday meeting</p>
+  <table class="ro-table">
+    <thead><tr><th>Type</th><th>Description</th><th>Prob.</th><th>Impact</th><th>Owner</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ro-type type-risk">RISK</span></td><td>CronosAI &mdash; no IT resources to execute roadmap</td><td><span class="prob-tag ph">High</span></td><td><span class="prob-tag pm">Medium</span></td><td><b>Yasin</b></td><td><span class="status-tag s-mon">Monitoring</span></td></tr>
+      <tr><td><span class="ro-type type-risk">RISK</span></td><td>Founder bottleneck on operational decisions</td><td><span class="prob-tag pm">Medium</span></td><td><span class="prob-tag pm">Medium</span></td><td><b>Lucas</b></td><td><span class="status-tag s-mon">Monitoring</span></td></tr>
+      <tr><td><span class="ro-type type-risk">RISK</span></td><td>Project Registry not updated &mdash; stale scores</td><td><span class="prob-tag ph">High</span></td><td><span class="prob-tag pl">Low</span></td><td><b>Lucas</b></td><td><span class="status-tag s-open">Open</span></td></tr>
+      <tr><td><span class="ro-type type-opp">OPP</span></td><td>Golden Camel VC process &mdash; first close potential</td><td><span class="prob-tag pm">Medium</span></td><td><span class="prob-tag ph">High</span></td><td><b>Louis</b></td><td><span class="status-tag s-open">Open</span></td></tr>
+      <tr><td><span class="ro-type type-opp">OPP</span></td><td>Xperience Space &mdash; validation in progress</td><td><span class="prob-tag pm">Medium</span></td><td><span class="prob-tag pm">Medium</span></td><td><b>Yasin</b></td><td><span class="status-tag s-mon">Monitoring</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- TOOLS -->
+<div class="tab" id="tab-tools">
+  <p class="sec-label">Teams channels &mdash; minimum viable setup</p>
+  <div class="ch-grid">
+    <div class="ch"><div class="ch-name">#ideas-vuc</div><div class="ch-desc">Links to new Jira idea tickets posted every Friday after the Ideas Session.</div></div>
+    <div class="ch"><div class="ch-name">#active-execution</div><div class="ch-desc">Thursday async: Progress / Blocker / Next step. Every active project owner posts by noon.</div></div>
+    <div class="ch"><div class="ch-name">#pipeline-updates</div><div class="ch-desc">Posted after Tuesday Pipeline Review: what moved, what was killed, and why.</div></div>
+    <div class="ch"><div class="ch-name">#vwc-updates</div><div class="ch-desc">VWC weekly objectives posted after Tuesday morning. Separate from VUC pipeline.</div></div>
+    <div class="ch"><div class="ch-name">#decisions</div><div class="ch-desc">All strategic decisions logged: Incubation Review, Pipeline Review, Strategic Review outputs.</div></div>
+    <div class="ch"><div class="ch-name">#blockers</div><div class="ch-desc">Critical blockers that cannot wait until Monday. Founders respond within 24 hours.</div></div>
+  </div>
+  <p class="sec-label">Jira ticket types</p>
+  <table class="tt">
+    <thead><tr><th>Type</th><th>Stages</th><th>Required fields</th></tr></thead>
+    <tbody>
+      <tr><td>Idea</td><td>Idea Pool &rarr; Under Review &rarr; Incubation</td><td>Owner, Strategic Value, Urgency (written), MVP Y/N</td></tr>
+      <tr><td>Project</td><td>Approved &rarr; Active Execution &rarr; Completed</td><td>Subtasks with owners + deadlines required before activation</td></tr>
+      <tr><td>R&amp;O</td><td>Open &rarr; Monitoring &rarr; Escalated &rarr; Actioned &rarr; Closed</td><td>Type (Risk/Opp), Probability, Impact, Owner, Mitigation plan</td></tr>
+      <tr><td>VWC Objective</td><td>Open &rarr; In Progress &rarr; Closed</td><td>Owner, deadline. Closed or carried forward on Friday.</td></tr>
+      <tr><td>Blocker</td><td>Open &rarr; Resolved</td><td>Linked to parent ticket. Founder tag. Resolved within 48h.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- RULES -->
+<div class="tab" id="tab-rules">
+  <p class="sec-label">Operating rules</p>
+  <table class="ot">
+    <tbody>
+      <tr><td>No agenda = no meeting</td><td>Every meeting requires an agenda posted in Teams 24 hours before. No agenda means it is cancelled or rescheduled.</td></tr>
+      <tr><td>Execution is protected</td><td>Monday Execution is for active projects only. Zero new ideas. Zero VWC topics. This separation is non-negotiable.</td></tr>
+      <tr><td>VWC has its own lane</td><td>VWC objectives are discussed Tuesday morning only. Mining operations never enter VUC pipeline discussions.</td></tr>
+      <tr><td>Decisions in the room</td><td>Operational decisions made by the project owner. Strategic decisions only in Pipeline Review, Incubation Review, or Strategic Review. Never in Teams chat.</td></tr>
+      <tr><td>R&amp;O: no change = no discussion</td><td>Risks and opportunities only enter the Monday agenda if their Jira status changed that week. Silence means stable.</td></tr>
+      <tr><td>Matrix updated monthly</td><td>The Project Evaluation Matrix is updated once a month in Strategic Review. Scores are not changed ad hoc.</td></tr>
+      <tr><td>Founders as bottleneck</td><td>If a task requires founder approval, it gets a Jira ticket with a deadline. Not chased over Teams chat.</td></tr>
+      <tr><td>MVP fast-track</td><td>Projects with a working MVP skip Idea Pool and enter Incubation directly. Still require a Jira ticket and a named owner on day one.</td></tr>
+      <tr><td>Urgency must be written</td><td>Urgency stated verbally does not move a ticket. It must be written in Jira. Unwritten urgency is not urgency.</td></tr>
+    </tbody>
+  </table>
+  <div class="principle">Core principle: execution is protected from the noise of ideation. Ideas have their moment (Friday) and their place (Jira). Active projects have their moment (Monday) and their owner. VWC has its own lane (Tuesday morning). Mixing any of these three destroys team focus.</div>
+</div>
+</div>
+
+<script>
+var M={
+  mon1:{t:"Weekly Execution Meeting",m:"Monday &middot; 45 min &middot; Louis, Yasin, Lucas",
+    obj:["Review all Active Execution projects in Jira","Surface blockers and resolve them in the room or assign a resolution owner","Review R&amp;O tickets whose status changed this week (5 min max)","Confirm next steps for every active project"],
+    rules:["Active projects only &mdash; zero new ideas, zero VWC topics","R&amp;O section only runs if a ticket status changed &mdash; otherwise skipped","Each owner opens their Jira ticket on screen","If a project has no progress, the blocker must be in Jira before Thursday"],
+    tools:["Jira &lsquo;Active Execution&rsquo; dashboard + R&amp;O board open throughout","Teams #active-execution: summary posted before noon"],
+    out:"Blocker list + decisions + any R&amp;O actions posted in Teams before noon"},
+  tue1:{t:"VWC Weekly Objectives",m:"Tuesday morning &middot; 30 min &middot; Louis + Lucas (Yasin optional)",
+    obj:["Four pillar owners review: this week / this month / 90-day sprint","Set this week&rsquo;s objectives with owner and definition of done","Review previous week: delivered vs committed","R&amp;O status changes only if any ticket changed"],
+    rules:["Completely separate from Pipeline Review","Jira VWC board is the working surface","Objectives posted to Teams #vwc-updates immediately after"],
+    tools:["Jira: VWC board with pillar structure","Teams #vwc-updates"],
+    out:"VWC weekly objectives in Jira with named owners and clear deadlines"},
+  tue2:{t:"Pipeline Review",m:"Tuesday afternoon &middot; 45 min &middot; Louis, Yasin, Lucas",
+    obj:["Evaluate ideas in Idea Pool and Under Review in Jira","Decide: move to Incubation, Park, or Kill","Assign formal owner and written urgency to every advancing idea"],
+    rules:["Work directly on the Jira dashboard","Every advancing idea must have a named owner before the meeting closes","Urgency must be written in the Jira ticket, not stated verbally"],
+    tools:["Jira filter: status = Idea Pool OR Under Review","Teams #pipeline-updates: what moved and why"],
+    out:"All reviewed Jira tickets updated with new status before the meeting ends"},
+  thu1:{t:"Thursday Async &mdash; Status Update",m:"Thursday &middot; No meeting &middot; Each project owner posts",
+    obj:["Maintain full portfolio visibility without consuming meeting time","Surface blockers before the weekend","Build individual accountability as a habit"],
+    rules:["Fixed format: Progress / Blocker / Next step","Posted in #active-execution by noon Thursday","Must include a link to the corresponding Jira ticket"],
+    tools:["Teams #active-execution","Jira: owner updates ticket status when posting"],
+    out:"Full project status visible to all &mdash; no additional meeting needed"},
+  fri1:{t:"Ideas Session",m:"Friday &middot; 30 min &middot; Louis, Yasin, Lucas",
+    obj:["Protected space to propose ideas without validation pressure","Capture every idea in Jira before the session closes","Assign a provisional owner to every registered idea"],
+    rules:["No decisions made &mdash; capture and assign provisional owner only","Every idea becomes a Jira ticket (type: Idea) before the session closes","Projects with an existing MVP enter Incubation directly &mdash; skip Idea Pool"],
+    tools:["Jira: tickets created in real time","Teams #ideas-vuc: links to new tickets posted after"],
+    out:"All idea tickets in Jira with provisional owners before session ends"},
+  biw1:{t:"Incubation Review",m:"Bi-weekly &middot; 45 min &middot; Alternating Tuesdays &middot; Louis, Yasin, Lucas",
+    obj:["Evaluate ideas in Incubation using the Project Evaluation Matrix","Decide: approve for execution, continue incubation, or kill","Define resources, dates, and Jira subtasks for approved ideas"],
+    rules:["Owner presents a max 5-min case per idea","Evaluated against: strategic fit, feasibility, resources, urgency, and Matrix score","Approved ideas get Jira subtasks with deadlines before the meeting ends"],
+    tools:["Jira filter: status = Incubation","Project Evaluation Matrix (Excel) as scoring reference","Teams #decisions: what was approved, parked, or killed"],
+    out:"Decisions in Jira + subtasks created for approved ideas before meeting closes"},
+  monthly:{t:"Strategic Review + Matrix Update",m:"Monthly &middot; 90 min &middot; Last Monday of the month &middot; Louis, Yasin, Lucas",
+    obj:["Full portfolio review: executing, completed, killed","Update the Project Evaluation Matrix with real current state","Full R&amp;O register review &mdash; all open tickets regardless of status change","Resource allocation and priorities across all verticals"],
+    rules:["Agenda + Jira data + Matrix sent 48 hours before","The Evaluation Matrix is updated in the meeting &mdash; not before, not after","All R&amp;O tickets reviewed in full &mdash; this is the only meeting where that happens","Only meeting where active project priorities can be changed"],
+    tools:["Jira: full portfolio dashboard + full R&amp;O board","Project Evaluation Matrix (Excel): scores updated live","Teams #decisions: executive summary posted after"],
+    out:"Updated Evaluation Matrix + full R&amp;O review + prioritised portfolio for next month"}
+};
+
+var matrixData={
+  HHH:{level:"Critical",bg:"#450A0A",txt:"#FCA5A5",action:"Escalate immediately to all founders. Do not wait for the meeting.",jira:"Create a BLOCKER ticket linked to the R&O. Tag all owners. Resolve within 24 hours."},
+  HH2:{level:"High",bg:"#7F1D1D",txt:"#FEE2E2",action:"Discuss and define an action in this meeting. Owner presents in 60 seconds.",jira:"Create a child action ticket linked to the R&O. Owner assigned. Deadline set before meeting ends."},
+  MH:{level:"High",bg:"#7F1D1D",txt:"#FEE2E2",action:"Discuss and define an action in this meeting. Owner presents in 60 seconds.",jira:"Create a child action ticket linked to the R&O. Owner assigned. Deadline set before meeting ends."},
+  HM:{level:"Medium",bg:"#78350F",txt:"#FEF9C3",action:"Flag in the meeting. Owner gives 30-second update. No deep discussion unless status changed.",jira:"Update Jira ticket status to Monitoring. Add a note. No action ticket needed unless probability increases."},
+  MM:{level:"Medium",bg:"#78350F",txt:"#FEF9C3",action:"Flag in the meeting. Owner gives 30-second update. No deep discussion unless status changed.",jira:"Update Jira ticket status to Monitoring. Add a note. No action ticket needed unless probability increases."},
+  LH:{level:"Medium",bg:"#78350F",txt:"#FEF9C3",action:"Flag in the meeting. Owner gives 30-second update. No deep discussion unless status changed.",jira:"Update Jira ticket status to Monitoring. Add a note."},
+  ML:{level:"Low",bg:"#14532D",txt:"#DCFCE7",action:"Does not enter the weekly meeting. Reviewed in Monthly Strategic Review only.",jira:"Keep ticket in Monitoring status. No action required unless status changes."},
+  LM:{level:"Low",bg:"#14532D",txt:"#DCFCE7",action:"Does not enter the weekly meeting. Reviewed in Monthly Strategic Review only.",jira:"Keep ticket in Monitoring status. No action required unless status changes."},
+  LL:{level:"Low",bg:"#14532D",txt:"#DCFCE7",action:"Monitor quietly. Does not enter any meeting unless status changes.",jira:"Keep ticket open. Update only if probability or impact increases."},
+};
+
+var currentSel={vuc:null,vwc:null};
+
+function showMatrix(key,board){
+  var d=matrixData[key];if(!d)return;
+  var prev=currentSel[board];
+  if(prev){var el=document.getElementById(board+'-'+prev);if(el)el.classList.remove('sel');}
+  currentSel[board]=key;
+  var el=document.getElementById(board+'-'+key);if(el)el.classList.add('sel');
+  var det=document.getElementById(board+'-detail');
+  det.innerHTML='<div class="md-level">'+d.level+' priority</div><div class="md-action">Action: '+d.action+'</div><div class="md-jira">Jira: '+d.jira+'</div>';
+  det.style.background=d.bg;det.style.color=d.txt;
+  det.classList.add('show');
+}
+
+var sel=null;
+function show(id){
+  var m=M[id];if(!m)return;
+  if(sel){var old=document.getElementById("c-"+sel);if(old)old.classList.remove("sel");}
+  sel=id;
+  var el=document.getElementById("c-"+id);if(el)el.classList.add("sel");
+  document.getElementById("dp-t").innerHTML=m.t;
+  document.getElementById("dp-m").innerHTML=m.m;
+  var h="";
+  h+='<div class="dp-sl">Objective</div><ul class="dp-ul">'+m.obj.map(function(i){return"<li>"+i+"</li>";}).join("")+"</ul>";
+  h+='<div class="dp-sl">Golden rules</div><ul class="dp-ul">'+m.rules.map(function(i){return"<li>"+i+"</li>";}).join("")+"</ul>";
+  h+='<div class="dp-sl">Tools</div><ul class="dp-ul">'+m.tools.map(function(i){return"<li>"+i+"</li>";}).join("")+"</ul>";
+  h+='<div class="dp-sl">Concrete output</div><div class="dp-out">'+m.out+"</div>";
+  document.getElementById("dp-b").innerHTML=h;
+  var dp=document.getElementById("dp");dp.style.display="block";
+  dp.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function closeDP(){
+  if(sel){var old=document.getElementById("c-"+sel);if(old)old.classList.remove("sel");}
+  sel=null;document.getElementById("dp").style.display="none";
+}
+function sw(tab,btn){
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("on")});
+  document.querySelectorAll(".nav button").forEach(function(b){b.classList.remove("on")});
+  document.getElementById("tab-"+tab).classList.add("on");
+  btn.classList.add("on");closeDP();
+}
+</script>
+</body>
+</html>

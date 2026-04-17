@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VWC Ghana — Weekly Objectives System</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a1a;font-size:14px;line-height:1.6}
+.hdr{background:#1A1A2E;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.hdr-left h1{color:#fff;font-size:22px;font-weight:700}.hdr-left p{color:#6dbf8a;font-size:13px;margin-top:2px}
+.hdr-badge{background:rgba(255,255,255,0.1);color:#aaa;font-size:11px;padding:4px 10px;border-radius:20px}
+.nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 32px;display:flex;gap:2px;overflow-x:auto}
+.nav button{background:none;border:none;border-bottom:2px solid transparent;padding:14px 16px;font-size:13px;font-weight:500;color:#666;cursor:pointer;white-space:nowrap;transition:all .15s}
+.nav button:hover{color:#1B5E38}.nav button.on{color:#1B5E38;border-bottom-color:#1B5E38}
+.main{max-width:1060px;margin:0 auto;padding:28px 20px}
+.tab{display:none}.tab.on{display:block}
+.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#999;margin-bottom:14px}
+
+/* AGENDA */
+.agenda-grid{display:grid;grid-template-columns:36px 1fr 56px;background:#e8e8e8;gap:1px;border-radius:10px;overflow:hidden;margin-bottom:20px}
+.ag-num{background:#1B5E38;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;padding:12px 0}
+.ag-body{background:#fff;padding:10px 14px}.ag-title{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:2px}
+.ag-detail{font-size:11px;color:#666;line-height:1.4}
+.ag-time{background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1B5E38;font-weight:600}
+
+/* PILLARS */
+.pillar-block{border-radius:10px;overflow:hidden;margin-bottom:12px;border:1px solid #e8e8e8}
+.pillar-hdr{padding:12px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:opacity .15s}
+.pillar-hdr:hover{opacity:.9}
+.ph-left{display:flex;align-items:center;gap:10px}
+.ph-num{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;opacity:.8}
+.ph-name{font-size:13px;font-weight:700;color:#fff}
+.ph-owner{font-size:11px;color:rgba(255,255,255,.65);margin-left:4px}
+.ph-arrow{font-size:14px;color:rgba(255,255,255,.6);transition:transform .2s}
+.ph-arrow.open{transform:rotate(90deg)}
+.pillar-body{display:none;background:#fff}
+.pillar-body.open{display:block}
+.p-cols{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #e8e8e8}
+.p-col-hdr{padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:center;border-right:1px solid #e8e8e8}
+.p-col-hdr:last-child{border-right:none}
+.p-content{display:grid;grid-template-columns:1fr 1fr 1fr}
+.p-cell{padding:12px;border-right:1px solid #f0f0f0;min-height:80px}
+.p-cell:last-child{border-right:none}
+.p-cell:nth-child(2){background:#fafafa}
+.sprint-item{font-size:12px;color:#333;padding:3px 0 3px 14px;position:relative;line-height:1.4}
+.sprint-item::before{content:"•";position:absolute;left:2px;color:#1B5E38}
+.blocker-row{background:#fef9f0;padding:10px 14px;border-top:1px solid #fde8c8;font-size:12px;color:#92400e}
+.blocker-row span{font-weight:700;color:#B45309}
+.write-line{border:none;border-bottom:1px solid #e0e0e0;width:100%;font-size:12px;color:#333;background:transparent;padding:4px 0;margin-bottom:6px;outline:none;font-family:inherit}
+.write-line::placeholder{color:#bbb}
+
+/* OBJECTIVES TABLE */
+.obj-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+.obj-table th{background:#1A1A2E;color:#fff;font-size:11px;padding:10px 12px;text-align:left;font-weight:600}
+.obj-table td{font-size:12px;padding:9px 12px;border-bottom:1px solid #e8e8e8;vertical-align:middle}
+.obj-table tr:nth-child(even) td{background:#fafafa}
+.ptag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;color:#fff}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+
+/* R&O */
+.ro-rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.ro-rule{border-radius:8px;padding:12px 14px;border:1px solid transparent}
+.ro-risk-box{background:#FEF2F2;border-color:#FCA5A5}
+.ro-opp-box{background:#F0FDF4;border-color:#86EFAC}
+.ro-rl{font-size:11px;font-weight:700;margin-bottom:4px}
+.ro-rv{font-size:12px;line-height:1.5}
+
+.ro-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+.ro-table th{font-size:11px;padding:10px 12px;text-align:left;font-weight:600;color:#fff}
+.ro-table td{font-size:12px;padding:8px 10px;border-bottom:1px solid #e8e8e8;vertical-align:middle}
+.ro-table tr:nth-child(even) td{background:#fafafa}
+.ro-type{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase}
+.type-risk{background:#FEE2E2;color:#7F1D1D}
+.type-opp{background:#DCFCE7;color:#14532D}
+.prob-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.ph{background:#FEE2E2;color:#7F1D1D}.pm{background:#FEF9C3;color:#78350F}.pl{background:#DCFCE7;color:#14532D}
+.status-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.s-open{background:#DBEAFE;color:#1E40AF}.s-mon{background:#F3F4F6;color:#555}
+.s-esc{background:#FEE2E2;color:#7F1D1D}.s-act{background:#DCFCE7;color:#14532D}
+.s-closed{background:#F0FDF4;color:#166534}
+
+/* PRIORITY MATRIX */
+.matrix-wrap{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:16px;margin-bottom:16px}
+.matrix-title{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px}
+.matrix-sub{font-size:11px;color:#888;margin-bottom:14px}
+.matrix-grid{display:grid;grid-template-columns:60px repeat(3,1fr);gap:2px}
+.mx{padding:10px 8px;border-radius:4px;text-align:center;font-size:11px;cursor:pointer;transition:all .15s;border:2px solid transparent}
+.mx:hover{transform:scale(1.03);z-index:1;position:relative}
+.mx.sel{border-color:#1a1a1a!important;transform:scale(1.05);z-index:2;position:relative}
+.mx-hdr{background:#f5f5f5;font-weight:700;color:#666;font-size:10px;text-transform:uppercase;letter-spacing:.04em;cursor:default}
+.mx-hdr:hover{transform:none}
+.mx-prob{background:#1A1A2E;color:#fff;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.04em;cursor:default;border-radius:4px}
+.mx-prob:hover{transform:none}
+.mx-low{background:#DCFCE7;color:#166534}.mx-med{background:#FEF9C3;color:#854D0E}
+.mx-high{background:#FEE2E2;color:#991B1B}.mx-crit{background:#450A0A;color:#FCA5A5;font-weight:700}
+.mx-label{font-weight:700;font-size:12px;margin-bottom:2px}
+.mx-action{font-size:10px;opacity:.8;line-height:1.3}
+.matrix-detail{background:#1A1A2E;color:#fff;border-radius:8px;padding:14px 16px;margin-top:10px;font-size:13px;line-height:1.6;display:none}
+.matrix-detail.show{display:block}
+.md-level{font-size:16px;font-weight:700;margin-bottom:6px}
+.md-action{font-size:13px;color:#a0c4ff;margin-bottom:4px}
+.md-jira{font-size:12px;color:#aaa}
+
+/* ACTION TABLE */
+.act-table{width:100%;border-collapse:collapse;margin-bottom:12px}
+.act-table th{background:#1A1A2E;color:#fff;font-size:11px;padding:10px 12px;text-align:left;font-weight:600}
+.act-table td{font-size:12px;padding:9px 12px;border-bottom:1px solid #e8e8e8}
+.act-table tr:nth-child(even) td{background:#fafafa}
+
+@media(max-width:640px){
+  .p-cols,.p-content{grid-template-columns:1fr}
+  .ro-rule-grid{grid-template-columns:1fr}
+  .hdr{padding:16px}.main{padding:16px 12px}.nav{padding:0 12px}
+  .matrix-grid{grid-template-columns:50px repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left"><h1>VWC Ghana</h1><p>Weekly Objectives Meeting System</p></div>
+  <div class="hdr-badge">v2.0 &mdash; April 2026</div>
+</div>
+<nav class="nav">
+  <button class="on" onclick="sw('agenda',this)">Agenda</button>
+  <button onclick="sw('pillars',this)">Four Pillars</button>
+  <button onclick="sw('objectives',this)">This Week</button>
+  <button onclick="sw('review',this)">Previous Week</button>
+  <button onclick="sw('ro',this)">Risks &amp; Opportunities</button>
+  <button onclick="sw('actions',this)">Actions &amp; Blockers</button>
+</nav>
+
+<div class="main">
+
+<!-- AGENDA -->
+<div class="tab on" id="tab-agenda">
+  <p class="sec-label">Meeting structure &mdash; 30 minutes total</p>
+  <div class="agenda-grid">
+    <div class="ag-num">1</div>
+    <div class="ag-body"><div class="ag-title">Four Pillars &mdash; Objectives Review</div><div class="ag-detail">Each owner: this week / this month / 90-day sprint. Blockers surface immediately. No preparation needed beyond updating Jira.</div></div>
+    <div class="ag-time">15 min</div>
+    <div class="ag-num">2</div>
+    <div class="ag-body"><div class="ag-title">This Week&rsquo;s Objectives &mdash; set &amp; confirm</div><div class="ag-detail">Each objective gets a named owner and a definition of done. Logged in Jira before the meeting ends.</div></div>
+    <div class="ag-time">5 min</div>
+    <div class="ag-num">3</div>
+    <div class="ag-body"><div class="ag-title">Previous Week Review</div><div class="ag-detail">Committed vs delivered &mdash; specific and honest. Delivered / Not delivered / Partial and why.</div></div>
+    <div class="ag-time">5 min</div>
+    <div class="ag-num">4</div>
+    <div class="ag-body"><div class="ag-title">Risks &amp; Opportunities &mdash; status changes only</div><div class="ag-detail">Only R&amp;O tickets whose Jira status changed this week are discussed. New, escalated, or closed. If nothing changed &mdash; this section is skipped entirely.</div></div>
+    <div class="ag-time">5 min</div>
+    <div class="ag-num">5</div>
+    <div class="ag-body"><div class="ag-title">Action Items &amp; Blockers</div><div class="ag-detail">All actions logged in Jira before the meeting closes. Owner + deadline required. No exceptions.</div></div>
+    <div class="ag-time">5 min</div>
+  </div>
+  <div style="background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:14px 16px;font-size:13px;color:#333;line-height:1.7;border-left:4px solid #1B5E38">
+    <strong style="color:#1A1A2E">Ground rule:</strong> If it is not in Jira, it does not exist. Every objective, risk, opportunity, and action created in this meeting gets a Jira ticket before anyone leaves the room.
+  </div>
+</div>
+
+<!-- PILLARS -->
+<div class="tab" id="tab-pillars">
+  <p class="sec-label">Four pillars &mdash; click to expand each one</p>
+
+  <div class="pillar-block">
+    <div class="pillar-hdr" style="background:#1A237E" onclick="togglePillar('p1')">
+      <div class="ph-left">
+        <span class="ph-num" style="background:rgba(255,255,255,.15);color:#fff">P1</span>
+        <span class="ph-name">Strategy, Government JV &amp; Investor Partnerships</span>
+        <span class="ph-owner">&mdash; Louis</span>
+      </div>
+      <span class="ph-arrow" id="arr-p1">&#9656;</span>
+    </div>
+    <div class="pillar-body" id="body-p1">
+      <div class="p-cols">
+        <div class="p-col-hdr" style="color:#1A237E">This week</div>
+        <div class="p-col-hdr" style="color:#1A237E;background:#f5f7ff">This month</div>
+        <div class="p-col-hdr" style="color:#1A237E">90-day sprint milestones</div>
+      </div>
+      <div class="p-content">
+        <div class="p-cell"><input class="write-line" placeholder="Objective 1..."><input class="write-line" placeholder="Objective 2..."><input class="write-line" placeholder="Objective 3..."></div>
+        <div class="p-cell"><input class="write-line" placeholder="Monthly goal 1..."><input class="write-line" placeholder="Monthly goal 2..."><input class="write-line" placeholder="Monthly goal 3..."></div>
+        <div class="p-cell">
+          <div class="sprint-item">Day 10: MLNR / MIIF first JV scoping meeting</div>
+          <div class="sprint-item">Day 60: JV framework term sheet in negotiation</div>
+          <div class="sprint-item">Day 90: MLNR MoU signed</div>
+        </div>
+      </div>
+      <div class="blocker-row"><span>Blocked / needs decision: </span><input class="write-line" placeholder="Describe blocker..." style="width:70%;display:inline-block"></div>
+    </div>
+  </div>
+
+  <div class="pillar-block">
+    <div class="pillar-hdr" style="background:#0D47A1" onclick="togglePillar('p2')">
+      <div class="ph-left">
+        <span class="ph-num" style="background:rgba(255,255,255,.15);color:#fff">P2</span>
+        <span class="ph-name">Technical Infrastructure &amp; Digital</span>
+        <span class="ph-owner">&mdash; Yasin</span>
+      </div>
+      <span class="ph-arrow" id="arr-p2">&#9656;</span>
+    </div>
+    <div class="pillar-body" id="body-p2">
+      <div class="p-cols">
+        <div class="p-col-hdr" style="color:#0D47A1">This week</div>
+        <div class="p-col-hdr" style="color:#0D47A1;background:#f0f5ff">This month</div>
+        <div class="p-col-hdr" style="color:#0D47A1">90-day sprint milestones</div>
+      </div>
+      <div class="p-content">
+        <div class="p-cell"><input class="write-line" placeholder="Objective 1..."><input class="write-line" placeholder="Objective 2..."><input class="write-line" placeholder="Objective 3..."></div>
+        <div class="p-cell"><input class="write-line" placeholder="Monthly goal 1..."><input class="write-line" placeholder="Monthly goal 2..."><input class="write-line" placeholder="Monthly goal 3..."></div>
+        <div class="p-cell">
+          <div class="sprint-item">Day 14: Website scope &amp; brief agreed, design started</div>
+          <div class="sprint-item">Day 30: Geologist engaged, fieldwork commenced</div>
+          <div class="sprint-item">Day 45: VWC website v1 live</div>
+        </div>
+      </div>
+      <div class="blocker-row"><span>Blocked / needs decision: </span><input class="write-line" placeholder="Describe blocker..." style="width:70%;display:inline-block"></div>
+    </div>
+  </div>
+
+  <div class="pillar-block">
+    <div class="pillar-hdr" style="background:#1B5E20" onclick="togglePillar('p3')">
+      <div class="ph-left">
+        <span class="ph-num" style="background:rgba(255,255,255,.15);color:#fff">P3</span>
+        <span class="ph-name">Growth &amp; Presentation</span>
+        <span class="ph-owner">&mdash; Lucas</span>
+      </div>
+      <span class="ph-arrow" id="arr-p3">&#9656;</span>
+    </div>
+    <div class="pillar-body" id="body-p3">
+      <div class="p-cols">
+        <div class="p-col-hdr" style="color:#1B5E20">This week</div>
+        <div class="p-col-hdr" style="color:#1B5E20;background:#f0fdf4">This month</div>
+        <div class="p-col-hdr" style="color:#1B5E20">90-day sprint milestones</div>
+      </div>
+      <div class="p-content">
+        <div class="p-cell"><input class="write-line" placeholder="Objective 1..."><input class="write-line" placeholder="Objective 2..."><input class="write-line" placeholder="Objective 3..."></div>
+        <div class="p-cell"><input class="write-line" placeholder="Monthly goal 1..."><input class="write-line" placeholder="Monthly goal 2..."><input class="write-line" placeholder="Monthly goal 3..."></div>
+        <div class="p-cell">
+          <div class="sprint-item">Day 21: Pitch deck first draft complete</div>
+          <div class="sprint-item">Day 30: Business plan outline agreed, drafting begun</div>
+          <div class="sprint-item">Day 60: Full investor-ready deck + plan complete</div>
+        </div>
+      </div>
+      <div class="blocker-row"><span>Blocked / needs decision: </span><input class="write-line" placeholder="Describe blocker..." style="width:70%;display:inline-block"></div>
+    </div>
+  </div>
+
+  <div class="pillar-block">
+    <div class="pillar-hdr" style="background:#6D4C0A" onclick="togglePillar('p4')">
+      <div class="ph-left">
+        <span class="ph-num" style="background:rgba(255,255,255,.15);color:#fff">P4</span>
+        <span class="ph-name">Ghana Operations &amp; Data</span>
+        <span class="ph-owner">&mdash; Emmanuel</span>
+      </div>
+      <span class="ph-arrow" id="arr-p4">&#9656;</span>
+    </div>
+    <div class="pillar-body" id="body-p4">
+      <div class="p-cols">
+        <div class="p-col-hdr" style="color:#6D4C0A">This week</div>
+        <div class="p-col-hdr" style="color:#6D4C0A;background:#fffbeb">This month</div>
+        <div class="p-col-hdr" style="color:#6D4C0A">90-day sprint milestones</div>
+      </div>
+      <div class="p-content">
+        <div class="p-cell"><input class="write-line" placeholder="Objective 1..."><input class="write-line" placeholder="Objective 2..."><input class="write-line" placeholder="Objective 3..."></div>
+        <div class="p-cell"><input class="write-line" placeholder="Monthly goal 1..."><input class="write-line" placeholder="Monthly goal 2..."><input class="write-line" placeholder="Monthly goal 3..."></div>
+        <div class="p-cell">
+          <div class="sprint-item">Day 14: M-07 &amp; M-08 data delivered</div>
+          <div class="sprint-item">Ongoing: Mercury-free protocol enforced at intake</div>
+          <div class="sprint-item">Ongoing: Security &amp; gold custody chain maintained</div>
+        </div>
+      </div>
+      <div class="blocker-row"><span>Blocked / needs decision: </span><input class="write-line" placeholder="Describe blocker..." style="width:70%;display:inline-block"></div>
+    </div>
+  </div>
+</div>
+
+<!-- THIS WEEK -->
+<div class="tab" id="tab-objectives">
+  <p class="sec-label">Set at the start of the meeting &mdash; every objective needs an owner and a definition of done</p>
+  <table class="obj-table">
+    <thead><tr><th>Pillar</th><th>Objective this week</th><th>Definition of done</th><th>Owner</th><th>Status</th></tr></thead>
+    <tbody id="obj-tbody">
+      <tr><td><span class="ptag" style="background:#1A237E">P1</span></td><td><input class="write-line" placeholder="Objective..."></td><td><input class="write-line" placeholder="Done when..."></td><td style="font-weight:600;color:#1A237E">Louis</td><td><span class="status-tag s-mon">Pending</span></td></tr>
+      <tr><td><span class="ptag" style="background:#1A237E">P1</span></td><td><input class="write-line" placeholder="Objective..."></td><td><input class="write-line" placeholder="Done when..."></td><td style="font-weight:600;color:#1A237E">Louis</td><td><span class="status-tag s-mon">Pending</span></td></tr>
+      <tr><td><span class="ptag" style="background:#0D47A1">P2</span></td><td><input class="write-line" placeholder="Objective..."></td><td><input class="write-line" placeholder="Done when..."></td><td style="font-weight:600;color:#0D47A1">Yasin</td><td><span class="status-tag s-mon">Pending</span></td></tr>
+      <tr><td><span class="ptag" style="background:#0D47A1">P2</span></td><td><input class="write-line" placeholder="Objective..."></td><td><input class="write-line" placeholder="Done when..."></td><td style="font-weight:600;color:#0D47A1">Yasin</td><td><span class="status-tag s-mon">Pending</span></td></tr>
+      <tr><td><span class="ptag" style="background:#1B5E20">P3</span></td><td><input class="write-line" placeholder="Objective..."></td><td><input class="write-line" placeholder="Done when..."></td><td style="font-weight:600;color:#1B5E20">Lucas</td><td><span class="status-tag s-mon">Pending</span></td></tr>
+      <tr><td><span class="ptag" style="background:#1B5E20">P3</span></td><td><input class="write-line" placeholder="Objective..."></td><td><input class="write-line" placeholder="Done when..."></td><td style="font-weight:600;color:#1B5E20">Lucas</td><td><span class="status-tag s-mon">Pending</span></td></tr>
+      <tr><td><span class="ptag" style="background:#6D4C0A">P4</span></td><td><input class="write-line" placeholder="Objective..."></td><td><input class="write-line" placeholder="Done when..."></td><td style="font-weight:600;color:#6D4C0A">Emmanuel</td><td><span class="status-tag s-mon">Pending</span></td></tr>
+      <tr><td><span class="ptag" style="background:#6D4C0A">P4</span></td><td><input class="write-line" placeholder="Objective..."></td><td><input class="write-line" placeholder="Done when..."></td><td style="font-weight:600;color:#6D4C0A">Emmanuel</td><td><span class="status-tag s-mon">Pending</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- PREVIOUS WEEK -->
+<div class="tab" id="tab-review">
+  <p class="sec-label">Compare committed vs delivered &mdash; specific and honest</p>
+  <table class="obj-table">
+    <thead><tr><th>Pillar</th><th>Objective committed</th><th>Notes / reason if not delivered</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ptag" style="background:#1A237E">P1</span></td><td><input class="write-line" placeholder="What was committed..."></td><td><input class="write-line" placeholder="Notes..."></td><td><select style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid #ccc;background:#fff"><option>&#10003; Done</option><option>&#10007; Not done</option><option>&#9651; Partial</option></select></td></tr>
+      <tr><td><span class="ptag" style="background:#1A237E">P1</span></td><td><input class="write-line" placeholder="What was committed..."></td><td><input class="write-line" placeholder="Notes..."></td><td><select style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid #ccc;background:#fff"><option>&#10003; Done</option><option>&#10007; Not done</option><option>&#9651; Partial</option></select></td></tr>
+      <tr><td><span class="ptag" style="background:#0D47A1">P2</span></td><td><input class="write-line" placeholder="What was committed..."></td><td><input class="write-line" placeholder="Notes..."></td><td><select style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid #ccc;background:#fff"><option>&#10003; Done</option><option>&#10007; Not done</option><option>&#9651; Partial</option></select></td></tr>
+      <tr><td><span class="ptag" style="background:#0D47A1">P2</span></td><td><input class="write-line" placeholder="What was committed..."></td><td><input class="write-line" placeholder="Notes..."></td><td><select style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid #ccc;background:#fff"><option>&#10003; Done</option><option>&#10007; Not done</option><option>&#9651; Partial</option></select></td></tr>
+      <tr><td><span class="ptag" style="background:#1B5E20">P3</span></td><td><input class="write-line" placeholder="What was committed..."></td><td><input class="write-line" placeholder="Notes..."></td><td><select style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid #ccc;background:#fff"><option>&#10003; Done</option><option>&#10007; Not done</option><option>&#9651; Partial</option></select></td></tr>
+      <tr><td><span class="ptag" style="background:#1B5E20">P3</span></td><td><input class="write-line" placeholder="What was committed..."></td><td><input class="write-line" placeholder="Notes..."></td><td><select style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid #ccc;background:#fff"><option>&#10003; Done</option><option>&#10007; Not done</option><option>&#9651; Partial</option></select></td></tr>
+      <tr><td><span class="ptag" style="background:#6D4C0A">P4</span></td><td><input class="write-line" placeholder="What was committed..."></td><td><input class="write-line" placeholder="Notes..."></td><td><select style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid #ccc;background:#fff"><option>&#10003; Done</option><option>&#10007; Not done</option><option>&#9651; Partial</option></select></td></tr>
+      <tr><td><span class="ptag" style="background:#6D4C0A">P4</span></td><td><input class="write-line" placeholder="What was committed..."></td><td><input class="write-line" placeholder="Notes..."></td><td><select style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid #ccc;background:#fff"><option>&#10003; Done</option><option>&#10007; Not done</option><option>&#9651; Partial</option></select></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- R&O -->
+<div class="tab" id="tab-ro">
+  <div class="ro-rule-grid">
+    <div class="ro-rule ro-risk-box">
+      <div class="ro-rl" style="color:#7F1D1D">When does it enter the agenda?</div>
+      <div class="ro-rv" style="color:#450A0A">Only if its Jira status changed this week &mdash; new ticket logged, status escalated, or ticket closed. No change = not discussed. Section is skipped entirely.</div>
+    </div>
+    <div class="ro-rule ro-opp-box">
+      <div class="ro-rl" style="color:#14532D">What happens when it enters?</div>
+      <div class="ro-rv" style="color:#14532D">Owner presents in 60 seconds: what changed, what is the action. Action becomes a child Jira ticket linked to the R&amp;O ticket.</div>
+    </div>
+  </div>
+
+  <p class="sec-label" style="margin-bottom:8px">Priority matrix &mdash; click any cell to see required action</p>
+  <div class="matrix-wrap">
+    <div class="matrix-title">Probability &times; Impact</div>
+    <div class="matrix-sub">Click a cell to understand what action it requires and how it enters the meeting</div>
+    <div class="matrix-grid">
+      <div class="mx mx-hdr" style="cursor:default"></div>
+      <div class="mx mx-hdr">Low impact</div>
+      <div class="mx mx-hdr">Medium impact</div>
+      <div class="mx mx-hdr">High impact</div>
+      <div class="mx mx-prob">High prob.</div>
+      <div class="mx mx-med" onclick="showMatrix('HM','vwc')" id="vwc-HM"><div class="mx-label">Medium</div><div class="mx-action">Flag in meeting</div></div>
+      <div class="mx mx-high" onclick="showMatrix('HH2','vwc')" id="vwc-HH2"><div class="mx-label">High</div><div class="mx-action">Discuss + action</div></div>
+      <div class="mx mx-crit" onclick="showMatrix('HHH','vwc')" id="vwc-HHH"><div class="mx-label">Critical</div><div class="mx-action">Escalate now</div></div>
+      <div class="mx mx-prob">Med prob.</div>
+      <div class="mx mx-low" onclick="showMatrix('ML','vwc')" id="vwc-ML"><div class="mx-label">Low</div><div class="mx-action">Monitor monthly</div></div>
+      <div class="mx mx-med" onclick="showMatrix('MM','vwc')" id="vwc-MM"><div class="mx-label">Medium</div><div class="mx-action">Flag in meeting</div></div>
+      <div class="mx mx-high" onclick="showMatrix('MH','vwc')" id="vwc-MH"><div class="mx-label">High</div><div class="mx-action">Discuss + action</div></div>
+      <div class="mx mx-prob">Low prob.</div>
+      <div class="mx mx-low" onclick="showMatrix('LL','vwc')" id="vwc-LL"><div class="mx-label">Low</div><div class="mx-action">Monitor quietly</div></div>
+      <div class="mx mx-low" onclick="showMatrix('LM','vwc')" id="vwc-LM"><div class="mx-label">Low</div><div class="mx-action">Monitor monthly</div></div>
+      <div class="mx mx-med" onclick="showMatrix('LH','vwc')" id="vwc-LH"><div class="mx-label">Medium</div><div class="mx-action">Flag in meeting</div></div>
+    </div>
+    <div class="matrix-detail" id="vwc-detail"></div>
+  </div>
+
+  <p class="sec-label" style="margin-top:20px;margin-bottom:8px">Open register &mdash; update in Jira before every Tuesday meeting</p>
+  <table class="ro-table">
+    <thead style="background:#1A1A2E"><tr><th>Type</th><th>Description</th><th>Prob.</th><th>Impact</th><th>Owner</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ro-type type-risk">RISK</span></td><td>Government JV &mdash; regulatory delay</td><td><span class="prob-tag ph">High</span></td><td><span class="prob-tag ph">High</span></td><td><b>Louis</b></td><td><span class="status-tag s-mon">Monitoring</span></td></tr>
+      <tr><td><span class="ro-type type-risk">RISK</span></td><td>Equipment downtime &mdash; gravity circuit failure</td><td><span class="prob-tag pm">Medium</span></td><td><span class="prob-tag ph">High</span></td><td><b>Emmanuel</b></td><td><span class="status-tag s-mon">Monitoring</span></td></tr>
+      <tr><td><span class="ro-type type-risk">RISK</span></td><td>Gold custody chain integrity</td><td><span class="prob-tag pl">Low</span></td><td><span class="prob-tag ph">High</span></td><td><b>Emmanuel</b></td><td><span class="status-tag s-mon">Monitoring</span></td></tr>
+      <tr><td><span class="ro-type type-opp">OPP</span></td><td>MLNR MoU &mdash; fast-track Responsible Mining Hub designation</td><td><span class="prob-tag ph">High</span></td><td><span class="prob-tag ph">High</span></td><td><b>Louis</b></td><td><span class="status-tag s-open">Open</span></td></tr>
+      <tr><td><span class="ro-type type-opp">OPP</span></td><td>Rand Refinery off-take partnership</td><td><span class="prob-tag pm">Medium</span></td><td><span class="prob-tag ph">High</span></td><td><b>Louis</b></td><td><span class="status-tag s-open">Open</span></td></tr>
+      <tr><td><span class="ro-type type-opp">OPP</span></td><td>Recovery rate improvement &mdash; 3&ndash;8pp upside</td><td><span class="prob-tag pm">Medium</span></td><td><span class="prob-tag pm">Medium</span></td><td><b>Yasin</b></td><td><span class="status-tag s-mon">Monitoring</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ACTIONS -->
+<div class="tab" id="tab-actions">
+  <p class="sec-label">All actions logged in Jira before anyone leaves the room</p>
+  <table class="act-table">
+    <thead><tr><th>Pillar</th><th>Action</th><th>Owner</th><th>Deadline</th><th>Jira ticket</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ptag" style="background:#1A237E">P1</span></td><td><input class="write-line" placeholder="Action..."></td><td><input class="write-line" placeholder="Owner..." style="width:80px"></td><td><input class="write-line" placeholder="Date..." style="width:80px"></td><td><input class="write-line" placeholder="VWC-..." style="width:70px"></td></tr>
+      <tr><td><span class="ptag" style="background:#0D47A1">P2</span></td><td><input class="write-line" placeholder="Action..."></td><td><input class="write-line" placeholder="Owner..." style="width:80px"></td><td><input class="write-line" placeholder="Date..." style="width:80px"></td><td><input class="write-line" placeholder="VWC-..." style="width:70px"></td></tr>
+      <tr><td><span class="ptag" style="background:#1B5E20">P3</span></td><td><input class="write-line" placeholder="Action..."></td><td><input class="write-line" placeholder="Owner..." style="width:80px"></td><td><input class="write-line" placeholder="Date..." style="width:80px"></td><td><input class="write-line" placeholder="VWC-..." style="width:70px"></td></tr>
+      <tr><td><span class="ptag" style="background:#6D4C0A">P4</span></td><td><input class="write-line" placeholder="Action..."></td><td><input class="write-line" placeholder="Owner..." style="width:80px"></td><td><input class="write-line" placeholder="Date..." style="width:80px"></td><td><input class="write-line" placeholder="VWC-..." style="width:70px"></td></tr>
+    </tbody>
+  </table>
+  <p class="sec-label" style="margin-top:16px">Blockers requiring escalation</p>
+  <table class="act-table">
+    <thead><tr><th>Pillar</th><th>Blocker</th><th>Escalate to</th><th>Resolution deadline</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ptag" style="background:#1A237E">P1</span></td><td><input class="write-line" placeholder="Blocker..."></td><td><input class="write-line" placeholder="Who..." style="width:120px"></td><td><input class="write-line" placeholder="By when..." style="width:100px"></td></tr>
+      <tr><td><span class="ptag" style="background:#0D47A1">P2</span></td><td><input class="write-line" placeholder="Blocker..."></td><td><input class="write-line" placeholder="Who..." style="width:120px"></td><td><input class="write-line" placeholder="By when..." style="width:100px"></td></tr>
+      <tr><td><span class="ptag" style="background:#1B5E20">P3</span></td><td><input class="write-line" placeholder="Blocker..."></td><td><input class="write-line" placeholder="Who..." style="width:120px"></td><td><input class="write-line" placeholder="By when..." style="width:100px"></td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<script>
+var matrixData={
+  HHH:{level:"Critical",color:"#7F1D1D",bg:"#450A0A",txt:"#FCA5A5",action:"Escalate immediately to all founders. Do not wait for the meeting.",jira:"Create a BLOCKER ticket linked to the R&O. Tag all pillar owners. Resolve within 24 hours or document why it cannot be resolved."},
+  HH2:{level:"High",color:"#991B1B",bg:"#FEE2E2",txt:"#7F1D1D",action:"Discuss and define an action in this meeting. Owner presents in 60 seconds.",jira:"Create a child action ticket linked to the R&O. Owner assigned. Deadline set before meeting ends."},
+  MH:{level:"High",color:"#991B1B",bg:"#FEE2E2",txt:"#7F1D1D",action:"Discuss and define an action in this meeting. Owner presents in 60 seconds.",jira:"Create a child action ticket linked to the R&O. Owner assigned. Deadline set before meeting ends."},
+  HM:{level:"Medium",color:"#854D0E",bg:"#FEF9C3",txt:"#78350F",action:"Flag in the meeting. Owner gives 30-second update. No deep discussion unless status changed.",jira:"Update Jira ticket status to Monitoring. Add a note. No action ticket needed unless probability increases."},
+  MM:{level:"Medium",color:"#854D0E",bg:"#FEF9C3",txt:"#78350F",action:"Flag in the meeting. Owner gives 30-second update. No deep discussion unless status changed.",jira:"Update Jira ticket status to Monitoring. Add a note. No action ticket needed unless probability increases."},
+  LH:{level:"Medium",color:"#854D0E",bg:"#FEF9C3",txt:"#78350F",action:"Flag in the meeting. Owner gives 30-second update. No deep discussion unless status changed.",jira:"Update Jira ticket status to Monitoring. Add a note. No action ticket needed unless probability increases."},
+  ML:{level:"Low",color:"#166534",bg:"#F0FDF4",txt:"#14532D",action:"Does not enter the weekly meeting. Reviewed in Monthly Strategic Review only.",jira:"Keep ticket in Monitoring status. No action required unless status changes."},
+  LM:{level:"Low",color:"#166534",bg:"#F0FDF4",txt:"#14532D",action:"Does not enter the weekly meeting. Reviewed in Monthly Strategic Review only.",jira:"Keep ticket in Monitoring status. No action required unless status changes."},
+  LL:{level:"Low",color:"#166534",bg:"#F0FDF4",txt:"#14532D",action:"Monitor quietly. Does not enter weekly or monthly meetings unless status changes.",jira:"Keep ticket open. Update only if probability or impact increases."},
+};
+
+var currentSel={vwc:null,vuc:null};
+
+function showMatrix(key,board){
+  var d=matrixData[key];
+  if(!d)return;
+  var prev=currentSel[board];
+  if(prev){var el=document.getElementById(board+'-'+prev);if(el)el.classList.remove('sel');}
+  currentSel[board]=key;
+  var el=document.getElementById(board+'-'+key);if(el)el.classList.add('sel');
+  var det=document.getElementById(board+'-detail');
+  det.innerHTML='<div class="md-level" style="color:'+d.txt+'">'+d.level+' priority</div><div class="md-action">Action: '+d.action+'</div><div class="md-jira">Jira: '+d.jira+'</div>';
+  det.style.background=d.bg;
+  det.classList.add('show');
+}
+
+function togglePillar(id){
+  var body=document.getElementById('body-'+id);
+  var arr=document.getElementById('arr-'+id);
+  var open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  arr.classList.toggle('open',!open);
+}
+
+function sw(tab,btn){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on')});
+  document.querySelectorAll('.nav button').forEach(function(b){b.classList.remove('on')});
+  document.getElementById('tab-'+tab).classList.add('on');
+  btn.classList.add('on');
+}
+</script>
+</body>
+</html>
