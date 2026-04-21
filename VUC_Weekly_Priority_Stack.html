@@ -362,6 +362,7 @@ function startFresh(){
   document.getElementById('rev-panel').style.display='none';
   showInfo('&#10003; Starting fresh &mdash; no previous week to review');
   reviewConfirmed=true;
+  renderP();
 }
 
 function showInfo(msg){
@@ -543,9 +544,10 @@ function upN(id,v){var p=P.find(function(x){return x.id===id;});if(p)p.name=v;}
 
 function collectT(){
   allT=[];Q={inbox:[],q1:[],q2:[],q3:[],q4:[]};
-  document.querySelectorAll('.task-row').forEach(function(r){
-    var inp=r.querySelector('.task-inp');
+  document.querySelectorAll('[data-t]').forEach(function(wrapper){
+    var inp=wrapper.querySelector('.task-inp');
     if(!inp||!inp.value.trim())return;
+    var r=wrapper;
     var tid=r.getAttribute('data-t');
     var pi=r.getAttribute('data-p');
     var pk=r.getAttribute('data-k');
@@ -709,6 +711,18 @@ function addBlocker(){
 function exportJSON(){
   var dateEl=document.getElementById('wdate');
   var week=dateEl.value||new Date().toISOString().slice(0,10);
+  var crossData=[];
+  document.querySelectorAll('#cross-list [data-cross],.cross-row').forEach(function(r){
+    var inputs=r.querySelectorAll('input,select');
+    var action=inputs[0]?inputs[0].value.trim():'';
+    if(action)crossData.push({action:action,from:inputs[1]?inputs[1].value:'',to:inputs[2]?inputs[2].value:'',priority:inputs[3]?inputs[3].value:''});
+  });
+  var blockerData=[];
+  document.querySelectorAll('#blocker-list .blocker-row').forEach(function(r){
+    var inputs=r.querySelectorAll('input');
+    var blocker=inputs[0]?inputs[0].value.trim():'';
+    if(blocker)blockerData.push({blocker:blocker,owner:inputs[1]?inputs[1].value:'',by:inputs[2]?inputs[2].value:''});
+  });
   var exportData={
     week:week,
     exported:new Date().toISOString(),
@@ -727,7 +741,12 @@ function sw(tab,btn){
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
   document.querySelectorAll('.nav button').forEach(function(b){b.classList.remove('on');});
   document.getElementById('tab-'+tab).classList.add('on');
-  btn.classList.add('on');window.scrollTo(0,0);
+  btn.classList.add('on');
+  if(tab==='tasks' && !document.getElementById('proj-list').children.length){
+    if(!previousWeek){previousWeek={tasks:[],week:''};}
+    renderP();
+  }
+  window.scrollTo(0,0);
 }
 </script>
 </body>
