@@ -73,6 +73,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .task-inp.carryover{background:#FEF3C7;padding:3px 6px;border-radius:4px;border-bottom:1px solid #FDE68A}
 .task-del{width:16px;height:16px;border-radius:50%;border:1px solid #e8e8e8;background:#fff;color:#ccc;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;padding:0;line-height:1}
 .task-del:hover{background:#fee2e2;color:#b91c1c;border-color:#fca5a5}
+.task-expand{width:16px;height:16px;border-radius:50%;border:1px solid #e8e8e8;background:#fff;color:#aaa;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;padding:0;line-height:1}
+.task-expand:hover{background:#EFF6FF;color:#2C5F8A;border-color:#93C5FD}
+.task-desc{display:none;width:100%;border:none;border-bottom:1px dashed #e0e0e0;font-size:11px;color:#555;background:#fafafa;outline:none;font-family:inherit;padding:4px 6px;margin-bottom:4px;border-radius:0 0 4px 4px;resize:vertical;min-height:32px}
+.task-desc.open{display:block}
+.cross-section{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:14px;margin-top:16px}
+.cross-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#2C5F8A;margin-bottom:10px}
+.cross-row{display:grid;grid-template-columns:1fr 70px 70px 80px;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5}
+.cross-row:last-child{border-bottom:none}
+.cross-inp{border:none;border-bottom:1px solid #e0e0e0;font-size:12px;color:#333;background:transparent;outline:none;font-family:inherit;padding:2px 0;width:100%}
+.cross-sel{font-size:11px;border:1px solid #e0e0e0;border-radius:20px;padding:2px 5px;outline:none;background:#fff;font-family:inherit;width:100%}
+.blocker-section{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:14px;margin-top:12px}
+.blocker-row{display:grid;grid-template-columns:1fr 80px 90px;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5}
+.blocker-row:last-child{border-bottom:none}
 .carryover-badge{font-size:9px;font-weight:700;color:#78350F;background:#FEF3C7;padding:1px 6px;border-radius:10px;flex-shrink:0}
 .add-task{font-size:11px;color:#2C5F8A;cursor:pointer;margin-top:4px;display:inline-block}
 .add-task:hover{text-decoration:underline}
@@ -191,6 +204,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
   <div class="sl">Top 5 projects from Decision Engine &mdash; click to expand, edit names, write tasks</div>
   <div class="hint"><b>Source:</b> Priority Allocation sheet in the Decision Engine. Update project names and scores in the Excel monthly. Edit names here if needed. Yellow tasks are carryovers from last week.</div>
   <div id="proj-list"></div>
+  <!-- CROSS-PILLAR -->
+  <div class="cross-section">
+    <div class="cross-label">Cross-project dependencies this week</div>
+    <div id="cross-list">
+      <div class="cross-row"><input class="cross-inp" placeholder="Dependency or action..."><select class="cross-sel"><option value="">From...</option><option>[SOL]</option><option>[GC]</option><option>[VWC]</option><option>[XS]</option><option>[IT]</option></select><select class="cross-sel"><option value="">To...</option><option>[SOL]</option><option>[GC]</option><option>[VWC]</option><option>[XS]</option><option>[IT]</option></select><select class="cross-sel"><option>High</option><option>Medium</option><option>Low</option></select></div>
+      <div class="cross-row"><input class="cross-inp" placeholder="Dependency or action..."><select class="cross-sel"><option value="">From...</option><option>[SOL]</option><option>[GC]</option><option>[VWC]</option><option>[XS]</option><option>[IT]</option></select><select class="cross-sel"><option value="">To...</option><option>[SOL]</option><option>[GC]</option><option>[VWC]</option><option>[XS]</option><option>[IT]</option></select><select class="cross-sel"><option>High</option><option>Medium</option><option>Low</option></select></div>
+    </div>
+    <span class="add-task" onclick="addCross()" style="font-size:11px">+ add dependency</span>
+  </div>
+  <!-- BLOCKERS -->
+  <div class="blocker-section">
+    <div class="cross-label">Blockers requiring escalation</div>
+    <div id="blocker-list">
+      <div class="blocker-row"><input class="cross-inp" placeholder="Describe blocker..."><input class="cross-inp" placeholder="Owner..." style="width:80px"><input class="cross-inp" placeholder="By when..."></div>
+      <div class="blocker-row"><input class="cross-inp" placeholder="Describe blocker..."><input class="cross-inp" placeholder="Owner..." style="width:80px"><input class="cross-inp" placeholder="By when..."></div>
+    </div>
+    <span class="add-task" onclick="addBlocker()" style="font-size:11px">+ add blocker</span>
+  </div>
+
   <div class="btn-row">
     <button class="btn btn-g" onclick="buildMatrix()">Continue to Eisenhower Matrix &rarr;</button>
     <button class="btn btn-s" onclick="window.print()">Print / PDF</button>
@@ -449,13 +481,28 @@ function renderP(){
 
 function trHTML(pi,pk){
   var tid='t'+(++tc);
-  return '<div class="task-row" id="r-'+tid+'" data-t="'+tid+'" data-p="'+pi+'" data-k="'+pk+'"><input class="task-inp" placeholder="Task..." id="i-'+tid+'"><button class="task-del" onclick="document.getElementById(\'r-'+tid+'\').remove()">&#x2715;</button></div>';
+  return '<div data-t="'+tid+'" data-p="'+pi+'" data-k="'+pk+'" id="wrap-'+tid+'">'+
+    '<div class="task-row" id="r-'+tid+'">'+
+    '<input class="task-inp" placeholder="Task..." id="i-'+tid+'">'+
+    '<button class="task-expand" title="Add description" onclick="togDesc(\''+tid+'\')" id="exp-'+tid+'">&#9656;</button>'+
+    '<button class="task-del" onclick="document.getElementById(\'wrap-'+tid+'\').remove()">&#x2715;</button>'+
+    '</div>'+
+    '<textarea class="task-desc" placeholder="Description (context, links, Jira ticket...)" id="d-'+tid+'" rows="2"></textarea>'+
+    '</div>';
 }
 
 function trCarryover(pi,pk,text,fromStatus){
   var tid='t'+(++tc);
   var label=fromStatus==='partial'?'CARRY (partial)':'CARRY (missed)';
-  return '<div class="task-row" id="r-'+tid+'" data-t="'+tid+'" data-p="'+pi+'" data-k="'+pk+'" data-carry="1"><span class="carryover-badge">'+label+'</span><input class="task-inp carryover" value="'+text+'" id="i-'+tid+'"><button class="task-del" onclick="document.getElementById(\'r-'+tid+'\').remove()">&#x2715;</button></div>';
+  return '<div data-t="'+tid+'" data-p="'+pi+'" data-k="'+pk+'" data-carry="1" id="wrap-'+tid+'">'+
+    '<div class="task-row" id="r-'+tid+'">'+
+    '<span class="carryover-badge">'+label+'</span>'+
+    '<input class="task-inp carryover" value="'+text+'" id="i-'+tid+'">'+
+    '<button class="task-expand" title="Add description" onclick="togDesc(\''+tid+'\')" id="exp-'+tid+'">&#9656;</button>'+
+    '<button class="task-del" onclick="document.getElementById(\'wrap-'+tid+'\').remove()">&#x2715;</button>'+
+    '</div>'+
+    '<textarea class="task-desc" placeholder="Description..." id="d-'+tid+'" rows="2"></textarea>'+
+    '</div>';
 }
 
 function addT(pi,pk){
@@ -463,6 +510,16 @@ function addT(pi,pk){
   var d=document.createElement('div');
   d.innerHTML=trHTML(pi,pk);
   c.appendChild(d.firstChild);
+}
+
+function togDesc(tid){
+  var desc=document.getElementById('d-'+tid);
+  var btn=document.getElementById('exp-'+tid);
+  if(!desc)return;
+  var open=desc.classList.toggle('open');
+  btn.innerHTML=open?'&#9660;':'&#9656;';
+  btn.style.color=open?'#2C5F8A':'#aaa';
+  if(open)desc.focus();
 }
 
 function togP(id){
@@ -486,7 +543,7 @@ function collectT(){
     var isCarry=r.getAttribute('data-carry')==='1';
     var proj=P.find(function(x){return x.id===pi;});
     var per=PPL.find(function(x){return x.key===pk;});
-    allT.push({tid:tid,text:inp.value.trim(),pi:pi,pn:proj?proj.name:'',pc:proj?proj.color:'#999',pk:pk,pname:per?per.name:'',pinit:per?per.init:'?',q:'inbox',carry:isCarry,reason:null});
+    var descEl=document.getElementById('d-'+tid);var desc=descEl?descEl.value.trim():'';allT.push({tid:tid,text:inp.value.trim(),desc:desc,pi:pi,pn:proj?proj.name:'',pc:proj?proj.color:'#999',pk:pk,pname:per?per.name:'',pinit:per?per.init:'?',q:'inbox',carry:isCarry,reason:null});
     Q.inbox.push(tid);
   });
 }
@@ -503,7 +560,7 @@ function chipH(t){
     +'<span class="chip-dot" style="background:'+t.pc+'"></span>'
     +'<span class="chip-proj">['+t.pn.substring(0,6).toUpperCase()+']</span>'
     +'<span class="chip-owner" style="background:'+(oc[t.pk]||'#999')+'">'+t.pinit+'</span>'
-    +'<span class="chip-text">'+t.text+'</span>'
+    +'<span class="chip-text">'+t.text+'</span>'+(t.desc?'<span style="font-size:9px;color:#999;margin-left:4px" title="'+t.desc+'">&#9432;</span>':'')
     +(t.carry?'<span class="chip-carry">CARRY</span>':'')
     +'</div>';
 }
@@ -611,7 +668,7 @@ function buildSummary(){
       h+='<div class="sum-q"><div class="sum-q-label" style="color:'+qc[q]+'">'+ql[q]+(tasks.length?' ('+tasks.length+')':'')+'</div>';
       if(tasks.length){
         tasks.forEach(function(t){
-          h+='<div class="sum-task"><span style="color:'+t.pc+';font-weight:600;font-size:11px">['+t.pn.substring(0,8)+']</span> '+t.text;
+          h+='<div class="sum-task"><span style="color:'+t.pc+';font-weight:600;font-size:11px">['+t.pn.substring(0,8)+']</span> '+t.text+(t.desc?'<div style="font-size:11px;color:#888;padding-left:8px;margin-top:2px">'+t.desc+'</div>':'');
           if(t.carry)h+=' <span class="chip-carry" style="margin-left:4px">CARRY</span>';
           if(t.q==='q4'&&t.reason)h+='<div class="sum-task-reason">Reason: '+t.reason+'</div>';
           h+='</div>';
@@ -629,13 +686,24 @@ function buildSummary(){
   document.getElementById('sum-content').innerHTML=h;
 }
 
+function addCross(){
+  var r=document.createElement('div');r.className='cross-row';
+  r.innerHTML='<input class="cross-inp" placeholder="Dependency..."><select class="cross-sel"><option value="">From...</option><option>[SOL]</option><option>[GC]</option><option>[VWC]</option><option>[XS]</option><option>[IT]</option></select><select class="cross-sel"><option value="">To...</option><option>[SOL]</option><option>[GC]</option><option>[VWC]</option><option>[XS]</option><option>[IT]</option></select><select class="cross-sel"><option>High</option><option>Medium</option><option>Low</option></select>';
+  document.getElementById('cross-list').appendChild(r);
+}
+function addBlocker(){
+  var r=document.createElement('div');r.className='blocker-row';
+  r.innerHTML='<input class="cross-inp" placeholder="Describe blocker..."><input class="cross-inp" placeholder="Owner..."><input class="cross-inp" placeholder="By when...">';
+  document.getElementById('blocker-list').appendChild(r);
+}
+
 function exportJSON(){
   var dateEl=document.getElementById('wdate');
   var week=dateEl.value||new Date().toISOString().slice(0,10);
   var exportData={
     week:week,
     exported:new Date().toISOString(),
-    tasks:allT.map(function(t){return {text:t.text,pi:t.pi,pn:t.pn,pc:t.pc,pk:t.pk,q:t.q,carry:t.carry,reason:t.reason};})
+    tasks:allT.map(function(t){return {text:t.text,desc:t.desc||'',pi:t.pi,pn:t.pn,pc:t.pc,pk:t.pk,q:t.q,carry:t.carry,reason:t.reason};}),crossDependencies:crossData,blockers:blockerData
   };
   var json=JSON.stringify(exportData,null,2);
   var out=document.getElementById('json-out');
