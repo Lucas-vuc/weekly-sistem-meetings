@@ -998,26 +998,39 @@
         </div>
       </div>`;
 
-    // Create a hidden container to render from
-    const container = document.createElement('div');
-    container.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff;';
-    container.innerHTML = html;
-    document.body.appendChild(container);
+    // Render into a wrapper that's visible to html2canvas
+    // html2canvas can't capture opacity:0 or off-screen fixed elements reliably
+    // Strategy: append below page content, capture, then remove
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'width:794px;background:#fff;margin:0 auto;';
+    wrapper.innerHTML = html;
 
-    const opt = {
-      margin:      [10, 10, 10, 10],
-      filename:    filename,
-      image:       { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', windowWidth: 794 },
-      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak:   { mode: 'avoid-all' }
-    };
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:#fff;z-index:9998;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:0;';
+    overlay.appendChild(wrapper);
+    document.body.appendChild(overlay);
 
-    html2pdf().set(opt).from(container).save().then(() => {
-      document.body.removeChild(container);
-      btn.classList.remove('loading');
-      btn.textContent = '⬇ Export PDF';
-    });
+    // Small delay to ensure render
+    setTimeout(() => {
+      const opt = {
+        margin:      [10, 10, 10, 10],
+        filename:    filename,
+        image:       { type: 'jpeg', quality: 0.97 },
+        html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', windowWidth: 794 },
+        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:   { mode: 'avoid-all' }
+      };
+
+      html2pdf().set(opt).from(wrapper).save().then(() => {
+        document.body.removeChild(overlay);
+        btn.classList.remove('loading');
+        btn.textContent = '⬇ Export PDF';
+      }).catch(() => {
+        document.body.removeChild(overlay);
+        btn.classList.remove('loading');
+        btn.textContent = '⬇ Export PDF';
+      });
+    }, 300);
   }
 
   // ── CLOSE ─────────────────────────────────────────────
