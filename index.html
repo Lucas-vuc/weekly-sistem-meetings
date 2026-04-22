@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VUC — Operation Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:  #0D1B2A;
+    --gold:  #C9A84C;
+    --slate: #2E4057;
+    --white: #FFFFFF;
+    --muted: #8494A8;
+    --fog:   #F0F4F8;
+    --line:  #DDE2EA;
+    --green: #1E7A4A;
+    --red:   #8B1A1A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    padding: 18px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(201,168,76,.25);
+  }
+  .brand { display: flex; align-items: baseline; gap: 12px; }
+  .brand .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 24px; color: var(--white); letter-spacing: 3px; }
+  .brand .tag  { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: 3px; text-transform: uppercase; }
+  .topbar-right { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+
+  /* ── CANVAS ── */
+  .canvas {
+    width: 100%;
+    padding: 48px 32px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* subtle grid bg */
+  .canvas::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+
+  /* ── FLOW LAYOUT ── */
+  .flow {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* ── ROW ── */
+  .flow-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ── CONNECTOR VERTICAL ── */
+  .connector-v {
+    width: 2px;
+    height: 36px;
+    background: linear-gradient(180deg, rgba(201,168,76,.6), rgba(201,168,76,.2));
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .connector-v::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid rgba(201,168,76,.5);
+  }
+
+  /* connector horizontal bridge */
+  .connector-bridge {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+  .bridge-line {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 5%, rgba(201,168,76,.3) 20%, rgba(201,168,76,.3) 80%, transparent 95%);
+    width: 80%;
+    top: 50%;
+  }
+  .bridge-down {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background: rgba(201,168,76,.3);
+    top: 0;
+  }
+
+  /* ── NODE ── */
+  .node {
+    position: relative;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    text-decoration: none;
+    display: block;
+  }
+  .node:hover { transform: translateY(-3px); }
+
+  /* START node */
+  .node-start {
+    background: linear-gradient(135deg, var(--gold) 0%, #E8C76A 100%);
+    padding: 14px 36px;
+    border-radius: 40px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(201,168,76,.35);
+  }
+  .node-start .n-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* DAILY node — special */
+  .node-daily {
+    background: var(--navy);
+    border: 2px solid var(--gold);
+    padding: 0;
+    width: 280px;
+    box-shadow: 0 0 24px rgba(201,168,76,.2);
+  }
+  .node-daily:hover { box-shadow: 0 6px 32px rgba(201,168,76,.35); }
+  .node-daily .n-header {
+    background: var(--gold);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 8px 8px 0 0;
+  }
+  .node-daily .n-header .freq {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--navy);
+    opacity: .7;
+  }
+  .node-daily .n-header .n-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: 1px;
+  }
+  .node-daily .n-body {
+    padding: 10px 16px 12px;
+  }
+  .node-daily .n-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .node-daily .n-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .n-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: rgba(255,255,255,.06);
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .n-tag.gold { background: rgba(201,168,76,.15); color: var(--gold); border-color: rgba(201,168,76,.3); }
+
+  /* STANDARD meeting node */
+  .node-meeting {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.1);
+    width: 230px;
+    transition: all .2s;
+  }
+  .node-meeting:hover {
+    background: rgba(255,255,255,.08);
+    border-color: rgba(201,168,76,.4);
+    box-shadow: 0 4px 20px rgba(201,168,76,.15);
+  }
+  .node-meeting .n-header {
+    padding: 9px 14px 8px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .freq-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .freq-daily   { background: rgba(201,168,76,.2);  color: var(--gold); }
+  .freq-weekly  { background: rgba(46,64,87,.6);    color: #7EA3C4; border: 1px solid rgba(126,163,196,.2); }
+  .freq-biweekly{ background: rgba(30,122,74,.2);   color: #5DBF8A; border: 1px solid rgba(93,191,138,.2); }
+  .freq-monthly { background: rgba(139,26,26,.2);   color: #E07070; border: 1px solid rgba(224,112,112,.2); }
+
+  .node-meeting .n-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: .3px;
+  }
+  .node-meeting .n-body {
+    padding: 8px 14px 10px;
+  }
+  .node-meeting .n-desc {
+    font-size: 10.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .node-meeting .n-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 7px;
+  }
+  .node-meeting .n-dur {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: rgba(132,148,168,.6);
+    margin-top: 6px;
+  }
+
+  /* TOOL node (excel) */
+  .node-tool {
+    background: rgba(255,255,255,.03);
+    border: 1px dashed rgba(255,255,255,.12);
+    width: 200px;
+  }
+  .node-tool:hover {
+    background: rgba(255,255,255,.07);
+    border-color: rgba(201,168,76,.3);
+  }
+  .node-tool .n-header {
+    padding: 9px 14px 8px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .node-tool .n-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,.6);
+  }
+  .node-tool .n-body { padding: 8px 14px 10px; }
+  .node-tool .n-desc { font-size: 10.5px; color: rgba(132,148,168,.5); line-height: 1.5; }
+  .node-tool .n-dur  { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(132,148,168,.4); margin-top: 6px; }
+
+  /* ── DAY LABELS ── */
+  .day-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(132,148,168,.4);
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  /* ── SECTION DIVIDERS ── */
+  .flow-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 90%;
+    margin: 32px auto 28px;
+  }
+  .flow-divider-line { flex: 1; height: 1px; background: rgba(255,255,255,.06); }
+  .flow-divider-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(132,148,168,.35);
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    position: fixed;
+    bottom: 24px;
+    right: 28px;
+    background: rgba(13,27,42,.9);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+    padding: 12px 16px;
+    backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+  .legend-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .legend-row:last-child { margin-bottom: 0; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .legend-text { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: .5px; }
+
+  /* ── HOVER TOOLTIP ── */
+  .node[data-tip]:hover::after {
+    content: '→ Open';
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--gold);
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  /* ── PIPELINE FLOW ── */
+  .pipeline-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+  .pipe-stage {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 6px;
+    padding: 8px 14px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .pipe-stage .ps-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .pipe-arrow {
+    font-size: 12px;
+    color: rgba(201,168,76,.35);
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="logo">VUC</span>
+    <span class="tag">Operation Framework</span>
+  </div>
+  <span class="topbar-right" id="topDate"></span>
+</div>
+
+<div class="canvas">
+<div class="flow">
+
+  <!-- ══ START ══ -->
+  <div class="node node-start">
+    <div class="n-title">VUC Operating System</div>
+  </div>
+
+  <div class="connector-v"></div>
+
+  <!-- ══ IDEA PIPELINE (small) ══ -->
+  <div style="text-align:center;margin-bottom:6px;">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(201,168,76,.5);margin-bottom:8px;">IDEA PIPELINE</div>
+    <div class="pipeline-row">
+      <div class="pipe-stage"><div class="ps-label">Idea Pool</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><div class="ps-label">Under Review</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><div class="ps-label">Incubation</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage" style="border-color:rgba(201,168,76,.3);"><div class="ps-label" style="color:var(--gold);">Approved</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><div class="ps-label">Active</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><div class="ps-label">Done / Parked / Killed</div></div>
+    </div>
+  </div>
+
+  <div class="connector-v"></div>
+
+  <!-- ══ ROW 1: DAILY ══ -->
+  <div class="flow-divider">
+    <div class="flow-divider-line"></div>
+    <div class="flow-divider-label">Daily</div>
+    <div class="flow-divider-line"></div>
+  </div>
+
+  <div class="flow-row">
+    <a class="node node-daily" href="vuc-daily-meeting.html" data-tip>
+      <div class="n-header">
+        <span class="freq-badge freq-daily">Daily</span>
+        <span class="n-title">Daily Meeting</span>
+      </div>
+      <div class="n-body">
+        <div class="n-desc">Priorities of the day per person · Eisenhower matrix · Blockers · Cross-department handoffs</div>
+        <div class="n-tags">
+          <span class="n-tag gold">Louis</span>
+          <span class="n-tag gold">Yasin</span>
+          <span class="n-tag gold">Lucas</span>
+          <span class="n-tag">10 min</span>
+          <span class="n-tag">PDF export</span>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="connector-v"></div>
+
+  <!-- ══ ROW 2: WEEKLY ══ -->
+  <div class="flow-divider">
+    <div class="flow-divider-line"></div>
+    <div class="flow-divider-label">Weekly Cadence</div>
+    <div class="flow-divider-line"></div>
+  </div>
+
+  <div class="flow-row">
+
+    <!-- MON -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <a class="node node-meeting" href="VUC_Weekly_Priority_Stack.html" data-tip>
+        <div class="n-header">
+          <span class="freq-badge freq-weekly">Monday</span>
+          <span class="n-title">Priority Stack</span>
+        </div>
+        <div class="n-body">
+          <div class="n-desc">Active projects · Q1/Q2/Q3 tasks · No new ideas</div>
+          <div class="n-tags">
+            <span class="n-tag">Execution</span>
+            <span class="n-tag">VUC</span>
+          </div>
+          <div class="n-dur">45 min</div>
+        </div>
+      </a>
+      <div class="day-label">Mon</div>
+    </div>
+
+    <!-- TUE AM -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <a class="node node-meeting" href="VWC_Weekly_Meeting.html" data-tip>
+        <div class="n-header">
+          <span class="freq-badge freq-weekly">Tue AM</span>
+          <span class="n-title">VWC Ghana Objectives</span>
+        </div>
+        <div class="n-body">
+          <div class="n-desc">4 Pillars · Week / Month / 90-day horizons · R&O</div>
+          <div class="n-tags">
+            <span class="n-tag">VWC</span>
+            <span class="n-tag">Ghana</span>
+          </div>
+          <div class="n-dur">30 min</div>
+        </div>
+      </a>
+      <div class="day-label">Tue</div>
+    </div>
+
+    <!-- TUE PM -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <a class="node node-meeting" href="VUC_Pipeline_Review.html" data-tip>
+        <div class="n-header">
+          <span class="freq-badge freq-weekly">Tue PM</span>
+          <span class="n-title">Pipeline Review</span>
+        </div>
+        <div class="n-body">
+          <div class="n-desc">Move ideas through stages · Assign owners · Kill or approve</div>
+          <div class="n-tags">
+            <span class="n-tag">Ideas</span>
+            <span class="n-tag">Pipeline</span>
+          </div>
+          <div class="n-dur">45 min</div>
+        </div>
+      </a>
+      <div class="day-label">Tue</div>
+    </div>
+
+    <!-- WED — no meeting -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <div class="node node-tool" style="width:140px;cursor:default;">
+        <div class="n-header">
+          <span class="freq-badge" style="background:rgba(255,255,255,.04);color:rgba(132,148,168,.4);border:1px solid rgba(255,255,255,.06);">Wed</span>
+          <span class="n-title" style="color:rgba(255,255,255,.25);">No Meeting</span>
+        </div>
+        <div class="n-body">
+          <div class="n-desc" style="color:rgba(132,148,168,.3);">Deep work day</div>
+        </div>
+      </div>
+      <div class="day-label">Wed</div>
+    </div>
+
+    <!-- THU async -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <div class="node node-tool" style="cursor:default;">
+        <div class="n-header">
+          <span class="freq-badge" style="background:rgba(255,255,255,.05);color:rgba(132,148,168,.5);border:1px solid rgba(255,255,255,.07);">Thu</span>
+          <span class="n-title">Async Update</span>
+        </div>
+        <div class="n-body">
+          <div class="n-desc">Status update via Teams · No meeting</div>
+          <div class="n-dur">Async</div>
+        </div>
+      </div>
+      <div class="day-label">Thu</div>
+    </div>
+
+    <!-- FRI ideas -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <a class="node node-meeting" href="VUC_Ideas_Session.html" data-tip>
+        <div class="n-header">
+          <span class="freq-badge freq-weekly">Friday</span>
+          <span class="n-title">Ideas Session</span>
+        </div>
+        <div class="n-body">
+          <div class="n-desc">Free ideation · No validation · Capture to Jira</div>
+          <div class="n-tags">
+            <span class="n-tag">Ideas</span>
+          </div>
+          <div class="n-dur">30 min</div>
+        </div>
+      </a>
+      <div class="day-label">Fri</div>
+    </div>
+
+  </div><!-- /flow-row weekly -->
+
+  <div class="connector-v"></div>
+
+  <!-- ══ ROW 3: BI-WEEKLY + MONTHLY ══ -->
+  <div class="flow-divider">
+    <div class="flow-divider-line"></div>
+    <div class="flow-divider-label">Bi-weekly &amp; Monthly</div>
+    <div class="flow-divider-line"></div>
+  </div>
+
+  <div class="flow-row">
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <a class="node node-meeting" href="VUC_Incubation_Meeting.html" data-tip>
+        <div class="n-header">
+          <span class="freq-badge freq-biweekly">Bi-weekly</span>
+          <span class="n-title">Incubation Review</span>
+        </div>
+        <div class="n-body">
+          <div class="n-desc">Validate ideas before execution · Go / No-go decisions</div>
+          <div class="n-tags">
+            <span class="n-tag">Incubation</span>
+            <span class="n-tag">Gate</span>
+          </div>
+          <div class="n-dur">45 min</div>
+        </div>
+      </a>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <a class="node node-meeting" href="VUC_Monthly_Strategic_Review.html" data-tip>
+        <div class="n-header">
+          <span class="freq-badge freq-monthly">Monthly</span>
+          <span class="n-title">Strategic Review</span>
+        </div>
+        <div class="n-body">
+          <div class="n-desc">Portfolio decisions · Verticals health · Kill / Park / Scale</div>
+          <div class="n-tags">
+            <span class="n-tag">Strategy</span>
+            <span class="n-tag">Portfolio</span>
+          </div>
+          <div class="n-dur">90 min</div>
+        </div>
+      </a>
+    </div>
+
+  </div>
+
+  <div class="connector-v"></div>
+
+  <!-- ══ ROW 4: DECISION ENGINE ══ -->
+  <div class="flow-divider">
+    <div class="flow-divider-line"></div>
+    <div class="flow-divider-label">Tools</div>
+    <div class="flow-divider-line"></div>
+  </div>
+
+  <div class="flow-row">
+    <div class="node node-tool" style="cursor:default;width:260px;">
+      <div class="n-header">
+        <span class="freq-badge" style="background:rgba(30,122,74,.15);color:#5DBF8A;border:1px solid rgba(93,191,138,.15);">Excel</span>
+        <span class="n-title" style="color:rgba(255,255,255,.5);">Decision Engine v7.0</span>
+      </div>
+      <div class="n-body">
+        <div class="n-desc" style="color:rgba(132,148,168,.45);">Project scoring · Quick Kill Filter · Portfolio Dashboard · Priority Allocation</div>
+        <div class="n-dur">Used in Monthly Strategic Review</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /flow -->
+</div><!-- /canvas -->
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-title">Frequency</div>
+  <div class="legend-row"><div class="legend-dot" style="background:rgba(201,168,76,.5);"></div><div class="legend-text">Daily</div></div>
+  <div class="legend-row"><div class="legend-dot" style="background:#3B5E7A;"></div><div class="legend-text">Weekly</div></div>
+  <div class="legend-row"><div class="legend-dot" style="background:#1E5C3A;"></div><div class="legend-text">Bi-weekly</div></div>
+  <div class="legend-row"><div class="legend-dot" style="background:#5C1A1A;"></div><div class="legend-text">Monthly</div></div>
+  <div class="legend-row"><div class="legend-dot" style="background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.15);"></div><div class="legend-text">No meeting / Tool</div></div>
+</div>
+
+<script>
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const now = new Date();
+  document.getElementById('topDate').textContent =
+    days[now.getDay()] + ' ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+</script>
+</body>
+</html>

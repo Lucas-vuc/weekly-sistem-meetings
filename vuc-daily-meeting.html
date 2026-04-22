@@ -868,41 +868,153 @@
   }
 
   // ── EXPORT PDF ────────────────────────────────────────
+  function getEisRows(blockEl) {
+    const cells = blockEl.querySelectorAll('.eis-cell');
+    const labels = ['DO FIRST','SCHEDULE','DELEGATE','ELIMINATE'];
+    const colors = ['#FFF8EC','#F0F7FF','#FFF3F3','#F5F5F5'];
+    const borders = ['#E8B84B','#6B9FD4','#D47B7B','#BBBBBB'];
+    const tcolors = ['#A07020','#2E5F8A','#8A2E2E','#888888'];
+    let rows = '';
+    cells.forEach((cell, i) => {
+      const val = cell.querySelector('textarea').value.trim() || '—';
+      rows += `
+        <tr>
+          <td style="width:22%;padding:8px 10px;background:${colors[i]};border:1px solid ${borders[i]};font-size:10px;font-weight:700;letter-spacing:1px;color:${tcolors[i]};vertical-align:top;">${labels[i]}</td>
+          <td style="padding:8px 10px;border:1px solid #DDE2EA;font-size:12px;color:#0D1B2A;vertical-align:top;white-space:pre-wrap;">${val}</td>
+        </tr>`;
+    });
+    return rows;
+  }
+
+  function getBlockers(blockEl) {
+    const rows = blockEl.querySelectorAll('.blocker-row');
+    if (!rows.length) return '<p style="font-size:11px;color:#8494A8;margin:4px 0;">None</p>';
+    let html = '';
+    rows.forEach(r => {
+      const val = r.querySelector('textarea').value.trim();
+      if (val) html += `<p style="font-size:12px;color:#B03030;margin:4px 0;padding:6px 10px;background:#FFF5F5;border-left:3px solid #B03030;">🚫 ${val}</p>`;
+    });
+    return html || '<p style="font-size:11px;color:#8494A8;margin:4px 0;">None</p>';
+  }
+
+  function getCrossRows() {
+    const rows = document.querySelectorAll('#crossBody tr');
+    let html = '';
+    rows.forEach(r => {
+      const task   = r.querySelector('td:nth-child(1) input')?.value.trim() || '';
+      const desc   = r.querySelector('td:nth-child(2) input')?.value.trim() || '';
+      const dir    = r.querySelector('td:nth-child(3) select');
+      const dirVal = dir ? dir.options[dir.selectedIndex]?.text || '' : '';
+      const stat   = r.querySelector('td:nth-child(4) select');
+      const statVal= stat ? stat.options[stat.selectedIndex]?.text || '' : '';
+      if (!task && !desc) return;
+      html += `<tr>
+        <td style="padding:7px 10px;border:1px solid #DDE2EA;font-size:12px;">${task}</td>
+        <td style="padding:7px 10px;border:1px solid #DDE2EA;font-size:12px;">${desc}</td>
+        <td style="padding:7px 10px;border:1px solid #DDE2EA;font-size:12px;">${dirVal}</td>
+        <td style="padding:7px 10px;border:1px solid #DDE2EA;font-size:12px;">${statVal}</td>
+      </tr>`;
+    });
+    return html || `<tr><td colspan="4" style="padding:8px 10px;color:#8494A8;font-size:11px;border:1px solid #DDE2EA;">No cross-department tasks logged.</td></tr>`;
+  }
+
+  function personPDFBlock(name, role, avatarColor, blockId) {
+    const block = document.getElementById(blockId).closest('.person-block');
+    return `
+      <div style="margin-bottom:20px;border:1px solid #DDE2EA;border-radius:6px;overflow:hidden;page-break-inside:avoid;">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:#F4F6F9;border-bottom:1px solid #DDE2EA;">
+          <div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;">${name[0]}</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#0D1B2A;">${name}</div>
+            <div style="font-size:10px;color:#8494A8;">${role}</div>
+          </div>
+        </div>
+        <div style="padding:12px 16px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#8494A8;margin-bottom:8px;">EISENHOWER MATRIX</div>
+          <table style="width:100%;border-collapse:collapse;">
+            ${getEisRows(block)}
+          </table>
+          <div style="margin-top:12px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#8494A8;margin-bottom:6px;">BLOCKERS</div>
+            ${getBlockers(document.getElementById(blockId))}
+          </div>
+        </div>
+      </div>`;
+  }
+
   function exportPDF(){
     const btn = document.getElementById('exportBtn');
     btn.classList.add('loading');
     btn.textContent = '⏳ Generating…';
 
-    // Sync textarea values to data-value spans for PDF rendering
-    // html2pdf captures the DOM visually — textareas render fine
-    // but we freeze selects as text for clean output
-    document.querySelectorAll('select').forEach(sel => {
-      sel.setAttribute('data-pdf-val', sel.options[sel.selectedIndex]?.text || '');
-    });
-
     const now2 = new Date();
     const dateStr = `${now2.getFullYear()}-${pad(now2.getMonth()+1)}-${pad(now2.getDate())}`;
+    const dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][now2.getDay()];
     const filename = `VUC_Daily_${dateStr}.pdf`;
 
-    // Hide interactive controls during export
-    const hideEls = document.querySelectorAll('.btn-timer, #timerBtn, .add-btn, .progress-bar-wrap, [onclick="resetTimer()"]');
-    hideEls.forEach(el => el.style.visibility = 'hidden');
-    // Freeze topbar (remove sticky so it prints once)
-    document.querySelector('.topbar').style.position = 'relative';
+    const html = `
+      <div style="font-family:Arial,sans-serif;color:#0D1B2A;padding:0;">
+
+        <!-- HEADER -->
+        <div style="background:#0D1B2A;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+          <div>
+            <span style="font-size:20px;font-weight:800;color:#fff;letter-spacing:2px;">VUC</span>
+            <span style="font-size:12px;color:#C9A84C;margin-left:8px;letter-spacing:2px;">DAILY MEETING</span>
+          </div>
+          <span style="font-size:11px;color:#8494A8;">${dayName}, ${dateStr}</span>
+        </div>
+
+        <!-- SECTION 1 -->
+        <div style="margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #C9A84C;">
+          <span style="font-size:11px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);padding:3px 8px;border-radius:3px;color:#C9A84C;letter-spacing:2px;margin-right:10px;">01</span>
+          <span style="font-size:13px;font-weight:700;letter-spacing:1px;color:#0D1B2A;text-transform:uppercase;">Today's Priorities</span>
+        </div>
+        <div style="margin-bottom:24px;">
+          ${personPDFBlock('Louis','Co-Founder · Strategy & Investors','#1A3A5C','blockers-louis')}
+          ${personPDFBlock('Yasin','Co-Founder · CTO & Consulting','#1A5C3A','blockers-yasin')}
+          ${personPDFBlock('Lucas','Organization & Development Manager','#8A5C1A','blockers-lucas')}
+        </div>
+
+        <!-- SECTION 2 -->
+        <div style="margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #2E4057;page-break-before:auto;">
+          <span style="font-size:11px;background:rgba(46,64,87,.15);border:1px solid rgba(46,64,87,.4);padding:3px 8px;border-radius:3px;color:#2E4057;letter-spacing:2px;margin-right:10px;">02</span>
+          <span style="font-size:13px;font-weight:700;letter-spacing:1px;color:#0D1B2A;text-transform:uppercase;">Cross-Department Tasks</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:32px;">
+          <thead>
+            <tr style="background:#0D1B2A;">
+              <th style="padding:8px 10px;font-size:10px;letter-spacing:2px;color:#C9A84C;text-align:left;font-weight:500;">TASK</th>
+              <th style="padding:8px 10px;font-size:10px;letter-spacing:2px;color:#C9A84C;text-align:left;font-weight:500;">DESCRIPTION</th>
+              <th style="padding:8px 10px;font-size:10px;letter-spacing:2px;color:#C9A84C;text-align:left;font-weight:500;">FROM → TO</th>
+              <th style="padding:8px 10px;font-size:10px;letter-spacing:2px;color:#C9A84C;text-align:left;font-weight:500;">STATUS</th>
+            </tr>
+          </thead>
+          <tbody>${getCrossRows()}</tbody>
+        </table>
+
+        <!-- FOOTER NOTE -->
+        <div style="border-top:1px solid #DDE2EA;padding-top:10px;text-align:center;">
+          <span style="font-size:10px;color:#8494A8;letter-spacing:1px;">VUC — CONFIDENTIAL · Daily Meeting Record · ${dateStr}</span>
+        </div>
+      </div>`;
+
+    // Create a hidden container to render from
+    const container = document.createElement('div');
+    container.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff;';
+    container.innerHTML = html;
+    document.body.appendChild(container);
 
     const opt = {
-      margin:      [8, 8, 8, 8],
+      margin:      [10, 10, 10, 10],
       filename:    filename,
       image:       { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#0D1B2A' },
+      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', windowWidth: 794 },
       jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak:   { mode: ['avoid-all', 'css', 'legacy'] }
+      pagebreak:   { mode: 'avoid-all' }
     };
 
-    html2pdf().set(opt).from(document.body).save().then(() => {
-      // Restore UI
-      hideEls.forEach(el => el.style.visibility = '');
-      document.querySelector('.topbar').style.position = 'sticky';
+    html2pdf().set(opt).from(container).save().then(() => {
+      document.body.removeChild(container);
       btn.classList.remove('loading');
       btn.textContent = '⬇ Export PDF';
     });
