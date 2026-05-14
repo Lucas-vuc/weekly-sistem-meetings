@@ -46,6 +46,360 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .qb3{background:#FEF9C3;color:#78350F}
 .qb4{background:#F3F4F6;color:#555}
 .task-desc-hint{font-size:10px;color:#999;font-style:italic;margin-left:4px}
+
+/* ── URGENT CARRY-OVER BANNER ── */
+.urgent-banner{
+  background:linear-gradient(135deg,#7F1D1D 0%,#991B1B 50%,#B91C1C 100%);
+  color:#fff;
+  border-radius:12px;
+  padding:18px 22px;
+  margin-bottom:20px;
+  box-shadow:0 4px 16px rgba(185,28,28,.25);
+  border:2px solid #DC2626;
+  display:none;
+  animation:urgentPulse 3s ease-in-out infinite;
+}
+.urgent-banner.show{display:block}
+@keyframes urgentPulse{
+  0%,100%{box-shadow:0 4px 16px rgba(185,28,28,.25)}
+  50%{box-shadow:0 4px 24px rgba(220,38,38,.5)}
+}
+.urgent-banner-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;gap:10px;
+}
+.urgent-banner-title{
+  font-size:13px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;
+}
+.urgent-banner-title::before{
+  content:'⚠';font-size:20px;
+  animation:urgentBlink 1.5s ease-in-out infinite;
+}
+@keyframes urgentBlink{
+  0%,100%{opacity:1}
+  50%{opacity:.4}
+}
+.urgent-count{
+  background:rgba(255,255,255,.2);
+  padding:3px 12px;border-radius:20px;
+  font-size:11px;font-weight:700;letter-spacing:.5px;
+}
+.urgent-section{
+  background:rgba(0,0,0,.2);
+  border-radius:8px;padding:10px 14px;margin-bottom:8px;
+}
+.urgent-section:last-child{margin-bottom:0}
+.urgent-section-title{
+  font-size:10px;font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase;
+  color:#FECACA;margin-bottom:8px;
+  display:flex;align-items:center;gap:6px;
+}
+.urgent-item{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:5px 0;font-size:12px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.urgent-item:last-child{border-bottom:none}
+.urgent-item-tag{
+  font-family:monospace;font-size:9px;font-weight:700;
+  padding:2px 6px;border-radius:4px;
+  background:rgba(255,255,255,.15);color:#FECACA;
+  letter-spacing:.5px;text-transform:uppercase;
+  flex-shrink:0;
+}
+.urgent-item-tag.louis{background:rgba(96,165,250,.3);color:#DBEAFE}
+.urgent-item-tag.yasin{background:rgba(74,222,128,.3);color:#DCFCE7}
+.urgent-item-tag.lucas{background:rgba(251,191,36,.3);color:#FEF3C7}
+.urgent-item-text{flex:1;color:#fff;line-height:1.4}
+.urgent-item-meta{
+  font-size:10px;color:#FECACA;
+  font-family:monospace;flex-shrink:0;
+}
+.urgent-banner-actions{
+  margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;
+}
+.urgent-btn{
+  background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);
+  border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;
+  cursor:pointer;letter-spacing:.3px;text-transform:uppercase;
+  font-family:inherit;
+}
+.urgent-btn:hover{background:rgba(255,255,255,.25)}
+.urgent-btn.primary{background:#fff;color:#7F1D1D}
+.urgent-btn.primary:hover{background:#FEE2E2}
+
+/* ── INACTIVE PROJECT CARD ── */
+.proj.inactive{
+  opacity:.65;
+  background:#fafafa;
+  position:relative;
+}
+.proj.inactive .proj-hdr{
+  cursor:default;
+}
+.proj.inactive .proj-rank{
+  background:#888 !important;
+}
+.proj-inactive-note{
+  background:linear-gradient(135deg,#1B5E20 0%,#15803D 100%);
+  color:#fff;
+  padding:14px 18px;
+  border-radius:0 0 8px 8px;
+  font-size:12px;
+  line-height:1.5;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.proj-inactive-note::before{
+  content:'→';
+  font-size:18px;
+  font-weight:700;
+}
+.proj-inactive-note b{
+  color:#FEF3C7;
+}
+
+/* ── FIRE BANNER (replaces old pulse) ── */
+@keyframes flameWiggle{
+  0%,100%{transform:rotate(-3deg) scale(1)}
+  25%{transform:rotate(3deg) scale(1.1)}
+  50%{transform:rotate(-2deg) scale(.95)}
+  75%{transform:rotate(4deg) scale(1.05)}
+}
+@keyframes flameGlow{
+  0%,100%{filter:drop-shadow(0 0 8px rgba(255,150,50,.8)) drop-shadow(0 0 14px rgba(255,100,0,.5))}
+  50%{filter:drop-shadow(0 0 14px rgba(255,200,80,1)) drop-shadow(0 0 22px rgba(255,80,0,.7))}
+}
+.urgent-banner-title::before{
+  content:'🔥' !important;
+  font-size:24px !important;
+  display:inline-block;
+  animation:flameWiggle .7s ease-in-out infinite, flameGlow 1.2s ease-in-out infinite !important;
+  transform-origin:center bottom;
+}
+.urgent-section-title::before{
+  content:'🔥';
+  font-size:13px;
+  display:inline-block;
+  animation:flameWiggle .9s ease-in-out infinite;
+  transform-origin:center bottom;
+  margin-right:2px;
+}
+
+/* ── DEPARTMENT GROUPS for objectives ── */
+.dept-group{
+  background:#fff;
+  border:1px solid #e8e8e8;
+  border-radius:12px;
+  overflow:hidden;
+  margin-bottom:14px;
+}
+.dept-hdr{
+  padding:12px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid #f0f0f0;
+}
+.dept-hdr.products{background:linear-gradient(90deg,#DBEAFE 0%,#EFF6FF 100%)}
+.dept-hdr.services{background:linear-gradient(90deg,#DCFCE7 0%,#F0FDF4 100%)}
+.dept-hdr.future{background:linear-gradient(90deg,#EDE9FE 0%,#F5F3FF 100%)}
+.dept-name{
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+}
+.dept-hdr.products .dept-name{color:#1E40AF}
+.dept-hdr.services .dept-name{color:#15803D}
+.dept-hdr.future .dept-name{color:#5B21B6}
+.dept-stats{
+  font-size:11px;
+  font-family:monospace;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+}
+.dept-hdr.products .dept-stats{color:#1E40AF}
+.dept-hdr.services .dept-stats{color:#15803D}
+.dept-hdr.future .dept-stats{color:#5B21B6}
+.owner-group{
+  border-bottom:1px solid #f0f0f0;
+}
+.owner-group:last-child{border-bottom:none}
+.owner-group-hdr{
+  padding:8px 18px;
+  background:#fafafa;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:#666;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.owner-mini-av{
+  width:20px;height:20px;border-radius:50%;
+  background:#1A1A2E;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;
+}
+.owner-mini-av.louis{background:#1A3A5C}
+.owner-mini-av.yasin{background:#1A5C3A}
+.owner-mini-av.lucas{background:#92400E}
+.dept-empty{
+  padding:14px 18px;
+  font-size:12px;
+  color:#999;
+  font-style:italic;
+}
+/* ── WEEKLY OBJECTIVE CARD ── */
+.weekly-obj{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:12px 18px;
+  border-bottom:1px solid #f4f4f4;
+  transition:background .15s;
+}
+.weekly-obj:last-child{border-bottom:none}
+.weekly-obj:hover{background:#fafafa}
+.wobj-body{flex:1;min-width:0}
+.wobj-title{
+  font-size:13px;
+  font-weight:600;
+  color:#1A1A2E;
+  line-height:1.4;
+  margin-bottom:5px;
+}
+.wobj-title-inp{
+  width:100%;
+  border:none;
+  border-bottom:1px solid #e8e8e8;
+  font-size:13px;
+  font-weight:600;
+  color:#1A1A2E;
+  background:transparent;
+  outline:none;
+  font-family:inherit;
+  padding:2px 0 4px 0;
+  margin-bottom:6px;
+}
+.wobj-title-inp:focus{border-bottom-color:#2C5F8A}
+.wobj-meta-row{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.wobj-sel{
+  font-size:10px;
+  border:1px solid #e8e8e8;
+  border-radius:14px;
+  padding:2px 8px;
+  outline:none;
+  background:#fff;
+  font-family:inherit;
+  cursor:pointer;
+  color:#555;
+}
+.wobj-sel:hover{border-color:#1A1A2E}
+.wobj-owner-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  font-size:10px;
+  font-weight:600;
+  padding:2px 8px 2px 3px;
+  border-radius:14px;
+  background:#f3f4f6;
+  color:#555;
+  letter-spacing:.2px;
+}
+.wobj-owner-pill.louis{background:#DBEAFE;color:#1E40AF}
+.wobj-owner-pill.yasin{background:#DCFCE7;color:#15803D}
+.wobj-owner-pill.lucas{background:#FEF3C7;color:#92400E}
+.wobj-owner-init{
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:rgba(0,0,0,.15);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:9px;
+  font-weight:700;
+}
+.wobj-project-pill{
+  font-size:10px;
+  font-weight:600;
+  padding:2px 8px;
+  border-radius:14px;
+  background:#f3f4f6;
+  color:#666;
+  letter-spacing:.2px;
+}
+
+/* ── DEPARTMENT PROGRESS BAR (in header) ── */
+.dept-progress-wrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:240px;
+}
+.dept-progress-text{
+  font-size:11px;
+  font-weight:600;
+  white-space:nowrap;
+  font-family:inherit;
+  text-transform:none;
+  letter-spacing:0;
+}
+.dept-progress-bar{
+  flex:1;
+  height:6px;
+  border-radius:3px;
+  background:rgba(0,0,0,.1);
+  overflow:hidden;
+  min-width:60px;
+}
+.dept-progress-fill{
+  height:100%;
+  border-radius:3px;
+  transition:width .3s ease;
+}
+.dept-progress-fill.products{background:#1E40AF}
+.dept-progress-fill.services{background:#15803D}
+.dept-progress-fill.future{background:#5B21B6}
+.dept-progress-pct{
+  font-size:12px;
+  font-weight:700;
+  font-family:inherit;
+  min-width:32px;
+  text-align:right;
+}
+
+.dept-add-row{
+  padding:12px 18px;
+  font-size:12px;
+  font-weight:600;
+  color:#666;
+  cursor:pointer;
+  text-align:center;
+  border-top:1px dashed #e8e8e8;
+  background:#fafafa;
+  transition:all .15s;
+  letter-spacing:.3px;
+}
+.dept-add-row:hover{
+  background:#FFFDF5;
+  color:#1A1A2E;
+  border-top-color:#C49A6C;
+}
 .rev-status-btns{display:flex;gap:3px;flex-shrink:0}
 .rev-btn{font-size:10px;padding:3px 8px;border:1px solid #e0e0e0;border-radius:12px;background:#fff;cursor:pointer;color:#666;font-weight:600;transition:all .15s;font-family:inherit}
 .rev-btn:hover{border-color:#999}
@@ -237,8 +591,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 <body>
 
 <div class="hdr">
-  <div><h1>VUC &mdash; Weekly Priority Stack</h1><p>Top 5 from Decision Engine &rarr; Tasks &rarr; Eisenhower Matrix</p></div>
-  <div class="hdr-r"><input class="dinp" type="date" id="wdate"></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <svg style="width:36px;height:36px;flex-shrink:0" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#C49A6C">
+      <path d="M38.97,54.21c-1.32,-0.15 -2.8,-0.71 -3.71,-1.41c-0.68,-0.53 -1.3,-1.24 -1.7,-1.95c-0.24,-0.43 -0.52,-1.18 -0.65,-1.72c-0.17,-0.72 -0.16,-0.42 -0.18,-6.67l-0.02,-5.81l-0.07,-0.16c-0.04,-0.09 -0.15,-0.24 -0.25,-0.35c-0.3,-0.32 -0.68,-0.46 -1.22,-0.46h-0.24v-0.14v-0.14l1.38,0.02c0.76,0.01 1.97,0.02 2.69,0.02h1.3v0.11v0.11l-0.27,0c-0.32,0 -0.65,0.06 -0.85,0.16c-0.23,0.12 -0.5,0.4 -0.61,0.63l-0.09,0.2l-0.01,5.4c-0.01,3.8 0,5.52 0.03,5.81c0.11,1.21 0.51,2.4 1.12,3.31c0.29,0.43 0.93,1.06 1.36,1.35c0.92,0.6 1.75,0.87 2.87,0.9c0.89,0.03 1.55,-0.06 2.29,-0.31c0.88,-0.29 1.57,-0.73 2.2,-1.37c0.71,-0.73 1.15,-1.55 1.42,-2.63c0.2,-0.81 0.19,-0.48 0.2,-6.48c0.01,-3.54 -0.001,-5.58 -0.02,-5.75c-0.02,-0.16 -0.07,-0.34 -0.12,-0.45c-0.1,-0.2 -0.39,-0.5 -0.6,-0.61c-0.19,-0.1 -0.52,-0.16 -0.83,-0.16l-0.25,0v-0.14v-0.14l1.38,0.02c0.76,0.01 1.86,0.02 2.44,0.02h1.06v0.11v0.11l-0.24,0c-0.69,0 -1.18,0.25 -1.43,0.73l-0.02,5.81c-0.01,4.31 -0.03,5.87 -0.06,6.04c-0.17,0.97 -0.35,1.57 -0.71,2.28c-0.51,1.02 -1.37,1.94 -2.4,2.54c-0.85,0.5 -1.94,0.85 -3,0.96c-0.38,0.04 -1.7,0.04 -2.07,-0.004z"/>
+      <path d="M40.05,49.59c-0.22,-0.53 -3.48,-7.97 -3.55,-8.11c-0.1,-0.21 -0.38,-0.48 -0.58,-0.57c-0.08,-0.04 -0.24,-0.07 -0.34,-0.08c-0.16,-0.01 -0.19,-0.03 -0.19,-0.08c0,-0.06 0.06,-0.06 1.43,-0.06c1.34,0 1.43,0 1.42,0.06c-0.01,0.03 -0.03,0.06 -0.06,0.06c-0.35,0.05 -0.52,0.17 -0.59,0.42l-0.04,0.15l0.59,1.48c2.31,5.84 2.11,5.35 2.16,5.22c0.02,-0.06 0.66,-1.58 1.4,-3.38c1.23,-2.97 1.36,-3.29 1.34,-3.42c-0.03,-0.25 -0.21,-0.43 -0.48,-0.46c-0.13,-0.01 -0.17,-0.03 -0.17,-0.08c0,-0.06 0.05,-0.06 1.28,-0.06c1.22,0 1.28,0 1.28,0.06c0,0.05 -0.03,0.06 -0.2,0.08c-0.42,0.04 -0.81,0.33 -1.03,0.78c-0.11,0.22 -2.93,6.55 -3.19,7.16c-0.13,0.3 -0.24,0.62 -0.31,0.89c-0.02,0.08 -0.11,0.04 -0.16,-0.07z"/>
+      <path d="M46.5,17.5c-0.45,-0.005 -0.9,-0.001 -1.35,0.012c-14.4,0.46 -25.77,10.3 -25.72,22.26l4.64,0.036c-0.047,-11.16 9.13,-20.39 21.31,-20.82c10.31,-0.34 19.56,5.76 22.5,14.82l-3.1,-10.01c-4.9,-3.96 -11.44,-6.22 -18.28,-6.31z"/>
+      <path d="M46.49,61.7c-0.45,0.005 -0.9,0.001 -1.35,-0.012c-14.4,-0.46 -25.77,-10.3 -25.72,-22.26l4.65,0.158c-0.047,11.16 9.12,20.19 21.3,20.62c10.31,0.34 19.56,-5.76 22.5,-14.82l-3.1,10.01c-4.9,3.96 -11.44,6.22 -18.28,6.31z"/>
+    </g>
+  </svg>
+    <div><h1 style="line-height:1.1">VUC &mdash; Weekly Priority Stack</h1><p>Top 5 from Decision Engine &rarr; Tasks &rarr; Eisenhower Matrix</p></div>
+  </div>
+  <div class="hdr-r">
+    <span id="weekly-save-indicator" style="font-family:monospace;font-size:10px;color:#C49A6C;opacity:.5;letter-spacing:.5px;text-transform:uppercase">Auto-save on</span>
+    <input class="dinp" type="date" id="wdate">
+  </div>
 </div>
 <nav class="nav">
   <button class="on" onclick="sw('review',this)">0. Previous Week</button>
@@ -252,6 +619,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 
 <!-- TAB 0: REVIEW -->
 <div class="tab on" id="tab-review">
+  <!-- URGENT CARRY-OVER BANNER -->
+  <div class="urgent-banner" id="urgentBanner">
+    <div class="urgent-banner-hdr">
+      <div class="urgent-banner-title">Still pending from last week <span class="urgent-count" id="urgentCount">0</span></div>
+      <button class="urgent-btn" onclick="dismissUrgentBanner()">Dismiss</button>
+    </div>
+    <div id="urgentContent"></div>
+    <div class="urgent-banner-actions">
+      <button class="urgent-btn primary" onclick="document.getElementById('tab-tasks').scrollIntoView();sw('tasks',document.querySelectorAll('.nav button')[1])">Move to this week's tasks</button>
+    </div>
+  </div>
+
   <div class="sl">Before opening a new week &mdash; close the previous one</div>
   <div class="hint"><b>Rule:</b> You cannot open this week without reviewing last week. Every task committed must be marked Done, Partial, or Missed.</div>
 
@@ -311,29 +690,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 
 <!-- TAB 2: VUC OBJECTIVES -->
 <div class="tab" id="tab-obj">
-  <div class="sl">VUC strategic objectives &mdash; defined and reviewed by the 3 founders</div>
-  <div class="hint"><b>The company&apos;s north star.</b> Independent of weekly projects and Top 5. Click "Edit" when the 3 founders agree to update direction or progress. Click any objective to expand its key results.</div>
+  <div class="sl">General company objectives this week &mdash; by department &amp; owner</div>
+  <div class="hint"><b>Reviewed by Louis, Yasin, and Lucas every Monday.</b> Click "Edit" to update direction or progress. Click any objective to expand its key results.</div>
 
   <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap">
     <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button class="obj-edit-pill" onclick="filterObj('all',this)" id="ofilt-all">All</button>
-      <button class="obj-edit-pill" onclick="filterObj('30',this)" id="ofilt-30">30 Days</button>
-      <button class="obj-edit-pill" onclick="filterObj('90',this)" id="ofilt-90">90 Days</button>
-      <button class="obj-edit-pill" onclick="filterObj('12',this)" id="ofilt-12">12 Months</button>
+      <span style="font-size:11px;color:#888;font-style:italic;align-self:center">Set this week's objectives by department. Completion is reviewed Friday.</span>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <button class="obj-edit-pill" onclick="importObj()">Import JSON</button>
-      <button class="obj-edit-pill" onclick="loadObjSample()">Load sample</button>
+      <button class="obj-edit-pill" onclick="clearObjectives()" style="color:#991B1B">Clear all</button>
       <button class="obj-edit-pill" id="obj-edit-btn" onclick="toggleObjEdit()">&#9998; Edit (Monday only)</button>
     </div>
   </div>
 
-  <div class="obj-overview" id="obj-overview" style="display:none">
-    <div class="ovv"><div class="ovv-n" id="ovv-total">0</div><div class="ovv-l">Objectives</div></div>
-    <div class="ovv"><div class="ovv-n" id="ovv-krs">0</div><div class="ovv-l">Key results</div></div>
-    <div class="ovv"><div class="ovv-n" id="ovv-prog">0%</div><div class="ovv-l">Avg progress</div></div>
-    <div class="ovv"><div class="ovv-n" id="ovv-done">0</div><div class="ovv-l">Completed KRs</div></div>
-  </div>
+  
 
   <div class="obj-list" id="obj-list"></div>
   <div id="obj-add-slot"></div>
@@ -427,10 +798,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 <script>
 var P=[
   {id:'p1',name:'VUC Consulting SOL',score:'0.69',status:'EXECUTE NOW',color:'#1A237E'},
-  {id:'p2',name:'VWC Ghana',score:'0.86',status:'EXECUTE NOW',color:'#1B5E20'},
-  {id:'p3',name:'Australia Gold',score:'0.73',status:'EXECUTE NOW',color:'#78350F'},
+  {id:'p2',name:'VWC Ghana',score:'0.86',status:'EXECUTE NOW',color:'#1B5E20',inactive:true,inactiveNote:'Covered in Tuesday VWC Weekly Meeting'},
+  {id:'p3',name:'Golden Camel Mining',score:'0.73',status:'EXECUTE NOW',color:'#78350F'},
   {id:'p4',name:'Xperience Space',score:'0.75',status:'QUEUE',color:'#7C3AED'},
-  {id:'p5',name:'IT / Dashboard',score:'0.73',status:'QUEUE',color:'#0D47A1'}
+  {id:'p5',name:'IT/Software',score:'0.73',status:'QUEUE',color:'#0D47A1'}
 ];
 var PPL=[
   {key:'louis',name:'Louis',init:'L',cls:'av-l'},
@@ -580,7 +951,21 @@ function renderP(){
   var h='';
   P.forEach(function(p,i){
     var sb=p.status==='EXECUTE NOW'?'background:#DCFCE7;color:#15803d':'background:#EFF6FF;color:#1E40AF';
-    h+='<div class="proj" id="proj-'+p.id+'">';
+    var inactiveCls = p.inactive ? ' inactive' : '';
+    h+='<div class="proj'+inactiveCls+'" id="proj-'+p.id+'">';
+
+    if(p.inactive){
+      // Inactive header: not clickable, no body, just a note
+      h+='<div class="proj-hdr">';
+      h+='<div class="proj-rank" style="background:'+p.color+'">'+(i+1)+'</div>';
+      h+='<input class="proj-name-inp" value="'+p.name+'" disabled style="color:#888">';
+      h+='<span class="proj-score" style="background:#FEF3C7;color:#92400E">TOMORROW</span>';
+      h+='</div>';
+      h+='<div class="proj-inactive-note"><b>'+(p.inactiveNote||'See separate meeting')+'</b></div>';
+      h+='</div>';
+      return;
+    }
+
     h+='<div class="proj-hdr" onclick="togP(\''+p.id+'\')">';
     h+='<div class="proj-rank" style="background:'+p.color+'">'+(i+1)+'</div>';
     h+='<input class="proj-name-inp" value="'+p.name+'" onclick="event.stopPropagation()" onchange="upN(\''+p.id+'\',this.value)">';
@@ -590,7 +975,6 @@ function renderP(){
     PPL.forEach(function(pe){
       h+='<div class="ow"><div class="ow-hdr"><div class="ow-av '+pe.cls+'">'+pe.init+'</div><span class="ow-nm">'+pe.name+'</span></div>';
       h+='<div id="tl-'+p.id+'-'+pe.key+'">';
-      // Inject carryovers for this project/person
       var carries=carryover.filter(function(c){return c.pi===p.id && c.pk===pe.key;});
       carries.forEach(function(c){
         h+=trCarryover(p.id,pe.key,c.text,c.fromStatus);
@@ -598,8 +982,7 @@ function renderP(){
       h+=trHTML(p.id,pe.key)+trHTML(p.id,pe.key);
       h+='</div><span class="add-task" onclick="addT(\''+p.id+'\',\''+pe.key+'\')">+ add task</span></div>';
     });
-    // R&O section per project
-    h+='</div>';  // close .owners
+    h+='</div>';
     h+='<div class="proj-ro">';
     h+='<div class="ro-toggle" onclick="togRO(\'ro-'+p.id+'\')"><span id="ro-arr-'+p.id+'">&#9656;</span> Risks &amp; Opportunities <span class="rt-badge" id="ro-risk-cnt-'+p.id+'">0 risks</span><span class="ot-badge" id="ro-opp-cnt-'+p.id+'">0 opps</span></div>';
     h+='<div class="ro-table-wrap" id="ro-'+p.id+'">';
@@ -608,12 +991,12 @@ function renderP(){
     h+='</tbody></table>';
     h+='<span class="add-task" style="font-size:10px;color:#7F1D1D;margin-top:4px;display:inline-block" onclick="addRO(\''+p.id+'\')">+ add risk or opportunity</span>';
     h+='</div></div>';
-    h+='</div>';  // close .proj-body
-    h+='</div>';  // close .proj
+    h+='</div>';
+    h+='</div>';
   });
   document.getElementById('proj-list').innerHTML=h;
-  // Auto-expand projects that have carryovers
   P.forEach(function(p){
+    if(p.inactive) return;
     var hasCarry=carryover.some(function(c){return c.pi===p.id;});
     if(hasCarry)togP(p.id);
   });
@@ -736,8 +1119,42 @@ function collectT(){
 
 function buildMatrix(){
   collectT();
+  collectVucObjectives();
   rInbox();rQ();updateCounts();
   sw('eis',document.querySelectorAll('.nav button')[3]);
+}
+
+function collectVucObjectives(){
+  // Add VUC weekly objectives as inbox tasks for the Eisenhower matrix
+  if(!vucObjectives || !vucObjectives.length) return;
+  var deptInfo = {p:{name:'Products',color:'#1E40AF'},s:{name:'Services',color:'#15803D'},f:{name:'Future',color:'#5B21B6'}};
+  vucObjectives.forEach(function(o){
+    if(!o.title || !o.title.trim()) return;
+    var owner = (o.owners && o.owners[0]) || 'Louis';
+    var pk = owner.toLowerCase();
+    if(pk === 'all three') pk = 'louis';  // default mapping for shared
+    var per = PPL.find(function(x){return x.key === pk;});
+    var dept = deptInfo[o.vertical] || {name:'VUC', color:'#888'};
+    var tid = 'vobj-' + o.id;
+    if(allT.find(function(x){return x.tid === tid;})) return;
+    allT.push({
+      tid: tid,
+      text: o.title,
+      desc: '',
+      pi: 'vobj',
+      pn: 'VUC ' + dept.name,
+      pc: dept.color,
+      pk: pk,
+      pname: per ? per.name : owner,
+      pinit: per ? per.init : owner.charAt(0),
+      q: 'inbox',
+      carry: false,
+      reason: null,
+      isVucObjective: true,
+      project: o.project || ''
+    });
+    Q.inbox.push(tid);
+  });
 }
 
 function chipH(t){
@@ -921,6 +1338,10 @@ function sw(tab,btn){
     if(!previousWeek){previousWeek={tasks:[],week:''};}
     renderP();
   }
+  if(tab==='obj'){
+    // Always re-render when entering the objectives tab
+    renderObj();
+  }
   window.scrollTo(0,0);
 }
 
@@ -944,55 +1365,94 @@ var VOBJ_HORIZONS = [
   {h:'12',l:'12 Months',cls:'oht-12'}
 ];
 var VOBJ_OWNERS = ['Louis','Yasin','Lucas','All three'];
+var WEEKLY_PROJECTS = [
+  'SOL',
+  'Golden Camel Mining',
+  'Xperience Space',
+  'IT/Software',
+  'Cross-project',
+  'No project'
+];
 
-function loadObjSample(){
-  vucObjectives = [
-    {id:'vo1',title:'Establish VWC Ghana as a profitable and scalable gold operation',
-     narrative:'Transform VWC from development to fully operational mining with consistent weekly production and a defined government JV structure.',
-     vertical:'p',horizon:'90',owners:['Louis'],open:false,
-     krs:[
-       {id:'vk1',text:'Reach 5 kg/week consistent gold production',metric:'5 kg/wk',pct:40},
-       {id:'vk2',text:'Sign MoU with MLNR',metric:'MoU signed',pct:20},
-     ]},
-    {id:'vo2',title:'Close first Golden Camel VC deal',
-     narrative:'Validate the VC matchmaking model by closing the first deal. Proves the model before scaling.',
-     vertical:'s',horizon:'90',owners:['Louis'],open:false,
-     krs:[
-       {id:'vk3',text:'First close with anchor investor',metric:'1 close',pct:30},
-       {id:'vk4',text:'5 qualified opportunities in pipeline',metric:'5 opps',pct:80},
-     ]},
-    {id:'vo3',title:'Build VUC Consulting into a repeatable revenue engine',
-     narrative:'SOL and SAMI deliver consistent revenue that funds operations. Systematize delivery beyond founder time.',
-     vertical:'s',horizon:'12',owners:['Yasin'],open:false,
-     krs:[
-       {id:'vk5',text:'SOL renewed or expanded',metric:'Contract',pct:50},
-       {id:'vk6',text:'SAMI active engagement',metric:'Active',pct:10},
-     ]},
-  ];
+function toggleObjDone(oid){
+  var o = vucObjectives.find(function(x){return x.id===oid;});
+  if(!o) return;
+  o.done = !o.done;
   renderObj();
 }
 
+function clearObjectives(){
+  if(!confirm('Remove ALL VUC objectives? This cannot be undone.')) return;
+  vucObjectives = [];
+  _void = 0;
+  renderObj();
+  if(typeof saveWeeklyState === 'function') saveWeeklyState();
+}
+
 function renderObj(){
-  var filtered = vucObjectives.filter(function(o){
-    return vucObjFilter==='all' || o.horizon===vucObjFilter;
-  });
+  var filtered = vucObjectives.slice(); // all objectives
   var list = document.getElementById('obj-list');
   var addSlot = document.getElementById('obj-add-slot');
-  var ov = document.getElementById('obj-overview');
 
-  ov.style.display = vucObjectives.length ? 'grid' : 'none';
-  if(vucObjectives.length) updateObjOverview(filtered);
-
-  if(!filtered.length){
-    list.innerHTML = '<div class="obj-empty"><div class="obj-empty-t">'+(vucObjectives.length?'No objectives for this period':'No VUC objectives loaded yet')+'</div><div class="obj-empty-s">'+(vucObjectives.length?'Switch to "All" or another horizon.':'Click "Load sample" to see how it works, or "Import JSON" to load existing objectives.')+'</div></div>';
-    addSlot.innerHTML = vucObjEdit?'<div class="add-obj-card" onclick="addObj()" style="margin-top:10px"><span>+ Add objective</span></div>':'';
-    return;
-  }
+  // Always show the 3 department sections, even when empty.
+  // Each section has its own +Add button so users can create objectives directly.
+  var depts = [
+    {key:'p', label:'Products', cls:'products'},
+    {key:'s', label:'Services', cls:'services'},
+    {key:'f', label:'Future', cls:'future'}
+  ];
 
   var h = '';
-  filtered.forEach(function(o,i){h+=objCardHTML(o,i);});
+  var objIndex = 0;
+
+  depts.forEach(function(dept){
+    var deptObjs = filtered.filter(function(o){return o.vertical === dept.key;});
+
+    // deptObjs.length: number of objectives this week in this dept
+
+    h += '<div class="dept-group">';
+    h += '<div class="dept-hdr '+dept.cls+'">';
+    h += '<div class="dept-name">'+dept.label+'</div>';
+    h += '<div class="dept-stats">';
+    if(deptObjs.length > 0){
+      h += deptObjs.length + ' objective' + (deptObjs.length !== 1 ? 's' : '');
+    } else {
+      h += '<span style="opacity:.6">No objectives yet</span>';
+    }
+    h += '</div>';
+    h += '</div>';
+
+    if(deptObjs.length > 0){
+      // Flat list of objectives — owner is shown in each objective pill, no grouping header
+      deptObjs.forEach(function(o){
+        h += objCardHTML(o, objIndex++);
+      });
+    }
+
+    // Always show an "+Add objective" row inside this dept
+    h += '<div class="dept-add-row" onclick="addObj(\''+dept.key+'\')">';
+    h += '+ Add objective to '+dept.label;
+    h += '</div>';
+
+    h += '</div>';
+  });
+
+  // Show "Company-wide" objectives (no specific dept) only if any exist
+  var companyObjs = filtered.filter(function(o){return o.vertical !== 'p' && o.vertical !== 's' && o.vertical !== 'f';});
+  if(companyObjs.length > 0){
+    h += '<div class="dept-group">';
+    h += '<div class="dept-hdr" style="background:linear-gradient(90deg,#F3F4F6 0%,#FAFAFA 100%)">';
+    h += '<div class="dept-name" style="color:#555">Company-wide</div>';
+    h += '<div class="dept-stats" style="color:#666">'+companyObjs.length+' objective'+(companyObjs.length!==1?'s':'')+'</div>';
+    h += '</div>';
+    companyObjs.forEach(function(o){
+      h += objCardHTML(o, objIndex++);
+    });
+    h += '</div>';
+  }
+
   list.innerHTML = h;
-  addSlot.innerHTML = vucObjEdit?'<div class="add-obj-card" onclick="addObj()" style="margin-top:10px"><span>+ Add objective</span></div>':'';
+  addSlot.innerHTML = ''; // No longer needed - add buttons are inside each dept
 
   filtered.forEach(function(o){
     if(o.open){
@@ -1005,81 +1465,63 @@ function renderObj(){
 }
 
 function objCardHTML(o,i){
-  var vInfo=VOBJ_VERTS.find(function(v){return v.v===o.vertical;})||VOBJ_VERTS[3];
-  var hInfo=VOBJ_HORIZONS.find(function(h){return h.h===o.horizon;})||VOBJ_HORIZONS[0];
-  var avgPct=o.krs.length?Math.round(o.krs.reduce(function(s,k){return s+(k.pct||0);},0)/o.krs.length):0;
+  // Weekly objective card: simple, has check (done Friday), owner, project link
+  var done = o.done === true;
+  var vInfo = VOBJ_VERTS.find(function(v){return v.v===o.vertical;}) || VOBJ_VERTS[3];
+  var ownerName = (o.owners && o.owners[0]) || 'Louis';
+  var ownerCls = ownerName === 'Louis' ? 'louis' : ownerName === 'Yasin' ? 'yasin' : ownerName === 'Lucas' ? 'lucas' : '';
+  var ownerInit = ownerName === 'All three' ? 'V' : ownerName.charAt(0);
+  var projectLabel = o.project || 'No project';
 
-  var h='<div class="obj-c" id="ocard-'+o.id+'">';
-  h+='<div class="obj-c-hdr" onclick="togObj(\''+o.id+'\')">';
-  h+='<div class="obj-rank">'+(i+1)+'</div>';
-  h+='<div class="obj-c-body">';
+  var h = '<div class="weekly-obj" id="wobj-' + o.id + '">';
+
+  // BODY: title + meta line (no check — completion is reviewed Friday, not here)
+  h += '<div class="wobj-body">';
 
   if(vucObjEdit){
-    h+='<input class="obj-inp" value="'+escObj(o.title)+'" oninput="setObjF(\''+o.id+'\',\'title\',this.value)" onclick="event.stopPropagation()">';
-    h+='<textarea class="obj-narr-inp" oninput="setObjF(\''+o.id+'\',\'narrative\',this.value)" onclick="event.stopPropagation()">'+escObj(o.narrative)+'</textarea>';
-    h+='<div class="obj-c-tags" style="margin-top:6px">';
-    h+='<select class="obj-sel" onchange="setObjF(\''+o.id+'\',\'vertical\',this.value)" onclick="event.stopPropagation()">';
-    VOBJ_VERTS.forEach(function(v){h+='<option value="'+v.v+'"'+(v.v===o.vertical?' selected':'')+'>'+v.l+'</option>';});
-    h+='</select>';
-    h+='<select class="obj-sel" onchange="setObjF(\''+o.id+'\',\'horizon\',this.value)" onclick="event.stopPropagation()">';
-    VOBJ_HORIZONS.forEach(function(hh){h+='<option value="'+hh.h+'"'+(hh.h===o.horizon?' selected':'')+'>'+hh.l+'</option>';});
-    h+='</select>';
-    h+='<select class="obj-sel" onchange="setObjF(\''+o.id+'\',\'owners\',[this.value])" onclick="event.stopPropagation()">';
-    VOBJ_OWNERS.forEach(function(ow){var sel=o.owners&&o.owners[0]===ow;h+='<option'+(sel?' selected':'')+'>'+ow+'</option>';});
-    h+='</select>';
-    h+='<button class="del-mini" onclick="event.stopPropagation();delObj(\''+o.id+'\')">&#x2715; remove</button>';
-    h+='</div>';
+    h += '<input class="wobj-title-inp" placeholder="Weekly objective..." value="'+escObj(o.title)+'" oninput="setObjF(\''+o.id+'\',\'title\',this.value)">';
+    h += '<div class="wobj-meta-row">';
+    h += '<select class="wobj-sel" onchange="setObjF(\''+o.id+'\',\'owners\',[this.value])" title="Owner">';
+    VOBJ_OWNERS.forEach(function(ow){
+      var sel = o.owners && o.owners[0]===ow;
+      h += '<option' + (sel?' selected':'') + '>' + ow + '</option>';
+    });
+    h += '</select>';
+    h += '<select class="wobj-sel" onchange="setObjF(\''+o.id+'\',\'project\',this.value)" title="Project">';
+    WEEKLY_PROJECTS.forEach(function(p){
+      var sel = (o.project || 'No project') === p;
+      h += '<option' + (sel?' selected':'') + '>' + p + '</option>';
+    });
+    h += '</select>';
+    h += '<select class="wobj-sel" onchange="setObjF(\''+o.id+'\',\'vertical\',this.value)" title="Department">';
+    VOBJ_VERTS.forEach(function(v){h += '<option value="'+v.v+'"' + (v.v===o.vertical?' selected':'') + '>' + v.l + '</option>';});
+    h += '</select>';
+    h += '<button class="del-mini" onclick="event.stopPropagation();delObj(\''+o.id+'\')" title="Remove">&#x2715;</button>';
+    h += '</div>';
   } else {
-    h+='<div class="obj-c-title">'+escObj(o.title)+'</div>';
-    h+='<div class="obj-c-narr">'+escObj(o.narrative)+'</div>';
-    h+='<div class="obj-c-tags">';
-    h+='<span class="ovt '+vInfo.cls+'">'+vInfo.l+'</span>';
-    h+='<span class="oht '+hInfo.cls+'">'+hInfo.l+'</span>';
-    if(o.owners&&o.owners.length)o.owners.forEach(function(ow){h+='<span class="ovt ovt-co">'+ow+'</span>';});
-    h+='</div>';
+    h += '<div class="wobj-title">' + escObj(o.title || 'Untitled objective') + '</div>';
+    h += '<div class="wobj-meta-row">';
+    h += '<span class="wobj-owner-pill ' + ownerCls + '">';
+    h += '<span class="wobj-owner-init">' + ownerInit + '</span>';
+    h += ownerName;
+    h += '</span>';
+    h += '<span class="wobj-project-pill">' + escObj(projectLabel) + '</span>';
+    h += '</div>';
   }
-  h+='</div>';
-  h+='<div class="obj-c-right">';
-  h+='<div class="obj-pct">'+avgPct+'%</div>';
-  h+='<div class="obj-pct-l">progress</div>';
-  h+='<div class="obj-pbar"><div class="obj-pfill" style="width:'+avgPct+'%"></div></div>';
-  h+='</div>';
-  h+='<div class="obj-tog" id="otog-'+o.id+'">&#9656;</div>';
-  h+='</div>';
 
-  h+='<div class="kr-wrap" id="kr-'+o.id+'">';
-  h+='<div class="kr-lbl">Key results</div>';
-  o.krs.forEach(function(kr){
-    var done=kr.pct===100,partial=kr.pct>0&&kr.pct<100;
-    h+='<div class="kr-row">';
-    h+='<div class="kr-dot'+(done?' done':partial?' partial':'')+'" onclick="event.stopPropagation();cycleKR(\''+o.id+'\',\''+kr.id+'\')">'+(done?'&#10003;':partial?'~':'')+'</div>';
-    if(vucObjEdit){
-      h+='<input class="obj-inp" style="font-size:11px;font-weight:400" value="'+escObj(kr.text)+'" oninput="setKRf(\''+o.id+'\',\''+kr.id+'\',\'text\',this.value)" onclick="event.stopPropagation()">';
-      h+='<input class="obj-inp" style="width:80px;font-size:9px;text-align:center;color:#1E40AF" value="'+escObj(kr.metric)+'" placeholder="Target" oninput="setKRf(\''+o.id+'\',\''+kr.id+'\',\'metric\',this.value)" onclick="event.stopPropagation()">';
-      h+='<input class="obj-num" type="number" min="0" max="100" value="'+kr.pct+'" oninput="setKRf(\''+o.id+'\',\''+kr.id+'\',\'pct\',+this.value)" onclick="event.stopPropagation()">%';
-      h+='<button class="del-mini" onclick="event.stopPropagation();delKR(\''+o.id+'\',\''+kr.id+'\')">&#x2715;</button>';
-    } else {
-      h+='<div class="kr-txt'+(done?' done':'')+'">'+escObj(kr.text)+'</div>';
-      if(kr.metric)h+='<span class="kr-m">'+escObj(kr.metric)+'</span>';
-      h+='<div class="kr-pbar2"><div class="kr-pfill2" style="width:'+kr.pct+'%"></div></div>';
-      h+='<span class="kr-pct">'+kr.pct+'%</span>';
-    }
-    h+='</div>';
-  });
-  if(vucObjEdit)h+='<span class="add-kr-btn" onclick="event.stopPropagation();addKR(\''+o.id+'\')">+ add key result</span>';
-  h+='</div>';
-  h+='</div>';
+  h += '</div>'; // wobj-body
+  h += '</div>'; // weekly-obj
   return h;
 }
 
 function updateObjOverview(filtered){
-  var allKRs=filtered.reduce(function(a,o){return a.concat(o.krs);},[]);
-  var doneKRs=allKRs.filter(function(k){return k.pct===100;}).length;
-  var avgPct=allKRs.length?Math.round(allKRs.reduce(function(s,k){return s+(k.pct||0);},0)/allKRs.length):0;
-  document.getElementById('ovv-total').textContent=filtered.length;
-  document.getElementById('ovv-krs').textContent=allKRs.length;
-  document.getElementById('ovv-prog').textContent=avgPct+'%';
-  document.getElementById('ovv-done').textContent=doneKRs;
+  var done = filtered.filter(function(o){return o.done;}).length;
+  var pending = filtered.length - done;
+  var pct = filtered.length ? Math.round(done / filtered.length * 100) : 0;
+  document.getElementById('ovv-total').textContent = filtered.length;
+  document.getElementById('ovv-done').textContent = done;
+  document.getElementById('ovv-pending').textContent = pending;
+  document.getElementById('ovv-prog').textContent = pct + '%';
 }
 
 function togObj(id){
@@ -1101,8 +1543,19 @@ function cycleKR(oid,kid){
   renderObj();
 }
 
+var vucObjStatusFilter = 'all';
+
 function filterObj(f,btn){
-  vucObjFilter=f;
+  vucObjFilter = f;
+  vucObjStatusFilter = 'all';
+  document.querySelectorAll('#tab-obj .obj-edit-pill[id^="ofilt-"]').forEach(function(b){b.classList.remove('editing');});
+  if(btn)btn.classList.add('editing');
+  renderObj();
+}
+
+function filterObjStatus(status,btn){
+  vucObjStatusFilter = status;
+  vucObjFilter = 'all';
   document.querySelectorAll('#tab-obj .obj-edit-pill[id^="ofilt-"]').forEach(function(b){b.classList.remove('editing');});
   if(btn)btn.classList.add('editing');
   renderObj();
@@ -1129,10 +1582,32 @@ function setKRf(oid,kid,field,val){
   if(field==='pct')renderObj();
 }
 
-function addObj(){
+function addObj(deptKey){
   _void++;
-  vucObjectives.push({id:'vo'+_void,title:'New objective',narrative:'Describe the strategic direction...',vertical:'co',horizon:'90',owners:['All three'],open:true,krs:[{id:'vk'+(++_vkid),text:'Key result 1',metric:'Target',pct:0}]});
+  var vertical = deptKey || 'p';
+  vucObjectives.push({
+    id:'vo'+_void,
+    title:'',
+    vertical:vertical,
+    owners:['Louis'],
+    project:'No project',
+    done:false
+  });
+  // Auto-enter edit mode so user can type immediately
+  if(!vucObjEdit){
+    vucObjEdit = true;
+    var editBtn = document.getElementById('obj-edit-btn');
+    if(editBtn){editBtn.innerHTML='&#10003; Save &amp; lock';editBtn.classList.add('editing');}
+  }
   renderObj();
+  // Focus on the newly added objective's title input
+  setTimeout(function(){
+    var newCard = document.getElementById('wobj-vo'+_void);
+    if(newCard){
+      var inp = newCard.querySelector('.wobj-title-inp');
+      if(inp) inp.focus();
+    }
+  }, 50);
 }
 
 function delObj(id){
@@ -1185,6 +1660,401 @@ document.addEventListener('DOMContentLoaded',function(){
   var allBtn=document.getElementById('ofilt-all');
   if(allBtn)allBtn.classList.add('editing');
 });
+
+
+// ═══════════════════════════════════════════════════════
+// PERSISTENT STORAGE (localStorage) + URGENT BANNER
+// ═══════════════════════════════════════════════════════
+var STORAGE_PREFIX_W = 'vuc_';
+var WEEKLY_STORAGE_KEY = STORAGE_PREFIX_W + 'priority_stack';
+var _saveDebounceW = null;
+
+function padW(n){return String(n).padStart(2,'0');}
+
+function getWeekKey(date){
+  // Find Monday of the given date's week and use that as the key
+  var d = new Date(date.getTime());
+  var day = d.getDay();
+  var diff = day === 0 ? -6 : 1 - day; // Sunday: -6, otherwise diff to Monday
+  d.setDate(d.getDate() + diff);
+  return d.getFullYear() + '-' + padW(d.getMonth()+1) + '-' + padW(d.getDate());
+}
+
+function getPreviousWeekKey(){
+  var d = new Date();
+  d.setDate(d.getDate() - 7);
+  return getWeekKey(d);
+}
+
+function getLastWeekDailyKeys(){
+  // Returns localStorage keys for daily meetings of Tue/Wed/Thu/Fri from LAST week
+  // Last week's Monday = today minus 7 days, find that Monday
+  var today = new Date();
+  var todayDow = today.getDay();
+  var thisMonday = new Date(today.getTime());
+  thisMonday.setDate(thisMonday.getDate() + (todayDow === 0 ? -6 : 1 - todayDow));
+
+  var lastMonday = new Date(thisMonday.getTime());
+  lastMonday.setDate(lastMonday.getDate() - 7);
+
+  var keys = [];
+  // Tue=1, Wed=2, Thu=3, Fri=4 days after last Monday
+  for(var i=1; i<=4; i++){
+    var d = new Date(lastMonday.getTime());
+    d.setDate(d.getDate() + i);
+    var dayName = ['Mon','Tue','Wed','Thu','Fri'][i];
+    keys.push({
+      key: STORAGE_PREFIX_W + 'daily_' + d.getFullYear() + '-' + padW(d.getMonth()+1) + '-' + padW(d.getDate()),
+      label: dayName
+    });
+  }
+  return keys;
+}
+
+function collectWeeklyState(){
+  // Gather all UI state
+  var state = {
+    date: new Date().toISOString(),
+    weekDate: document.getElementById('wdate').value,
+    objectives: vucObjectives,
+    tasks: [],
+    crossDeps: [],
+    blockers: [],
+    reviewStatuses: {}
+  };
+
+  // Tasks per person/project (from rendered project list)
+  document.querySelectorAll('[data-t]').forEach(function(wrapper){
+    var inp = wrapper.querySelector('.task-inp');
+    if(!inp || !inp.value.trim()) return;
+    var descEl = wrapper.querySelector('.task-desc, textarea[id^="d-"]');
+    state.tasks.push({
+      tid: wrapper.getAttribute('data-t'),
+      pi: wrapper.getAttribute('data-p'),
+      pk: wrapper.getAttribute('data-k'),
+      carry: wrapper.getAttribute('data-carry') === '1',
+      text: inp.value.trim(),
+      desc: descEl ? descEl.value : ''
+    });
+  });
+
+  // Cross dependencies
+  document.querySelectorAll('#cross-list .cross-row').forEach(function(r){
+    var inputs = r.querySelectorAll('input,select');
+    var action = inputs[0] ? inputs[0].value.trim() : '';
+    if(action) state.crossDeps.push({
+      action: action,
+      from: inputs[1] ? inputs[1].value : '',
+      to: inputs[2] ? inputs[2].value : '',
+      priority: inputs[3] ? inputs[3].value : ''
+    });
+  });
+
+  // Blockers
+  document.querySelectorAll('#blocker-list .blocker-row').forEach(function(r){
+    var inputs = r.querySelectorAll('input');
+    var blocker = inputs[0] ? inputs[0].value.trim() : '';
+    if(blocker) state.blockers.push({
+      blocker: blocker,
+      owner: inputs[1] ? inputs[1].value : '',
+      by: inputs[2] ? inputs[2].value : ''
+    });
+  });
+
+  // Review statuses from previous week (if applicable)
+  document.querySelectorAll('.rev-task-line').forEach(function(line){
+    var rid = line.getAttribute('data-rid');
+    var status = line.getAttribute('data-status');
+    if(rid && status) state.reviewStatuses[rid] = status;
+  });
+
+  // Previous week reference
+  if(previousWeek) state.previousWeek = previousWeek;
+
+  return state;
+}
+
+function saveWeeklyState(){
+  try {
+    var state = collectWeeklyState();
+    localStorage.setItem(WEEKLY_STORAGE_KEY, JSON.stringify(state));
+    showWeeklySaved();
+  } catch(e){
+    console.warn('Weekly save failed:', e);
+  }
+}
+
+function debouncedWeeklySave(){
+  clearTimeout(_saveDebounceW);
+  _saveDebounceW = setTimeout(saveWeeklyState, 500);
+}
+
+function showWeeklySaved(){
+  var el = document.getElementById('weekly-save-indicator');
+  if(!el) return;
+  el.textContent = '✓ Saved';
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.style.opacity = '0.5'; el.textContent = 'Auto-save on'; }, 1500);
+}
+
+function restoreWeeklyState(){
+  try {
+    var raw = localStorage.getItem(WEEKLY_STORAGE_KEY);
+    if(!raw) return false;
+    var state = JSON.parse(raw);
+
+    // Restore objectives
+    if(state.objectives && Array.isArray(state.objectives)){
+      vucObjectives = state.objectives;
+      renderObj();
+    }
+
+    // Restore previous week reference + show review panel
+    if(state.previousWeek){
+      previousWeek = state.previousWeek;
+      showReview();
+      reviewConfirmed = true;
+      // Restore review statuses
+      if(state.reviewStatuses){
+        Object.keys(state.reviewStatuses).forEach(function(rid){
+          var line = document.querySelector('[data-rid="'+rid+'"]');
+          if(line){
+            var status = state.reviewStatuses[rid];
+            line.setAttribute('data-status', status);
+            var btn = line.querySelector('.rev-btn.'+status);
+            if(btn) btn.classList.add('sel');
+          }
+        });
+        updateRevSummary();
+      }
+    }
+
+    // Date
+    if(state.weekDate) document.getElementById('wdate').value = state.weekDate;
+
+    // Tasks, cross-deps, blockers — we restore them when user navigates to tasks tab
+    window._pendingRestore = state;
+    return true;
+  } catch(e){
+    console.warn('Weekly restore failed:', e);
+    return false;
+  }
+}
+
+function applyPendingTaskRestore(){
+  if(!window._pendingRestore) return;
+  var state = window._pendingRestore;
+  window._pendingRestore = null;
+
+  // Restore tasks into projects
+  if(state.tasks && state.tasks.length){
+    state.tasks.forEach(function(t){
+      var listEl = document.getElementById('tl-' + t.pi + '-' + t.pk);
+      if(!listEl) return;
+      var d = document.createElement('div');
+      d.innerHTML = trHTML(t.pi, t.pk);
+      var newWrapper = d.firstChild;
+      listEl.appendChild(newWrapper);
+      var inp = newWrapper.querySelector('.task-inp');
+      if(inp) inp.value = t.text;
+      var descEl = newWrapper.querySelector('textarea[id^="d-"]');
+      if(descEl && t.desc) descEl.value = t.desc;
+      if(t.carry) newWrapper.setAttribute('data-carry', '1');
+    });
+  }
+
+  // Restore cross-deps
+  if(state.crossDeps && state.crossDeps.length){
+    var clist = document.getElementById('cross-list');
+    if(clist){
+      // Clear existing default rows and add saved ones
+      clist.innerHTML = '';
+      state.crossDeps.forEach(function(d){
+        addCross();
+        var rows = clist.querySelectorAll('.cross-row');
+        var last = rows[rows.length-1];
+        if(last){
+          var inputs = last.querySelectorAll('input,select');
+          if(inputs[0]) inputs[0].value = d.action || '';
+          if(inputs[1]) inputs[1].value = d.from || '';
+          if(inputs[2]) inputs[2].value = d.to || '';
+          if(inputs[3]) inputs[3].value = d.priority || '';
+        }
+      });
+    }
+  }
+
+  // Restore blockers
+  if(state.blockers && state.blockers.length){
+    var blist = document.getElementById('blocker-list');
+    if(blist){
+      blist.innerHTML = '';
+      state.blockers.forEach(function(b){
+        addBlocker();
+        var rows = blist.querySelectorAll('.blocker-row');
+        var last = rows[rows.length-1];
+        if(last){
+          var inputs = last.querySelectorAll('input');
+          if(inputs[0]) inputs[0].value = b.blocker || '';
+          if(inputs[1]) inputs[1].value = b.owner || '';
+          if(inputs[2]) inputs[2].value = b.by || '';
+        }
+      });
+    }
+  }
+}
+
+// ───────────────────────────────────────────────────────
+// URGENT BANNER: gather pending items from last week
+// ───────────────────────────────────────────────────────
+function buildUrgentBanner(){
+  var pendingTasks = [];     // Q1/Q2 tasks marked Partial/Missed in review
+  var pendingDailyTasks = []; // Q1 tasks from last week's dailies not done
+  var behindObjectives = [];  // objectives at-risk or behind
+
+  // 1) From previous week tasks (loaded from JSON or from previous Priority Stack)
+  if(previousWeek && previousWeek.tasks){
+    previousWeek.tasks.forEach(function(t){
+      // Show Q1 and Q2 that weren't marked done — we use absence of "done" in reviewStatuses
+      if(t.q === 'q1' || t.q === 'q2'){
+        pendingTasks.push({
+          tag: t.pn ? t.pn.substring(0,8).toUpperCase() : 'TASK',
+          text: t.text,
+          quad: t.q
+        });
+      }
+    });
+  }
+
+  // 2) From last week's daily files (Tue, Wed, Thu, Fri)
+  var dailyKeys = getLastWeekDailyKeys();
+  dailyKeys.forEach(function(dk){
+    var raw = localStorage.getItem(dk.key);
+    if(!raw) return;
+    try {
+      var ds = JSON.parse(raw);
+      if(!ds.persons) return;
+      Object.keys(ds.persons).forEach(function(p){
+        var q1 = (ds.persons[p].eisenhower && ds.persons[p].eisenhower.q1) || [];
+        q1.forEach(function(t){
+          if(!t.done && t.text){
+            pendingDailyTasks.push({
+              person: p,
+              day: dk.label,
+              text: t.text
+            });
+          }
+        });
+      });
+    } catch(e){}
+  });
+
+  // 3) Objectives at risk or behind
+  if(vucObjectives && vucObjectives.length){
+    vucObjectives.forEach(function(o){
+      var avgPct = o.krs && o.krs.length
+        ? Math.round(o.krs.reduce(function(s,k){return s+(k.pct||0);},0)/o.krs.length)
+        : 0;
+      if(avgPct < 60){
+        behindObjectives.push({
+          title: o.title,
+          pct: avgPct,
+          status: avgPct < 30 ? 'BEHIND' : 'AT RISK'
+        });
+      }
+    });
+  }
+
+  var totalCount = pendingTasks.length + pendingDailyTasks.length + behindObjectives.length;
+  if(totalCount === 0){
+    document.getElementById('urgentBanner').classList.remove('show');
+    return;
+  }
+
+  document.getElementById('urgentCount').textContent = totalCount;
+  var html = '';
+
+  if(pendingTasks.length){
+    html += '<div class="urgent-section">';
+    html += '<div class="urgent-section-title">Weekly tasks committed but not completed (' + pendingTasks.length + ')</div>';
+    pendingTasks.forEach(function(t){
+      html += '<div class="urgent-item">';
+      html += '<span class="urgent-item-tag">[' + t.tag + ']</span>';
+      html += '<span class="urgent-item-text">' + escObj(t.text) + '</span>';
+      html += '<span class="urgent-item-meta">' + (t.quad === 'q1' ? 'Q1 Do First' : 'Q2 Schedule') + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  if(pendingDailyTasks.length){
+    html += '<div class="urgent-section">';
+    html += '<div class="urgent-section-title">Daily "Do First" tasks left undone last week (' + pendingDailyTasks.length + ')</div>';
+    pendingDailyTasks.forEach(function(t){
+      var personName = t.person.charAt(0).toUpperCase() + t.person.slice(1);
+      html += '<div class="urgent-item">';
+      html += '<span class="urgent-item-tag ' + t.person + '">' + personName + '</span>';
+      html += '<span class="urgent-item-text">' + escObj(t.text) + '</span>';
+      html += '<span class="urgent-item-meta">' + t.day + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  if(behindObjectives.length){
+    html += '<div class="urgent-section">';
+    html += '<div class="urgent-section-title">VUC objectives needing attention (' + behindObjectives.length + ')</div>';
+    behindObjectives.forEach(function(o){
+      html += '<div class="urgent-item">';
+      html += '<span class="urgent-item-tag">' + o.status + '</span>';
+      html += '<span class="urgent-item-text">' + escObj(o.title) + '</span>';
+      html += '<span class="urgent-item-meta">' + o.pct + '%</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  document.getElementById('urgentContent').innerHTML = html;
+  document.getElementById('urgentBanner').classList.add('show');
+}
+
+function dismissUrgentBanner(){
+  document.getElementById('urgentBanner').classList.remove('show');
+}
+
+// Hook auto-save on inputs/changes
+document.addEventListener('input', function(e){
+  if(e.target && e.target.matches && e.target.matches('input, textarea, select')){
+    debouncedWeeklySave();
+  }
+});
+document.addEventListener('change', function(e){
+  if(e.target && e.target.matches && e.target.matches('input, textarea, select')){
+    debouncedWeeklySave();
+  }
+});
+
+// Restore on load & build banner
+window.addEventListener('load', function(){
+  var restored = restoreWeeklyState();
+  // Always render objectives tab so its content is ready when user navigates there
+  renderObj();
+  // Build urgent banner regardless of restore
+  setTimeout(function(){
+    buildUrgentBanner();
+  }, 100);
+});
+
+// Hook into tab switching: when entering tasks tab, apply pending restore
+var _origSw = sw;
+sw = function(tab, btn){
+  _origSw(tab, btn);
+  if(tab === 'tasks' && window._pendingRestore){
+    applyPendingTaskRestore();
+  }
+};
+
 </script>
 </body>
 </html>
