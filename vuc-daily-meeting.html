@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VUC — Daily Meeting</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root {
     --navy:   #0D1B2A;
@@ -32,6 +32,335 @@
     color: var(--navy);
   }
 
+  /* ── OBJECTIVES REFERENCE PANEL ── */
+  .obj-panel {
+    background: #FFFFFF;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin: 20px 40px 0 40px;
+    padding: 16px 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .obj-panel-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .obj-panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .obj-panel-title::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+  }
+  .obj-panel-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .obj-panel-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .obj-action-btn {
+    background: var(--fog);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--slate);
+    cursor: pointer;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .obj-action-btn:hover {
+    background: var(--gold);
+    color: var(--white);
+    border-color: var(--gold);
+  }
+  .obj-list-compact {
+    display: grid;
+    gap: 8px;
+  }
+  .obj-line {
+    display: grid;
+    grid-template-columns: 80px 1fr 80px 70px;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 10px;
+    background: var(--fog);
+    border-radius: 8px;
+    border-left: 3px solid var(--gold);
+    transition: all 0.15s;
+  }
+  .obj-line.on-track { border-left-color: var(--green); }
+  .obj-line.at-risk { border-left-color: var(--amber); }
+  .obj-line.behind { border-left-color: var(--red); }
+  .obj-line-dept {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-align: center;
+  }
+  .obj-line-dept.products { background: #DBEAFE; color: #1E40AF; }
+  .obj-line-dept.services { background: #DCFCE7; color: #15803D; }
+  .obj-line-dept.future { background: #EDE9FE; color: #5B21B6; }
+  .obj-line-dept.company { background: #F3F4F6; color: #555; }
+  .obj-line-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--navy);
+    font-weight: 500;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .obj-line-pct {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: right;
+  }
+  .obj-line-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    text-align: right;
+  }
+  .obj-line-status.on-track { color: var(--green); }
+  .obj-line-status.at-risk { color: var(--amber); }
+  .obj-line-status.behind { color: var(--red); }
+  .obj-panel-empty {
+    text-align: center;
+    padding: 16px;
+    color: var(--muted);
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  /* ── TASK LINKING DROPDOWN (inside Eisenhower cells) ── */
+  .eis-task-line {
+    position: relative;
+    margin-bottom: 6px;
+    padding: 6px 8px;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .eis-task-line.unlinked {
+    border-left: 3px solid var(--amber);
+  }
+  .eis-task-line.linked {
+    border-left: 3px solid var(--green);
+  }
+  .eis-task-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--navy);
+    outline: none;
+    padding: 2px 0;
+    resize: none;
+    min-height: 18px;
+    line-height: 1.4;
+  }
+  .eis-link-btn {
+    background: var(--fog);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .eis-link-btn:hover {
+    background: var(--gold);
+    color: var(--white);
+    border-color: var(--gold);
+  }
+  .eis-link-btn.linked-active {
+    background: #DCFCE7;
+    color: #15803D;
+    border-color: #86EFAC;
+  }
+  .eis-link-btn.linked-active:hover {
+    background: #15803D;
+    color: var(--white);
+  }
+  .eis-task-del {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 2px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .eis-task-del:hover { color: var(--red); }
+  .eis-add-task {
+    background: transparent;
+    border: 1px dashed var(--line);
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    width: 100%;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .eis-add-task:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .eis-cell.has-unlinked::after {
+    content: '⚠';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: var(--amber);
+    font-size: 14px;
+    line-height: 1;
+  }
+  .eis-cell { position: relative; }
+
+  /* ── LINK MODAL ── */
+  .link-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(13, 27, 42, 0.6);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .link-modal-overlay.show { display: flex; }
+  .link-modal {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .link-modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .link-modal-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 16px;
+  }
+  .link-modal-opt {
+    background: var(--fog);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+  }
+  .link-modal-opt:hover {
+    border-color: var(--gold);
+    background: #FFFEF7;
+  }
+  .link-modal-opt.selected {
+    border-color: var(--gold);
+    background: #FFFDF0;
+  }
+  .link-modal-opt-text {
+    flex: 1;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--navy);
+    line-height: 1.4;
+  }
+  .link-modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    justify-content: flex-end;
+  }
+  .link-modal-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: 1px solid var(--line);
+    background: var(--white);
+    color: var(--slate);
+  }
+  .link-modal-btn.primary {
+    background: var(--navy);
+    color: var(--white);
+    border-color: var(--navy);
+  }
+  .link-modal-btn.danger {
+    background: var(--white);
+    color: var(--red);
+    border-color: var(--red);
+  }
+
   /* ── TOP BAR ── */
   .topbar {
     background: var(--navy);
@@ -46,22 +375,36 @@
   }
   .topbar-brand {
     display: flex;
-    align-items: baseline;
-    gap: 10px;
+    align-items: center;
+    gap: 12px;
+  }
+  .topbar-brand .logo-svg {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: block;
+  }
+  .topbar-brand .logo-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
   }
   .topbar-brand .logo {
     font-family: 'Syne', sans-serif;
     font-weight: 800;
-    font-size: 22px;
+    font-size: 18px;
     color: var(--white);
     letter-spacing: 2px;
+    line-height: 1;
   }
   .topbar-brand .subtitle {
     font-family: 'DM Mono', monospace;
-    font-size: 11px;
+    font-size: 9px;
     color: var(--gold);
-    letter-spacing: 3px;
+    letter-spacing: 2px;
     text-transform: uppercase;
+    line-height: 1;
   }
   .topbar-meta {
     display: flex;
@@ -470,6 +813,515 @@
     transition: all .15s;
   }
   .btn-export:hover { background: rgba(201,168,76,.12); }
+  .btn-friday {
+    background: rgba(176,141,87,.08);
+    border: 1px solid rgba(176,141,87,.3);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 7px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .btn-friday:hover { background: rgba(201,168,76,.18); border-color: var(--gold); }
+  .btn-friday.active {
+    background: linear-gradient(135deg, #C49A6C 0%, #b8923e 100%);
+    color: #0D1B2A;
+    border-color: #C49A6C;
+    font-weight: 700;
+    box-shadow: 0 0 0 1px rgba(196,154,108,.3), 0 2px 8px rgba(196,154,108,.25);
+  }
+
+  /* ── FRIDAY REVIEW SECTION ── */
+  .friday-section {
+    display: none;
+    margin-top: 32px;
+    border-top: 2px solid #C49A6C;
+    padding-top: 28px;
+    animation: fridaySlideIn 0.4s ease;
+  }
+  .friday-section.show { display: block; }
+  @keyframes fridaySlideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .friday-banner {
+    background: linear-gradient(135deg, #FFFEF7 0%, #FFF8E8 100%);
+    border: 1px solid #C49A6C;
+    border-radius: 10px;
+    padding: 16px 22px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .friday-banner-icon { font-size: 26px; }
+  .friday-banner-text { flex: 1; }
+  .friday-banner-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0D1B2A;
+    margin-bottom: 2px;
+  }
+  .friday-banner-sub {
+    font-size: 12px;
+    color: #6B5634;
+    line-height: 1.4;
+  }
+
+  /* Review block */
+  .review-block {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .review-block-hdr {
+    background: linear-gradient(135deg, #0D1B2A 0%, #1A1A2E 100%);
+    color: #fff;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .review-block-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .review-block-stats {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .review-block-body { padding: 6px 0; }
+
+  /* Objective row */
+  .friday-obj-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid #f4f4f4;
+    transition: background .15s;
+  }
+  .friday-obj-row:last-child { border-bottom: none; }
+  .friday-obj-row:hover { background: #fafafa; }
+  .friday-obj-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .friday-obj-tag.products { background: #DBEAFE; color: #1E40AF; }
+  .friday-obj-tag.services { background: #DCFCE7; color: #15803D; }
+  .friday-obj-tag.future { background: #EDE9FE; color: #5B21B6; }
+  .friday-obj-tag.company { background: #F3F4F6; color: #555; }
+  .friday-obj-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--navy);
+    line-height: 1.4;
+  }
+  .friday-obj-meta {
+    font-size: 10px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .friday-obj-status {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .friday-status-btn {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .friday-status-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .friday-status-btn.done.sel { background: #DCFCE7; border-color: #15803D; color: #15803D; }
+  .friday-status-btn.partial.sel { background: #FEF3C7; border-color: #B45309; color: #92400E; }
+  .friday-status-btn.missed.sel { background: #FEE2E2; border-color: #DC2626; color: #991B1B; }
+
+  /* Daily task summary */
+  .daily-task-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    border-bottom: 1px solid #f8f8f8;
+    font-size: 12px;
+  }
+  .daily-task-row:last-child { border-bottom: none; }
+  .daily-task-check {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid var(--line);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--green);
+  }
+  .daily-task-check.done {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .daily-task-day {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--muted);
+    width: 28px;
+    flex-shrink: 0;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .daily-task-person {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .daily-task-person.louis { background: #DBEAFE; color: #1E40AF; }
+  .daily-task-person.yasin { background: #DCFCE7; color: #15803D; }
+  .daily-task-person.lucas { background: #FEF3C7; color: #92400E; }
+  .daily-task-text {
+    flex: 1;
+    color: var(--navy);
+    line-height: 1.4;
+  }
+  .daily-task-text.done { text-decoration: line-through; opacity: 0.6; }
+
+  /* Stats grid */
+  .friday-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .friday-stat {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .friday-stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .friday-stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-top: 4px;
+  }
+
+  .friday-empty {
+    padding: 32px 20px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .friday-stat.highlight {
+    background: linear-gradient(135deg, #FFFEF7 0%, #FFF8E8 100%);
+    border-color: #C49A6C;
+  }
+  .friday-stat.highlight .friday-stat-num {
+    color: #B45309;
+  }
+
+  /* Department bars */
+  .dept-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px;
+    border-bottom: 1px solid #f4f4f4;
+  }
+  .dept-row:last-child { border-bottom: none; }
+  .dept-row-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .dept-row-label.products { color: #1E40AF; }
+  .dept-row-label.services { color: #15803D; }
+  .dept-row-label.future   { color: #5B21B6; }
+  .dept-row-bar-wrap {
+    flex: 1;
+    height: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+  }
+  .dept-row-bar {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.4s ease;
+  }
+  .dept-row-bar.products { background: linear-gradient(90deg, #3B82F6 0%, #1E40AF 100%); }
+  .dept-row-bar.services { background: linear-gradient(90deg, #22C55E 0%, #15803D 100%); }
+  .dept-row-bar.future   { background: linear-gradient(90deg, #A78BFA 0%, #5B21B6 100%); }
+  .dept-row-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 70px;
+    text-align: right;
+  }
+  .dept-row-pct {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--navy);
+    width: 50px;
+    text-align: right;
+  }
+
+  /* Founder distribution */
+  .founder-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px;
+    border-bottom: 1px solid #f4f4f4;
+  }
+  .founder-row:last-child { border-bottom: none; }
+  .founder-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .founder-avatar.louis { background: #1E40AF; }
+  .founder-avatar.yasin { background: #15803D; }
+  .founder-avatar.lucas { background: #92400E; }
+  .founder-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    width: 70px;
+    flex-shrink: 0;
+  }
+  .founder-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .founder-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .founder-bar.louis { background: linear-gradient(90deg, #60A5FA 0%, #1E40AF 100%); }
+  .founder-bar.yasin { background: linear-gradient(90deg, #4ADE80 0%, #15803D 100%); }
+  .founder-bar.lucas { background: linear-gradient(90deg, #FBBF24 0%, #92400E 100%); }
+  .founder-stats {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 110px;
+    text-align: right;
+  }
+  .founder-pct {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--navy);
+    width: 50px;
+    text-align: right;
+  }
+
+  /* Eisenhower drift */
+  .drift-container {
+    padding: 18px 20px;
+  }
+  .drift-bar {
+    height: 32px;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .drift-segment {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+    transition: width 0.5s ease;
+    min-width: 0;
+  }
+  .drift-segment.q1 { background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); }
+  .drift-segment.q2 { background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%); }
+  .drift-legend {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .drift-verdict {
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .drift-verdict.reactive {
+    background: #FEF2F2;
+    border-left: 3px solid #DC2626;
+    color: #7F1D1D;
+  }
+  .drift-verdict.balanced {
+    background: #F0F9FF;
+    border-left: 3px solid #1E40AF;
+    color: #1E3A8A;
+  }
+  .drift-verdict.strategic {
+    background: #F0FDF4;
+    border-left: 3px solid #15803D;
+    color: #14532D;
+  }
+
+  /* Learnings */
+  .learning-field { margin-bottom: 16px; }
+  .learning-field:last-child { margin-bottom: 0; }
+  .learning-label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .learning-text {
+    width: 100%;
+    min-height: 60px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--navy);
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    background: #fafafa;
+    transition: all 0.15s;
+  }
+  .learning-text:focus {
+    border-color: var(--gold);
+    background: #fff;
+  }
+
+  /* Export row */
+  .friday-export-row {
+    margin-top: 14px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #0D1B2A 0%, #1A1A2E 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .btn-friday-export {
+    background: var(--gold);
+    color: #0D1B2A;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 2px 6px rgba(196,154,108,0.3);
+  }
+  .btn-friday-export:hover {
+    background: #b8923e;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(196,154,108,0.4);
+  }
+  .friday-export-hint {
+    flex: 1;
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.4;
+    min-width: 200px;
+  }
+
+  @media (max-width: 640px) {
+    .friday-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .friday-obj-row { flex-wrap: wrap; }
+    .friday-status-btn { font-size: 8px; padding: 3px 6px; }
+  }
   .btn-export.loading { opacity: .5; pointer-events: none; }
 
   /* scroll */
@@ -481,6 +1333,141 @@
     .topbar { position: relative; background: var(--navy); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .btn-timer, .btn-close, .add-btn { display: none; }
   }
+
+
+  /* ── TASK CHECK + DONE STATE ── */
+  .eis-task-check {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    background: var(--white);
+    color: var(--green);
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .eis-task-check:hover {
+    border-color: var(--green);
+  }
+  .eis-task-line.done {
+    background: #F0F9F4;
+    border-left-color: var(--green) !important;
+    opacity: 0.7;
+  }
+  .eis-task-line.done .eis-task-check {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--white);
+  }
+  .eis-task-line.done .eis-task-input {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+
+  /* ── YESTERDAY REMINDER BANNER ── */
+  .yesterday-banner {
+    background: linear-gradient(90deg, #FFFEF7 0%, #FFFFFF 100%);
+    border: 1px solid #E8C76A;
+    border-left: 4px solid var(--gold);
+    border-radius: 10px;
+    margin: 12px 40px 0 40px;
+    padding: 14px 18px;
+    display: none;
+  }
+  .yesterday-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .yesterday-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .yesterday-title::before {
+    content: '⏱';
+    font-size: 14px;
+  }
+  .yesterday-dismiss {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .yesterday-dismiss:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .yesterday-list {
+    display: grid;
+    gap: 6px;
+  }
+  .yesterday-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    background: var(--white);
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .yesterday-person {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    flex-shrink: 0;
+  }
+  .yesterday-person.louis { background: #DBEAFE; color: #1E40AF; }
+  .yesterday-person.yasin { background: #DCFCE7; color: #15803D; }
+  .yesterday-person.lucas { background: #FEF3C7; color: #92400E; }
+  .yesterday-text {
+    flex: 1;
+    color: var(--navy);
+  }
+
+  /* ── SAVE INDICATOR ── */
+  .save-indicator {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: var(--navy);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 5px 12px;
+    border-radius: 16px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+    z-index: 50;
+    pointer-events: none;
+  }
 </style>
 </head>
 <body>
@@ -488,8 +1475,18 @@
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-brand">
-    <span class="logo">VUC</span>
-    <span class="subtitle">Daily Meeting</span>
+    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#C49A6C">
+        <path d="M38.97,54.21c-1.32,-0.15 -2.8,-0.71 -3.71,-1.41c-0.68,-0.53 -1.3,-1.24 -1.7,-1.95c-0.24,-0.43 -0.52,-1.18 -0.65,-1.72c-0.17,-0.72 -0.16,-0.42 -0.18,-6.67l-0.02,-5.81l-0.07,-0.16c-0.04,-0.09 -0.15,-0.24 -0.25,-0.35c-0.3,-0.32 -0.68,-0.46 -1.22,-0.46h-0.24v-0.14v-0.14l1.38,0.02c0.76,0.01 1.97,0.02 2.69,0.02h1.3v0.11v0.11l-0.27,0c-0.32,0 -0.65,0.06 -0.85,0.16c-0.23,0.12 -0.5,0.4 -0.61,0.63l-0.09,0.2l-0.01,5.4c-0.01,3.8 0,5.52 0.03,5.81c0.11,1.21 0.51,2.4 1.12,3.31c0.29,0.43 0.93,1.06 1.36,1.35c0.92,0.6 1.75,0.87 2.87,0.9c0.89,0.03 1.55,-0.06 2.29,-0.31c0.88,-0.29 1.57,-0.73 2.2,-1.37c0.71,-0.73 1.15,-1.55 1.42,-2.63c0.2,-0.81 0.19,-0.48 0.2,-6.48c0.01,-3.54 -0.001,-5.58 -0.02,-5.75c-0.02,-0.16 -0.07,-0.34 -0.12,-0.45c-0.1,-0.2 -0.39,-0.5 -0.6,-0.61c-0.19,-0.1 -0.52,-0.16 -0.83,-0.16l-0.25,0v-0.14v-0.14l1.38,0.02c0.76,0.01 1.86,0.02 2.44,0.02h1.06v0.11v0.11l-0.24,0c-0.69,0 -1.18,0.25 -1.43,0.73l-0.02,5.81c-0.01,4.31 -0.03,5.87 -0.06,6.04c-0.17,0.97 -0.35,1.57 -0.71,2.28c-0.51,1.02 -1.37,1.94 -2.4,2.54c-0.85,0.5 -1.94,0.85 -3,0.96c-0.38,0.04 -1.7,0.04 -2.07,-0.004z"/>
+        <path d="M40.05,49.59c-0.22,-0.53 -3.48,-7.97 -3.55,-8.11c-0.1,-0.21 -0.38,-0.48 -0.58,-0.57c-0.08,-0.04 -0.24,-0.07 -0.34,-0.08c-0.16,-0.01 -0.19,-0.03 -0.19,-0.08c0,-0.06 0.06,-0.06 1.43,-0.06c1.34,0 1.43,0 1.42,0.06c-0.01,0.03 -0.03,0.06 -0.06,0.06c-0.35,0.05 -0.52,0.17 -0.59,0.42l-0.04,0.15l0.59,1.48c2.31,5.84 2.11,5.35 2.16,5.22c0.02,-0.06 0.66,-1.58 1.4,-3.38c1.23,-2.97 1.36,-3.29 1.34,-3.42c-0.03,-0.25 -0.21,-0.43 -0.48,-0.46c-0.13,-0.01 -0.17,-0.03 -0.17,-0.08c0,-0.06 0.05,-0.06 1.28,-0.06c1.22,0 1.28,0 1.28,0.06c0,0.05 -0.03,0.06 -0.2,0.08c-0.42,0.04 -0.81,0.33 -1.03,0.78c-0.11,0.22 -2.93,6.55 -3.19,7.16c-0.13,0.3 -0.24,0.62 -0.31,0.89c-0.02,0.08 -0.11,0.04 -0.16,-0.07z"/>
+        <path d="M46.5,17.5c-0.45,-0.005 -0.9,-0.001 -1.35,0.012c-14.4,0.46 -25.77,10.3 -25.72,22.26l4.64,0.036c-0.047,-11.16 9.13,-20.39 21.31,-20.82c10.31,-0.34 19.56,5.76 22.5,14.82l-3.1,-10.01c-4.9,-3.96 -11.44,-6.22 -18.28,-6.31z"/>
+        <path d="M46.49,61.7c-0.45,0.005 -0.9,0.001 -1.35,-0.012c-14.4,-0.46 -25.77,-10.3 -25.72,-22.26l4.65,0.158c-0.047,11.16 9.12,20.19 21.3,20.62c10.31,0.34 19.56,-5.76 22.5,-14.82l-3.1,10.01c-4.9,3.96 -11.44,6.22 -18.28,6.31z"/>
+      </g>
+    </svg>
+    <div class="logo-text">
+      <span class="logo">VUC</span>
+      <span class="subtitle">Daily Meeting</span>
+    </div>
   </div>
   <div class="topbar-meta">
     <span class="topbar-date" id="todayDate"></span>
@@ -505,6 +1502,66 @@
 </div>
 
 <!-- PAGE -->
+<!-- YESTERDAY'S INCOMPLETE Q1 TASKS REMINDER -->
+<div class="yesterday-banner" id="yesterdayBanner">
+  <div class="yesterday-header">
+    <div class="yesterday-title">Yesterday's "Do First" still open</div>
+    <button class="yesterday-dismiss" onclick="dismissYesterdayBanner()">Dismiss</button>
+  </div>
+  <div class="yesterday-list" id="yesterdayList"></div>
+</div>
+
+<!-- SAVE INDICATOR -->
+<div class="save-indicator" id="saveIndicator">Auto-save on</div>
+
+<!-- OBJECTIVES REFERENCE PANEL -->
+<div class="obj-panel">
+  <div class="obj-panel-hdr">
+    <div>
+      <div class="obj-panel-title">VUC Objectives — Reference</div>
+      <div class="obj-panel-sub">Read-only · Updated weekly in Monday Priority Stack</div>
+    </div>
+    <div class="obj-panel-actions">
+      <button class="obj-action-btn" onclick="openImportModal('weekly')">Import Weekly Priority Stack</button>
+      <button class="obj-action-btn" onclick="openImportModal('daily')">Import Previous Daily</button>
+    </div>
+  </div>
+  <div class="obj-list-compact" id="objList">
+    <div class="obj-panel-empty">No objectives loaded yet. Click <b>Import Weekly Priority Stack</b> to load this week's VUC objectives.</div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="link-modal-overlay" id="importModal">
+  <div class="link-modal" style="max-width:560px">
+    <div class="link-modal-title" id="importModalTitle">Import JSON</div>
+    <div class="link-modal-sub" id="importModalSub">Paste the JSON content below</div>
+
+    <textarea id="importJsonInput" placeholder="Paste JSON here..." style="width:100%;min-height:160px;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--navy);background:#fafafa;outline:none;resize:vertical;line-height:1.4"></textarea>
+
+    <div id="importModalHint" style="margin-top:10px;padding:10px 12px;background:#FFFEF7;border-left:3px solid var(--gold);border-radius:6px;font-size:11px;color:#6B5634;line-height:1.5;display:none"></div>
+
+    <div class="link-modal-actions">
+      <button class="link-modal-btn" onclick="closeImportModal()">Cancel</button>
+      <button class="link-modal-btn primary" onclick="confirmImport()">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- LINK MODAL -->
+<div class="link-modal-overlay" id="linkModal">
+  <div class="link-modal">
+    <div class="link-modal-title">Link task to objective</div>
+    <div class="link-modal-sub" id="linkModalSub">Which VUC objective does this task contribute to?</div>
+    <div id="linkModalList"></div>
+    <div class="link-modal-actions">
+      <button class="link-modal-btn danger" onclick="clearTaskLink()">Unlink</button>
+      <button class="link-modal-btn" onclick="closeLinkModal()">Cancel</button>
+      <button class="link-modal-btn primary" onclick="confirmTaskLink()">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <div class="page">
 
   <!-- ───────────────────────────────────────────── -->
@@ -528,7 +1585,7 @@
     </div>
     <div class="person-body" style="padding-top:16px;">
       <span class="field-label">Eisenhower Matrix — Today</span>
-      <div class="eis-axis-label">← NOT URGENT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; URGENT →</div>
+      <div class="eis-axis-label">← URGENT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NOT URGENT →</div>
       <div class="eis-wrap">
         <div class="eis-row-labels">
           <div class="eis-row-label">Important</div>
@@ -537,19 +1594,23 @@
         <div class="eisenhower-grid">
           <div class="eis-cell do-first">
             <div class="eis-label"><span class="eis-dot"></span>Do First</div>
-            <textarea class="eis-textarea" placeholder="Urgent + Important…" rows="3"></textarea>
+            <div class="eis-task-list" data-person="louis" data-quad="q1" id="eis-louis-q1"></div>
+            <button class="eis-add-task" onclick="addEisTask('louis','q1')">+ Add task</button>
           </div>
           <div class="eis-cell schedule">
             <div class="eis-label"><span class="eis-dot"></span>Schedule</div>
-            <textarea class="eis-textarea" placeholder="Important, not urgent…" rows="3"></textarea>
+            <div class="eis-task-list" data-person="louis" data-quad="q2" id="eis-louis-q2"></div>
+            <button class="eis-add-task" onclick="addEisTask('louis','q2')">+ Add task</button>
           </div>
           <div class="eis-cell delegate">
-            <div class="eis-label"><span class="eis-dot"></span>Delegate</div>
-            <textarea class="eis-textarea" placeholder="Urgent, not important…" rows="3"></textarea>
+            <div class="eis-label"><span class="eis-dot"></span>Coordinate</div>
+            <div class="eis-task-list" data-person="louis" data-quad="q3" id="eis-louis-q3"></div>
+            <button class="eis-add-task" onclick="addEisTask('louis','q3')">+ Add task</button>
           </div>
           <div class="eis-cell eliminate">
             <div class="eis-label"><span class="eis-dot"></span>Eliminate</div>
-            <textarea class="eis-textarea" placeholder="Neither…" rows="3"></textarea>
+            <div class="eis-task-list" data-person="louis" data-quad="q4" id="eis-louis-q4"></div>
+            <button class="eis-add-task" onclick="addEisTask('louis','q4')">+ Add task</button>
           </div>
         </div>
       </div>
@@ -571,7 +1632,7 @@
     </div>
     <div class="person-body" style="padding-top:16px;">
       <span class="field-label">Eisenhower Matrix — Today</span>
-      <div class="eis-axis-label">← NOT URGENT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; URGENT →</div>
+      <div class="eis-axis-label">← URGENT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NOT URGENT →</div>
       <div class="eis-wrap">
         <div class="eis-row-labels">
           <div class="eis-row-label">Important</div>
@@ -580,19 +1641,23 @@
         <div class="eisenhower-grid">
           <div class="eis-cell do-first">
             <div class="eis-label"><span class="eis-dot"></span>Do First</div>
-            <textarea class="eis-textarea" placeholder="Urgent + Important…" rows="3"></textarea>
+            <div class="eis-task-list" data-person="yasin" data-quad="q1" id="eis-yasin-q1"></div>
+            <button class="eis-add-task" onclick="addEisTask('yasin','q1')">+ Add task</button>
           </div>
           <div class="eis-cell schedule">
             <div class="eis-label"><span class="eis-dot"></span>Schedule</div>
-            <textarea class="eis-textarea" placeholder="Important, not urgent…" rows="3"></textarea>
+            <div class="eis-task-list" data-person="yasin" data-quad="q2" id="eis-yasin-q2"></div>
+            <button class="eis-add-task" onclick="addEisTask('yasin','q2')">+ Add task</button>
           </div>
           <div class="eis-cell delegate">
-            <div class="eis-label"><span class="eis-dot"></span>Delegate</div>
-            <textarea class="eis-textarea" placeholder="Urgent, not important…" rows="3"></textarea>
+            <div class="eis-label"><span class="eis-dot"></span>Coordinate</div>
+            <div class="eis-task-list" data-person="yasin" data-quad="q3" id="eis-yasin-q3"></div>
+            <button class="eis-add-task" onclick="addEisTask('yasin','q3')">+ Add task</button>
           </div>
           <div class="eis-cell eliminate">
             <div class="eis-label"><span class="eis-dot"></span>Eliminate</div>
-            <textarea class="eis-textarea" placeholder="Neither…" rows="3"></textarea>
+            <div class="eis-task-list" data-person="yasin" data-quad="q4" id="eis-yasin-q4"></div>
+            <button class="eis-add-task" onclick="addEisTask('yasin','q4')">+ Add task</button>
           </div>
         </div>
       </div>
@@ -614,7 +1679,7 @@
     </div>
     <div class="person-body" style="padding-top:16px;">
       <span class="field-label">Eisenhower Matrix — Today</span>
-      <div class="eis-axis-label">← NOT URGENT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; URGENT →</div>
+      <div class="eis-axis-label">← URGENT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NOT URGENT →</div>
       <div class="eis-wrap">
         <div class="eis-row-labels">
           <div class="eis-row-label">Important</div>
@@ -623,19 +1688,23 @@
         <div class="eisenhower-grid">
           <div class="eis-cell do-first">
             <div class="eis-label"><span class="eis-dot"></span>Do First</div>
-            <textarea class="eis-textarea" placeholder="Urgent + Important…" rows="3"></textarea>
+            <div class="eis-task-list" data-person="lucas" data-quad="q1" id="eis-lucas-q1"></div>
+            <button class="eis-add-task" onclick="addEisTask('lucas','q1')">+ Add task</button>
           </div>
           <div class="eis-cell schedule">
             <div class="eis-label"><span class="eis-dot"></span>Schedule</div>
-            <textarea class="eis-textarea" placeholder="Important, not urgent…" rows="3"></textarea>
+            <div class="eis-task-list" data-person="lucas" data-quad="q2" id="eis-lucas-q2"></div>
+            <button class="eis-add-task" onclick="addEisTask('lucas','q2')">+ Add task</button>
           </div>
           <div class="eis-cell delegate">
-            <div class="eis-label"><span class="eis-dot"></span>Delegate</div>
-            <textarea class="eis-textarea" placeholder="Urgent, not important…" rows="3"></textarea>
+            <div class="eis-label"><span class="eis-dot"></span>Coordinate</div>
+            <div class="eis-task-list" data-person="lucas" data-quad="q3" id="eis-lucas-q3"></div>
+            <button class="eis-add-task" onclick="addEisTask('lucas','q3')">+ Add task</button>
           </div>
           <div class="eis-cell eliminate">
             <div class="eis-label"><span class="eis-dot"></span>Eliminate</div>
-            <textarea class="eis-textarea" placeholder="Neither…" rows="3"></textarea>
+            <div class="eis-task-list" data-person="lucas" data-quad="q4" id="eis-lucas-q4"></div>
+            <button class="eis-add-task" onclick="addEisTask('lucas','q4')">+ Add task</button>
           </div>
         </div>
       </div>
@@ -749,22 +1818,115 @@
     </div>
   </div>
 
-  <!-- ── FOLLOW-UP BANNER (hidden by default, shown when yesterday data exists) ── -->
-  <div id="followUpBanner" style="display:none; margin-bottom:24px; border-radius:8px; overflow:hidden; border:1px solid rgba(201,168,76,.3); background:rgba(201,168,76,.06);">
-    <div style="background:rgba(201,168,76,.15); padding:12px 20px; display:flex; align-items:center; justify-content:space-between;">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-size:16px;">📋</span>
-        <div>
-          <div style="font-family:'DM Mono',monospace; font-size:11px; font-weight:600; color:#C9A84C; letter-spacing:1px;">FOLLOW-UP FROM YESTERDAY</div>
-          <div id="followUpDate" style="font-family:'DM Mono',monospace; font-size:9px; color:#8494A8; margin-top:1px;"></div>
-        </div>
-      </div>
-      <div style="display:flex; gap:8px;">
-        <button onclick="loadFollowUp()" style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; background:var(--gold); color:var(--navy); border:none; padding:6px 14px; border-radius:4px; cursor:pointer; font-weight:600;">↓ Load into today</button>
-        <button onclick="dismissFollowUp()" style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; background:none; color:var(--muted); border:1px solid rgba(255,255,255,.1); padding:6px 14px; border-radius:4px; cursor:pointer;">Dismiss</button>
+  <!-- ── SECTION 3: FRIDAY REVIEW (toggleable) ── -->
+  <div class="friday-section" id="fridaySection">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <span class="section-title">Weekly Review</span>
+      <span class="section-mins">12 MIN · 4 BLOCKS</span>
+    </div>
+    <div class="section-rule"></div>
+
+    <div class="friday-banner">
+      <div class="friday-banner-icon">📊</div>
+      <div class="friday-banner-text">
+        <div class="friday-banner-title">Friday review of the week</div>
+        <div class="friday-banner-sub">Mark which weekly objectives were achieved, and check which Eisenhower Q1/Q2 tasks from Mon–Thu were completed. Use this to prepare next Monday&apos;s Priority Stack.</div>
       </div>
     </div>
-    <div id="followUpPreview" style="padding:12px 20px; font-size:11.5px; color:var(--muted); line-height:1.7;"></div>
+
+    <!-- Week stats -->
+    <div class="friday-stats-grid" id="fridayStats">
+      <div class="friday-stat"><div class="friday-stat-num" id="fStatObj">0</div><div class="friday-stat-label">VUC Objectives</div></div>
+      <div class="friday-stat"><div class="friday-stat-num" id="fStatObjDone">0</div><div class="friday-stat-label">Achieved</div></div>
+      <div class="friday-stat highlight"><div class="friday-stat-num" id="fStatObjPct">0%</div><div class="friday-stat-label">Objectives completed</div></div>
+      <div class="friday-stat"><div class="friday-stat-num" id="fStatTasks">0</div><div class="friday-stat-label">Q1+Q2 tasks</div></div>
+      <div class="friday-stat"><div class="friday-stat-num" id="fStatTasksDone">0</div><div class="friday-stat-label">Completed</div></div>
+      <div class="friday-stat highlight"><div class="friday-stat-num" id="fStatTasksPct">0%</div><div class="friday-stat-label">Tasks completed</div></div>
+    </div>
+
+    <!-- Block: % by department -->
+    <div class="review-block">
+      <div class="review-block-hdr">
+        <div class="review-block-title"><span>🏢</span> Completion by Department</div>
+        <div class="review-block-stats" id="fDeptStats">—</div>
+      </div>
+      <div class="review-block-body" id="fDeptList">
+        <div class="friday-empty">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Block 1: VUC Objectives review -->
+    <div class="review-block">
+      <div class="review-block-hdr">
+        <div class="review-block-title"><span>🎯</span> VUC Weekly Objectives</div>
+        <div class="review-block-stats" id="fObjStats">— / —</div>
+      </div>
+      <div class="review-block-body" id="fObjList">
+        <div class="friday-empty">Click "📊 Friday Review" above to load this week&apos;s objectives.</div>
+      </div>
+    </div>
+
+    <!-- Block 2: Q1/Q2 tasks from each daily this week -->
+    <div class="review-block">
+      <div class="review-block-hdr">
+        <div class="review-block-title"><span>⚡</span> Daily Q1 / Q2 Tasks This Week</div>
+        <div class="review-block-stats" id="fTaskStats">— / —</div>
+      </div>
+      <div class="review-block-body" id="fTaskList">
+        <div class="friday-empty">No tasks logged yet this week.</div>
+      </div>
+    </div>
+
+    <!-- Block 3: By Founder -->
+    <div class="review-block">
+      <div class="review-block-hdr">
+        <div class="review-block-title"><span>👥</span> Distribution by Founder</div>
+        <div class="review-block-stats" id="fFounderStats">—</div>
+      </div>
+      <div class="review-block-body" id="fFounderList">
+        <div class="friday-empty">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Block 4: Eisenhower Drift -->
+    <div class="review-block">
+      <div class="review-block-hdr">
+        <div class="review-block-title"><span>⚖️</span> Eisenhower Drift</div>
+        <div class="review-block-stats" id="fDriftLabel">—</div>
+      </div>
+      <div class="review-block-body" id="fDriftBody">
+        <div class="friday-empty">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Block 5: Learnings & Carryovers -->
+    <div class="review-block">
+      <div class="review-block-hdr">
+        <div class="review-block-title"><span>📝</span> Learnings &amp; Carryovers</div>
+        <div class="review-block-stats">Free text — saved automatically</div>
+      </div>
+      <div class="review-block-body" style="padding:14px 20px">
+        <div class="learning-field">
+          <label class="learning-label">What did we learn this week?</label>
+          <textarea class="learning-text" id="learn-learnings" placeholder="Insights, patterns, what worked, what didn't..."></textarea>
+        </div>
+        <div class="learning-field">
+          <label class="learning-label">What carries to next Monday?</label>
+          <textarea class="learning-text" id="learn-carryovers" placeholder="Unfinished items, follow-ups, decisions to make next week..."></textarea>
+        </div>
+        <div class="learning-field">
+          <label class="learning-label">What blocked execution?</label>
+          <textarea class="learning-text" id="learn-blockers" placeholder="External dependencies, internal bottlenecks, missing info..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="friday-export-row">
+      <button class="btn-friday-export" onclick="exportFridayWrapup()">📦 Export Friday Wrap-up</button>
+      <span class="friday-export-hint">Copies a JSON summary to clipboard. Paste it in the next Monday Priority Stack to load carryovers automatically.</span>
+    </div>
   </div>
 
   <!-- ── FOOTER ── -->
@@ -774,6 +1936,7 @@
       <div class="footer-text" style="margin-top:3px; color:rgba(132,148,168,.5);">Blockers not resolved here → create Jira ticket immediately after.</div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn-friday" id="fridayToggle" onclick="toggleFridayReview()">📊 Friday Review</button>
       <button class="btn-export" id="exportBtn" onclick="exportPDF()">⬇ Export PDF</button>
       <button class="btn-close" onclick="closeMeeting()">Close Meeting</button>
     </div>
@@ -886,422 +2049,1267 @@
   }
 
   // ── EXPORT PDF ────────────────────────────────────────
-  // ── EXPORT PDF (jsPDF direct — no html2canvas) ───────
+  function getEisRows(blockEl) {
+    const cells = blockEl.querySelectorAll('.eis-cell');
+    const labels = ['DO FIRST','SCHEDULE','DELEGATE','ELIMINATE'];
+    const colors = ['#FFF8EC','#F0F7FF','#FFF3F3','#F5F5F5'];
+    const borders = ['#E8B84B','#6B9FD4','#D47B7B','#BBBBBB'];
+    const tcolors = ['#A07020','#2E5F8A','#8A2E2E','#888888'];
+    let rows = '';
+    cells.forEach((cell, i) => {
+      const val = cell.querySelector('textarea').value.trim() || '—';
+      rows += `
+        <tr>
+          <td style="width:22%;padding:8px 10px;background:${colors[i]};border:1px solid ${borders[i]};font-size:10px;font-weight:700;letter-spacing:1px;color:${tcolors[i]};vertical-align:top;">${labels[i]}</td>
+          <td style="padding:8px 10px;border:1px solid #DDE2EA;font-size:12px;color:#0D1B2A;vertical-align:top;white-space:pre-wrap;">${val}</td>
+        </tr>`;
+    });
+    return rows;
+  }
+
+  function getBlockers(blockEl) {
+    const rows = blockEl.querySelectorAll('.blocker-row');
+    if (!rows.length) return '<p style="font-size:11px;color:#8494A8;margin:4px 0;">None</p>';
+    let html = '';
+    rows.forEach(r => {
+      const val = r.querySelector('textarea').value.trim();
+      if (val) html += `<p style="font-size:12px;color:#B03030;margin:4px 0;padding:6px 10px;background:#FFF5F5;border-left:3px solid #B03030;">🚫 ${val}</p>`;
+    });
+    return html || '<p style="font-size:11px;color:#8494A8;margin:4px 0;">None</p>';
+  }
+
+  function getCrossRows() {
+    const rows = document.querySelectorAll('#crossBody tr');
+    let html = '';
+    rows.forEach(r => {
+      const task   = r.querySelector('td:nth-child(1) input')?.value.trim() || '';
+      const desc   = r.querySelector('td:nth-child(2) input')?.value.trim() || '';
+      const dir    = r.querySelector('td:nth-child(3) select');
+      const dirVal = dir ? dir.options[dir.selectedIndex]?.text || '' : '';
+      const stat   = r.querySelector('td:nth-child(4) select');
+      const statVal= stat ? stat.options[stat.selectedIndex]?.text || '' : '';
+      if (!task && !desc) return;
+      html += `<tr>
+        <td style="padding:7px 10px;border:1px solid #DDE2EA;font-size:12px;">${task}</td>
+        <td style="padding:7px 10px;border:1px solid #DDE2EA;font-size:12px;">${desc}</td>
+        <td style="padding:7px 10px;border:1px solid #DDE2EA;font-size:12px;">${dirVal}</td>
+        <td style="padding:7px 10px;border:1px solid #DDE2EA;font-size:12px;">${statVal}</td>
+      </tr>`;
+    });
+    return html || `<tr><td colspan="4" style="padding:8px 10px;color:#8494A8;font-size:11px;border:1px solid #DDE2EA;">No cross-department tasks logged.</td></tr>`;
+  }
+
+  function personPDFBlock(name, role, avatarColor, blockId) {
+    const block = document.getElementById(blockId).closest('.person-block');
+    return `
+      <div style="margin-bottom:20px;border:1px solid #DDE2EA;border-radius:6px;overflow:hidden;page-break-inside:avoid;">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:#F4F6F9;border-bottom:1px solid #DDE2EA;">
+          <div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;">${name[0]}</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#0D1B2A;">${name}</div>
+            <div style="font-size:10px;color:#8494A8;">${role}</div>
+          </div>
+        </div>
+        <div style="padding:12px 16px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#8494A8;margin-bottom:8px;">EISENHOWER MATRIX</div>
+          <table style="width:100%;border-collapse:collapse;">
+            ${getEisRows(block)}
+          </table>
+          <div style="margin-top:12px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#8494A8;margin-bottom:6px;">BLOCKERS</div>
+            ${getBlockers(document.getElementById(blockId))}
+          </div>
+        </div>
+      </div>`;
+  }
+
   function exportPDF(){
     const btn = document.getElementById('exportBtn');
     btn.classList.add('loading');
     btn.textContent = '⏳ Generating…';
 
-    try {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-      const W = 210, H = 297;
-      const ML = 14, MR = 14, MT = 14;
-      const CW = W - ML - MR; // content width
-      let y = MT;
+    const now2 = new Date();
+    const dateStr = `${now2.getFullYear()}-${pad(now2.getMonth()+1)}-${pad(now2.getDate())}`;
+    const dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][now2.getDay()];
+    const filename = `VUC_Daily_${dateStr}.pdf`;
 
-      const now2 = new Date();
-      const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const dateStr = `${days[now2.getDay()]} ${now2.getDate()} ${months[now2.getMonth()]} ${now2.getFullYear()}`;
-      const filename = `VUC_Daily_${now2.getFullYear()}-${pad(now2.getMonth()+1)}-${pad(now2.getDate())}.pdf`;
+    const html = `
+      <div style="font-family:Arial,sans-serif;color:#0D1B2A;padding:0;">
 
-      function checkPage(needed = 20) {
-        if (y + needed > H - 14) { doc.addPage(); y = MT; }
-      }
+        <!-- HEADER -->
+        <div style="background:#0D1B2A;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+          <div>
+            <span style="font-size:20px;font-weight:800;color:#fff;letter-spacing:2px;">VUC</span>
+            <span style="font-size:12px;color:#C9A84C;margin-left:8px;letter-spacing:2px;">DAILY MEETING</span>
+          </div>
+          <span style="font-size:11px;color:#8494A8;">${dayName}, ${dateStr}</span>
+        </div>
 
-      function hline(yy, color = [221,226,234]) {
-        doc.setDrawColor(...color);
-        doc.setLineWidth(0.3);
-        doc.line(ML, yy, W - MR, yy);
-      }
+        <!-- SECTION 1 -->
+        <div style="margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #C9A84C;">
+          <span style="font-size:11px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);padding:3px 8px;border-radius:3px;color:#C9A84C;letter-spacing:2px;margin-right:10px;">01</span>
+          <span style="font-size:13px;font-weight:700;letter-spacing:1px;color:#0D1B2A;text-transform:uppercase;">Today's Priorities</span>
+        </div>
+        <div style="margin-bottom:24px;">
+          ${personPDFBlock('Louis','Co-Founder · Strategy & Investors','#1A3A5C','blockers-louis')}
+          ${personPDFBlock('Yasin','Co-Founder · CTO & Consulting','#1A5C3A','blockers-yasin')}
+          ${personPDFBlock('Lucas','Organization & Development Manager','#8A5C1A','blockers-lucas')}
+        </div>
 
-      function fillRect(x, yy, w, h, r, g, b) {
-        doc.setFillColor(r, g, b);
-        doc.rect(x, yy, w, h, 'F');
-      }
+        <!-- SECTION 2 -->
+        <div style="margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #2E4057;page-break-before:auto;">
+          <span style="font-size:11px;background:rgba(46,64,87,.15);border:1px solid rgba(46,64,87,.4);padding:3px 8px;border-radius:3px;color:#2E4057;letter-spacing:2px;margin-right:10px;">02</span>
+          <span style="font-size:13px;font-weight:700;letter-spacing:1px;color:#0D1B2A;text-transform:uppercase;">Cross-Department Tasks</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:32px;">
+          <thead>
+            <tr style="background:#0D1B2A;">
+              <th style="padding:8px 10px;font-size:10px;letter-spacing:2px;color:#C9A84C;text-align:left;font-weight:500;">TASK</th>
+              <th style="padding:8px 10px;font-size:10px;letter-spacing:2px;color:#C9A84C;text-align:left;font-weight:500;">DESCRIPTION</th>
+              <th style="padding:8px 10px;font-size:10px;letter-spacing:2px;color:#C9A84C;text-align:left;font-weight:500;">FROM → TO</th>
+              <th style="padding:8px 10px;font-size:10px;letter-spacing:2px;color:#C9A84C;text-align:left;font-weight:500;">STATUS</th>
+            </tr>
+          </thead>
+          <tbody>${getCrossRows()}</tbody>
+        </table>
 
-      function textWrap(text, x, yy, maxW, lineH, color = [13,27,42]) {
-        doc.setTextColor(...color);
-        const lines = doc.splitTextToSize(text || '—', maxW);
-        doc.text(lines, x, yy);
-        return yy + lines.length * lineH;
-      }
+        <!-- FOOTER NOTE -->
+        <div style="border-top:1px solid #DDE2EA;padding-top:10px;text-align:center;">
+          <span style="font-size:10px;color:#8494A8;letter-spacing:1px;">VUC — CONFIDENTIAL · Daily Meeting Record · ${dateStr}</span>
+        </div>
+      </div>`;
 
-      // ── HEADER BAR ──
-      fillRect(0, 0, W, 16, 13, 27, 42);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(255, 255, 255);
-      doc.text('VUC', ML, 10.5);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(201, 168, 76);
-      doc.text('DAILY MEETING', ML + 14, 10.5);
-      doc.setTextColor(132, 148, 168);
-      doc.text(dateStr, W - MR, 10.5, { align: 'right' });
-      y = 24;
+    // Render into a wrapper that's visible to html2canvas
+    // html2canvas can't capture opacity:0 or off-screen fixed elements reliably
+    // Strategy: append below page content, capture, then remove
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'width:794px;background:#fff;margin:0 auto;';
+    wrapper.innerHTML = html;
 
-      // ── SECTION 01 ──
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(13, 27, 42);
-      doc.text('01  TODAY\'S PRIORITIES', ML, y);
-      doc.setDrawColor(201, 168, 76);
-      doc.setLineWidth(0.5);
-      doc.line(ML, y + 1.5, W - MR, y + 1.5);
-      y += 7;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:#fff;z-index:9998;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:0;';
+    overlay.appendChild(wrapper);
+    document.body.appendChild(overlay);
 
-      // ── PERSON BLOCKS ──
-      const persons = [
-        { name: 'Louis',  role: 'Co-Founder · Strategy & Investors', color: [26,58,92],  blockId: 'blockers-louis' },
-        { name: 'Yasin',  role: 'Co-Founder · CTO & Consulting',     color: [26,92,58],  blockId: 'blockers-yasin' },
-        { name: 'Lucas',  role: 'Org & Development Manager',          color: [138,92,26], blockId: 'blockers-lucas' },
-      ];
+    // Small delay to ensure render
+    setTimeout(() => {
+      const opt = {
+        margin:      [10, 10, 10, 10],
+        filename:    filename,
+        image:       { type: 'jpeg', quality: 0.97 },
+        html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', windowWidth: 794 },
+        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:   { mode: 'avoid-all' }
+      };
 
-      const eisLabels  = ['DO FIRST', 'SCHEDULE', 'DELEGATE', 'ELIMINATE'];
-      const eisBg      = [[255,248,236],[240,247,255],[255,243,243],[245,245,245]];
-      const eisTxt     = [[160,112,32],[46,95,138],[138,46,46],[136,136,136]];
-
-      persons.forEach(person => {
-        checkPage(80);
-
-        // person header
-        fillRect(ML, y, CW, 9, ...person.color);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(10);
-        doc.setTextColor(255,255,255);
-        doc.text(person.name, ML + 3, y + 6);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
-        doc.setTextColor(200,220,200);
-        doc.text(person.role, ML + 22, y + 6);
-        y += 10;
-
-        // eisenhower label
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(7);
-        doc.setTextColor(132,148,168);
-        doc.text('EISENHOWER MATRIX', ML, y + 4);
-        y += 6;
-
-        // eisenhower 2x2 grid
-        const halfW = CW / 2 - 1;
-        const cellH = 22;
-        const block = document.getElementById(person.blockId).closest('.person-block');
-        const cells = block.querySelectorAll('.eis-cell textarea');
-
-        [[0,1],[2,3]].forEach((pair, row) => {
-          pair.forEach((idx, col) => {
-            const cx = ML + col * (halfW + 2);
-            const cy = y + row * (cellH + 2);
-            fillRect(cx, cy, halfW, cellH, ...eisBg[idx]);
-            doc.setDrawColor(...eisBg[idx].map(v => Math.max(0, v - 30)));
-            doc.setLineWidth(0.2);
-            doc.rect(cx, cy, halfW, cellH);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(6.5);
-            doc.setTextColor(...eisTxt[idx]);
-            doc.text(eisLabels[idx], cx + 2, cy + 4.5);
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(8);
-            doc.setTextColor(13, 27, 42);
-            const val = cells[idx]?.value?.trim() || '—';
-            const wrapped = doc.splitTextToSize(val, halfW - 4);
-            doc.text(wrapped.slice(0, 3), cx + 2, cy + 9);
-          });
-        });
-        y += cellH * 2 + 6;
-
-        // blockers
-        checkPage(14);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(7);
-        doc.setTextColor(132,148,168);
-        doc.text('BLOCKERS', ML, y);
-        y += 4;
-
-        const blockerRows = document.getElementById(person.blockId).querySelectorAll('.blocker-row textarea');
-        let hasBlocker = false;
-        blockerRows.forEach(ta => {
-          const val = ta.value.trim();
-          if (!val) return;
-          hasBlocker = true;
-          checkPage(10);
-          fillRect(ML, y, CW, 8, 255, 245, 245);
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(8);
-          doc.setTextColor(176, 48, 48);
-          const wrapped = doc.splitTextToSize('🚫 ' + val, CW - 4);
-          doc.text(wrapped[0], ML + 2, y + 5.5);
-          y += 10;
-        });
-        if (!hasBlocker) {
-          doc.setFont('helvetica', 'italic');
-          doc.setFontSize(8);
-          doc.setTextColor(180,180,180);
-          doc.text('None', ML + 2, y + 1);
-          y += 5;
-        }
-        y += 6;
+      html2pdf().set(opt).from(wrapper).save().then(() => {
+        document.body.removeChild(overlay);
+        btn.classList.remove('loading');
+        btn.textContent = '⬇ Export PDF';
+      }).catch(() => {
+        document.body.removeChild(overlay);
+        btn.classList.remove('loading');
+        btn.textContent = '⬇ Export PDF';
       });
-
-      // ── SECTION 02: CROSS-DEPT ──
-      checkPage(30);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(13, 27, 42);
-      doc.text('02  CROSS-DEPARTMENT TASKS', ML, y);
-      doc.setDrawColor(46, 64, 87);
-      doc.setLineWidth(0.5);
-      doc.line(ML, y + 1.5, W - MR, y + 1.5);
-      y += 7;
-
-      // table header
-      const colW = [CW * 0.22, CW * 0.36, CW * 0.24, CW * 0.18];
-      const colX = [ML, ML + colW[0], ML + colW[0] + colW[1], ML + colW[0] + colW[1] + colW[2]];
-      const headers = ['TASK', 'DESCRIPTION', 'FROM → TO', 'STATUS'];
-      fillRect(ML, y, CW, 8, 13, 27, 42);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
-      doc.setTextColor(201, 168, 76);
-      headers.forEach((h, i) => doc.text(h, colX[i] + 2, y + 5.5));
-      y += 9;
-
-      // table rows
-      const crossRows = document.querySelectorAll('#crossBody tr');
-      let hasData = false;
-      crossRows.forEach((row, ri) => {
-        const task  = row.querySelector('td:nth-child(1) input')?.value.trim() || '';
-        const desc  = row.querySelector('td:nth-child(2) input')?.value.trim() || '';
-        const dirEl = row.querySelector('td:nth-child(3) select');
-        const dir   = dirEl ? dirEl.options[dirEl.selectedIndex]?.text || '' : '';
-        const stEl  = row.querySelector('td:nth-child(4) select');
-        const stat  = stEl  ? stEl.options[stEl.selectedIndex]?.text  || '' : '';
-        if (!task && !desc) return;
-        hasData = true;
-        checkPage(10);
-        if (ri % 2 === 0) fillRect(ML, y, CW, 8, 244, 246, 249);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.setTextColor(13, 27, 42);
-        [task, desc, dir, stat].forEach((v, i) => {
-          const lines = doc.splitTextToSize(v || '—', colW[i] - 4);
-          doc.text(lines[0], colX[i] + 2, y + 5.5);
-        });
-        hline(y + 8, [221,226,234]);
-        y += 9;
-      });
-      if (!hasData) {
-        doc.setFont('helvetica', 'italic');
-        doc.setFontSize(8);
-        doc.setTextColor(180,180,180);
-        doc.text('No cross-department tasks logged.', ML + 2, y + 5);
-        y += 10;
-      }
-
-      // ── FOOTER ──
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        hline(H - 10, [221,226,234]);
-        doc.setFont('helvetica', 'italic');
-        doc.setFontSize(7);
-        doc.setTextColor(132,148,168);
-        doc.text('VUC — Confidential · Daily Meeting Record · ' + dateStr, ML, H - 6);
-        doc.text(`${i} / ${pageCount}`, W - MR, H - 6, { align: 'right' });
-      }
-
-      doc.save(filename);
-
-    } catch(err) {
-      console.error('PDF error:', err);
-      alert('PDF generation failed. Please try again.');
-    }
-
-    btn.classList.remove('loading');
-    btn.textContent = '⬇ Export PDF';
-  }
-
-  // ── SNAPSHOT — read all data from the form ────────────
-  function buildSnapshot() {
-    const dateKey = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate());
-    const persons = ['louis','yasin','lucas'];
-    const personData = {};
-
-    persons.forEach(p => {
-      const block = document.getElementById('blockers-' + p).closest('.person-block');
-      const cells = block.querySelectorAll('.eis-cell textarea');
-      const eisLabels = ['doFirst','schedule','delegate','eliminate'];
-      const eis = {};
-      cells.forEach((ta, i) => { eis[eisLabels[i]] = ta.value.trim(); });
-
-      const blockers = [];
-      block.querySelectorAll('.blocker-row textarea').forEach(ta => {
-        if (ta.value.trim()) blockers.push(ta.value.trim());
-      });
-      personData[p] = { eisenhower: eis, blockers };
-    });
-
-    const crossTasks = [];
-    document.querySelectorAll('#crossBody tr').forEach(row => {
-      const task  = row.querySelector('td:nth-child(1) input')?.value.trim() || '';
-      const desc  = row.querySelector('td:nth-child(2) input')?.value.trim() || '';
-      const dirEl = row.querySelector('td:nth-child(3) select');
-      const dir   = dirEl ? dirEl.options[dirEl.selectedIndex]?.text || '' : '';
-      const stEl  = row.querySelector('td:nth-child(4) select');
-      const stat  = stEl  ? stEl.options[stEl.selectedIndex]?.value || 'pending' : 'pending';
-      const statText = stEl ? stEl.options[stEl.selectedIndex]?.text || '' : '';
-      if (task || desc) crossTasks.push({ task, desc, dir, stat, statText });
-    });
-
-    return { date: dateKey, savedAt: new Date().toISOString(), persons: personData, crossTasks };
-  }
-
-  // ── SAVE — localStorage + JSON download ───────────────
-  function saveSnapshot(snapshot) {
-    // 1. localStorage
-    localStorage.setItem('vuc_daily_last', JSON.stringify(snapshot));
-
-    // 2. JSON file download
-    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'VUC_Daily_' + snapshot.date + '.json';
-    a.click();
-    URL.revokeObjectURL(a.href);
-  }
-
-  // ── LOAD FOLLOW-UP on page open ───────────────────────
-  function checkFollowUp() {
-    const raw = localStorage.getItem('vuc_daily_last');
-    if (!raw) return;
-    try {
-      const snap = JSON.parse(raw);
-      const todayKey = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate());
-      if (snap.date === todayKey) return; // same day, skip
-
-      // Build preview
-      const lines = [];
-      const pNames = { louis: 'Louis', yasin: 'Yasin', lucas: 'Lucas' };
-      Object.entries(snap.persons).forEach(([p, data]) => {
-        const pending = Object.entries(data.eisenhower)
-          .filter(([k, v]) => k !== 'eliminate' && v)
-          .map(([k, v]) => v.split('\n')[0].slice(0,60))
-          .join(' · ');
-        if (pending) lines.push('<strong>' + pNames[p] + ':</strong> ' + pending);
-        data.blockers.forEach(b => lines.push('🚫 <strong>' + pNames[p] + ' blocker:</strong> ' + b.slice(0,80)));
-      });
-      snap.crossTasks
-        .filter(t => t.stat !== 'done')
-        .forEach(t => lines.push('↔ <strong>' + (t.task||'Cross-dept') + '</strong> (' + t.statText + ') ' + t.dir));
-
-      if (!lines.length) return;
-
-      document.getElementById('followUpDate').textContent = 'From ' + snap.date;
-      document.getElementById('followUpPreview').innerHTML = lines.slice(0,6).join('<br>') + (lines.length > 6 ? '<br><span style="color:#6A7E94">+ ' + (lines.length-6) + ' more…</span>' : '');
-      document.getElementById('followUpBanner').style.display = 'block';
-      document.getElementById('followUpBanner')._snap = snap;
-    } catch(e) { /* ignore corrupt data */ }
-  }
-
-  function dismissFollowUp() {
-    document.getElementById('followUpBanner').style.display = 'none';
-  }
-
-  // ── LOAD FOLLOW-UP INTO TODAY'S FORM ─────────────────
-  function loadFollowUp() {
-    const snap = document.getElementById('followUpBanner')._snap;
-    if (!snap) return;
-
-    const pNames = ['louis','yasin','lucas'];
-    const eisOrder = ['doFirst','schedule','delegate','eliminate'];
-
-    pNames.forEach(p => {
-      const block = document.getElementById('blockers-' + p).closest('.person-block');
-      const cells = block.querySelectorAll('.eis-cell textarea');
-
-      // Load Eisenhower — prefix with "↩ Carry:" to mark it as carried over
-      eisOrder.forEach((key, i) => {
-        const val = snap.persons[p]?.eisenhower[key] || '';
-        if (val && cells[i]) {
-          cells[i].value = cells[i].value
-            ? cells[i].value
-            : '↩ ' + val;
-        }
-      });
-
-      // Load unresolved blockers
-      const blockerWrap = document.getElementById('blockers-' + p);
-      (snap.persons[p]?.blockers || []).forEach(b => {
-        const row = document.createElement('div');
-        row.className = 'blocker-row';
-        row.style.borderColor = '#C9A84C';
-        row.innerHTML = `
-          <span class="blocker-icon">↩</span>
-          <textarea class="blocker-input" rows="2" style="color:#B06000;">${b}</textarea>
-          <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;color:#BBB;font-size:16px;padding:0 0 0 8px;align-self:flex-start;">×</button>
-        `;
-        blockerWrap.appendChild(row);
-      });
-    });
-
-    // Load pending/blocked cross-dept tasks
-    snap.crossTasks
-      .filter(t => t.stat !== 'done')
-      .forEach(t => {
-        const tbody = document.getElementById('crossBody');
-        const tr = document.createElement('tr');
-        tr.style.background = 'rgba(201,168,76,.05)';
-        tr.innerHTML = `
-          <td><input type="text" value="${t.task}" placeholder="Task name…"></td>
-          <td><input type="text" value="↩ ${t.desc}" placeholder="What needs to happen…"></td>
-          <td>
-            <select>
-              <option value="">Select…</option>
-              ${['Louis → Yasin','Louis → Lucas','Yasin → Louis','Yasin → Lucas','Lucas → Louis','Lucas → Yasin','VUC → VWC','VWC → VUC']
-                .map(o => `<option${o===t.dir?' selected':''}>${o}</option>`).join('')}
-            </select>
-          </td>
-          <td>
-            <select>
-              <option value="pending"${t.stat==='pending'?' selected':''}>⏳ Pending</option>
-              <option value="inprogress"${t.stat==='inprogress'?' selected':''}>🔄 In Progress</option>
-              <option value="done">✅ Done</option>
-              <option value="blocked"${t.stat==='blocked'?' selected':''}>🚫 Blocked</option>
-            </select>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-    document.getElementById('followUpBanner').style.display = 'none';
-
-    // Scroll to top so user sees loaded data
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 300);
   }
 
   // ── CLOSE ─────────────────────────────────────────────
   function closeMeeting(){
-    if(confirm('Close this Daily Meeting? This will save a follow-up JSON and make sure all blockers are logged in Jira.')){
-      // Save snapshot first
-      const snap = buildSnapshot();
-      saveSnapshot(snap);
-
-      // Lock the form
+    if(confirm('Close this Daily Meeting? Make sure all blockers are logged in Jira.')){
       document.querySelectorAll('textarea, input[type=text]').forEach(el => el.disabled = true);
       document.querySelectorAll('select').forEach(el => el.disabled = true);
       document.querySelectorAll('.add-btn').forEach(el => el.style.display = 'none');
-      document.querySelector('.btn-close').textContent = 'Meeting Closed ✓  — JSON saved';
+      document.querySelector('.btn-close').textContent = 'Meeting Closed ✓';
       document.querySelector('.btn-close').style.background = '#1E7A4A';
-      document.getElementById('exportBtn').style.display = 'none';
       clearInterval(interval);
       running = false;
     }
   }
 
+
+  // ── OBJECTIVES REFERENCE ─────────────────────────────
+  let vucObjectives = [];
+
+  // ── IMPORT MODAL: load Weekly Priority Stack or Previous Daily JSON ──
+  let _importMode = null;  // 'weekly' or 'daily'
+
+  function openImportModal(mode){
+    _importMode = mode;
+    const title = document.getElementById('importModalTitle');
+    const sub = document.getElementById('importModalSub');
+    const hint = document.getElementById('importModalHint');
+    const input = document.getElementById('importJsonInput');
+    input.value = '';
+
+    if(mode === 'weekly'){
+      title.textContent = 'Import Weekly Priority Stack';
+      sub.textContent = 'Loads VUC objectives + carryover tasks';
+      hint.innerHTML = '<b>Where to get it:</b> Open VUC Weekly Priority Stack (Monday meeting) → click "Export JSON" → paste here. This loads the VUC objectives for the week so you can link tasks to them.';
+      hint.style.display = 'block';
+    } else {
+      title.textContent = 'Import Previous Daily';
+      sub.textContent = 'Loads Today\'s Priorities, Eisenhower tasks, blockers';
+      hint.innerHTML = '<b>Where to get it:</b> Open the previous daily meeting (last Tuesday, Wednesday, or Thursday) → click "Export PDF" gives you a copy on paper. To get JSON, open that daily in browser, then in console run: <code>localStorage.getItem("vuc_daily_YYYY-MM-DD")</code>. Or use the daily\'s native export if available. This will save under today\'s date.';
+      hint.style.display = 'block';
+    }
+
+    document.getElementById('importModal').classList.add('show');
+    setTimeout(() => input.focus(), 100);
+  }
+
+  function closeImportModal(){
+    document.getElementById('importModal').classList.remove('show');
+    _importMode = null;
+  }
+
+  function confirmImport(){
+    const raw = document.getElementById('importJsonInput').value.trim();
+    if(!raw){
+      alert('Paste JSON content first');
+      return;
+    }
+    try {
+      const data = JSON.parse(raw);
+      if(_importMode === 'weekly'){
+        importWeeklyPriorityStack(data);
+      } else {
+        importPreviousDaily(data);
+      }
+      closeImportModal();
+    } catch(e){
+      alert('Invalid JSON: ' + e.message);
+    }
+  }
+
+  function importWeeklyPriorityStack(data){
+    // The weekly priority stack JSON should have an "objectives" array
+    if(!data.objectives || !Array.isArray(data.objectives)){
+      alert('No objectives found in JSON. Make sure you exported from the Weekly Priority Stack.');
+      return;
+    }
+
+    // Adopt VUC objectives — same as the old loader did
+    vucObjectives = data.objectives.map(o => {
+      const avgPct = o.krs && o.krs.length
+        ? Math.round(o.krs.reduce((s,k) => s + (k.pct||0), 0) / o.krs.length)
+        : (o.pct || 0);
+      const status = avgPct >= 60 ? 'on-track' : avgPct >= 30 ? 'at-risk' : 'behind';
+      const dept = o.vertical === 'p' ? 'products'
+                 : o.vertical === 's' ? 'services'
+                 : o.vertical === 'f' ? 'future'
+                 : (o.department || 'company');
+      return {
+        id: o.id,
+        title: o.title,
+        department: dept,
+        pct: avgPct,
+        status,
+        // Keep original fields for Friday review
+        vertical: o.vertical,
+        owners: o.owners,
+        project: o.project
+      };
+    });
+
+    // Save the full priority stack data so Friday Review can read it
+    try {
+      localStorage.setItem('vuc_priority_stack', JSON.stringify(data));
+    } catch(e){ console.warn('Failed to save priority stack:', e); }
+
+    renderObjectives();
+
+    let msg = '✅ Loaded ' + vucObjectives.length + ' VUC objectives.';
+    if(data.tasks && Array.isArray(data.tasks)){
+      msg += '\n' + data.tasks.length + ' carryover tasks available (will appear in Friday Review).';
+    }
+    alert(msg);
+  }
+
+  function importPreviousDaily(data){
+    // Expect the daily JSON structure: persons{}, crossDept[], objectives[]
+    if(!data.persons){
+      alert('JSON does not look like a daily meeting export.\n(Missing "persons" field)');
+      return;
+    }
+
+    // Override: save under TODAY's date key so it becomes today's daily
+    try {
+      const todayKey = getTodayKey();
+      // Re-stamp the date but keep the data
+      const stamped = Object.assign({}, data, { date: new Date().toISOString() });
+      localStorage.setItem(todayKey, JSON.stringify(stamped));
+    } catch(e){ console.warn('Failed to save:', e); }
+
+    // Apply state to UI (this will populate Today's Priorities & Eisenhower)
+    applyState(data, false);
+
+    let summary = '✅ Daily imported. Saved as today (' + getTodayKey().replace('vuc_daily_','') + ').\n\n';
+    let totalTasks = 0;
+    let totalBlockers = 0;
+    Object.keys(data.persons).forEach(p => {
+      const pdata = data.persons[p];
+      if(pdata.eisenhower){
+        ['q1','q2','q3','q4'].forEach(q => {
+          totalTasks += (pdata.eisenhower[q] || []).length;
+        });
+      }
+      totalBlockers += (pdata.blockers || []).length;
+    });
+    summary += totalTasks + ' Eisenhower tasks loaded\n';
+    summary += totalBlockers + ' blockers loaded';
+    alert(summary);
+  }
+
+
+  function renderObjectives(){
+    const list = document.getElementById('objList');
+    if(!vucObjectives.length){
+      list.innerHTML = '<div class="obj-panel-empty">No objectives loaded yet. Import the JSON exported from the Monday Priority Stack to align today\'s tasks.</div>';
+      return;
+    }
+    let html = '';
+    const deptLabel = { products:'Products', services:'Services', future:'Future', company:'Company' };
+    const statusLabel = { 'on-track':'On track', 'at-risk':'At risk', behind:'Behind' };
+    vucObjectives.forEach(o => {
+      html += '<div class="obj-line ' + o.status + '">' +
+              '<span class="obj-line-dept ' + o.department + '">' + (deptLabel[o.department] || 'VUC') + '</span>' +
+              '<span class="obj-line-title" title="' + escapeAttr(o.title) + '">' + escapeHtml(o.title) + '</span>' +
+              '<span class="obj-line-pct">' + o.pct + '%</span>' +
+              '<span class="obj-line-status ' + o.status + '">' + statusLabel[o.status] + '</span>' +
+              '</div>';
+    });
+    list.innerHTML = html;
+  }
+
+  function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function escapeAttr(s){ return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+  // ── EISENHOWER TASK SYSTEM WITH LINKING ─────────────────
+  let _eisTid = 0;
+  let _currentLinkTarget = null; // { person, quad, tid }
+  let _pendingLinkId = null;
+
+  function addEisTask(person, quad){
+    _eisTid++;
+    const tid = 'et' + _eisTid;
+    const wrap = document.getElementById('eis-' + person + '-' + quad);
+    const row = document.createElement('div');
+    row.className = 'eis-task-line unlinked';
+    row.id = tid;
+    row.dataset.linkedTo = '';
+    row.innerHTML =
+      '<button class="eis-task-check" onclick="toggleEisDone(\'' + tid + '\',\'' + person + '\',\'' + quad + '\')" title="Mark as done"></button>' +
+      '<textarea class="eis-task-input" placeholder="Task..." rows="1" oninput="autoGrow(this)"></textarea>' +
+      '<button class="eis-link-btn" onclick="openLinkModal(\'' + person + '\',\'' + quad + '\',\'' + tid + '\')">Link...</button>' +
+      '<button class="eis-task-del" onclick="removeEisTask(\'' + tid + '\',\'' + person + '\',\'' + quad + '\')">×</button>';
+    wrap.appendChild(row);
+    refreshQuadWarning(person, quad);
+    debouncedSave();
+  }
+
+  function autoGrow(el){
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  function removeEisTask(tid, person, quad){
+    const el = document.getElementById(tid);
+    if(el) el.remove();
+    refreshQuadWarning(person, quad);
+  }
+
+  function refreshQuadWarning(person, quad){
+    const wrap = document.getElementById('eis-' + person + '-' + quad);
+    if(!wrap) return;
+    const cell = wrap.closest('.eis-cell');
+    if(!cell) return;
+    const hasUnlinked = wrap.querySelectorAll('.eis-task-line.unlinked .eis-task-input').length > 0 &&
+                       Array.from(wrap.querySelectorAll('.eis-task-line.unlinked .eis-task-input')).some(t => t.value.trim());
+    cell.classList.toggle('has-unlinked', hasUnlinked && vucObjectives.length > 0);
+  }
+
+  function openLinkModal(person, quad, tid){
+    if(!vucObjectives.length){
+      alert('Load VUC objectives first (Import from Monday JSON, or Load sample).');
+      return;
+    }
+    _currentLinkTarget = { person, quad, tid };
+    const row = document.getElementById(tid);
+    _pendingLinkId = row ? (row.dataset.linkedTo || null) : null;
+    const taskText = row ? row.querySelector('.eis-task-input').value.trim() : '';
+    document.getElementById('linkModalSub').textContent = taskText
+      ? 'Task: "' + taskText + '"'
+      : 'Which VUC objective does this task contribute to?';
+
+    const deptLabel = { products:'Products', services:'Services', future:'Future', company:'Company' };
+    let html = '';
+    vucObjectives.forEach(o => {
+      const sel = (_pendingLinkId === o.id) ? ' selected' : '';
+      html += '<div class="link-modal-opt' + sel + '" data-oid="' + o.id + '" onclick="selectLinkOpt(\'' + o.id + '\')">' +
+              '<span class="obj-line-dept ' + o.department + '" style="flex-shrink:0">' + (deptLabel[o.department] || 'VUC') + '</span>' +
+              '<span class="link-modal-opt-text">' + escapeHtml(o.title) + '</span>' +
+              '<span class="obj-line-pct" style="font-size:12px">' + o.pct + '%</span>' +
+              '</div>';
+    });
+    document.getElementById('linkModalList').innerHTML = html;
+    document.getElementById('linkModal').classList.add('show');
+  }
+
+  function selectLinkOpt(oid){
+    _pendingLinkId = oid;
+    document.querySelectorAll('#linkModalList .link-modal-opt').forEach(el => {
+      el.classList.toggle('selected', el.dataset.oid === oid);
+    });
+  }
+
+  function confirmTaskLink(){
+    if(!_currentLinkTarget) return;
+    const { person, quad, tid } = _currentLinkTarget;
+    const row = document.getElementById(tid);
+    if(!row){ closeLinkModal(); return; }
+    if(_pendingLinkId){
+      const obj = vucObjectives.find(o => o.id === _pendingLinkId);
+      if(obj){
+        row.dataset.linkedTo = obj.id;
+        row.classList.remove('unlinked');
+        row.classList.add('linked');
+        const btn = row.querySelector('.eis-link-btn');
+        btn.textContent = '✓ ' + obj.title.substring(0,18) + (obj.title.length > 18 ? '...' : '');
+        btn.title = 'Linked to: ' + obj.title;
+        btn.classList.add('linked-active');
+      }
+    }
+    refreshQuadWarning(person, quad);
+    closeLinkModal();
+  }
+
+  function clearTaskLink(){
+    if(!_currentLinkTarget) return;
+    const { person, quad, tid } = _currentLinkTarget;
+    const row = document.getElementById(tid);
+    if(row){
+      row.dataset.linkedTo = '';
+      row.classList.remove('linked');
+      row.classList.add('unlinked');
+      const btn = row.querySelector('.eis-link-btn');
+      btn.textContent = 'Link...';
+      btn.title = '';
+      btn.classList.remove('linked-active');
+    }
+    refreshQuadWarning(person, quad);
+    closeLinkModal();
+  }
+
+  function closeLinkModal(){
+    document.getElementById('linkModal').classList.remove('show');
+    _currentLinkTarget = null;
+    _pendingLinkId = null;
+  }
+
+  // close modal on overlay click
+  document.getElementById('linkModal').addEventListener('click', function(e){
+    if(e.target === this) closeLinkModal();
+  });
+
+  // Refresh warnings as users type
+  document.addEventListener('input', function(e){
+    if(e.target.classList && e.target.classList.contains('eis-task-input')){
+      const row = e.target.closest('.eis-task-line');
+      if(!row) return;
+      const wrap = row.closest('.eis-task-list');
+      if(!wrap) return;
+      refreshQuadWarning(wrap.dataset.person, wrap.dataset.quad);
+    }
+  });
+
+
+
+  // ═══════════════════════════════════════════════════════
+  // PERSISTENT STORAGE (localStorage)
+  // ═══════════════════════════════════════════════════════
+  const STORAGE_PREFIX = 'vuc_';
+  let _saveDebounce = null;
+
+  function getTodayKey(){
+    const d = new Date();
+    return STORAGE_PREFIX + 'daily_' + d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  }
+
+  function getYesterdayKey(){
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    // Skip Sunday (Monday has no daily, weekly instead)
+    if(d.getDay() === 0){
+      // Sunday - go back to Friday
+      d.setDate(d.getDate() - 2);
+    }
+    return STORAGE_PREFIX + 'daily_' + d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  }
+
+  function collectDailyState(){
+    const state = {
+      date: new Date().toISOString(),
+      objectives: vucObjectives,
+      persons: {},
+      crossDept: []
+    };
+
+    ['louis','yasin','lucas'].forEach(p => {
+      state.persons[p] = { eisenhower: { q1:[], q2:[], q3:[], q4:[] }, blockers: [] };
+      ['q1','q2','q3','q4'].forEach(q => {
+        const wrap = document.getElementById('eis-' + p + '-' + q);
+        if(!wrap) return;
+        wrap.querySelectorAll('.eis-task-line').forEach(row => {
+          const input = row.querySelector('.eis-task-input');
+          if(!input || !input.value.trim()) return;
+          state.persons[p].eisenhower[q].push({
+            text: input.value.trim(),
+            linkedTo: row.dataset.linkedTo || '',
+            done: row.classList.contains('done') || false
+          });
+        });
+      });
+      const bwrap = document.getElementById('blockers-' + p);
+      if(bwrap){
+        bwrap.querySelectorAll('.blocker-row').forEach(row => {
+          const inp = row.querySelector('input');
+          if(inp && inp.value.trim()) state.persons[p].blockers.push(inp.value.trim());
+        });
+      }
+    });
+
+    const crossBody = document.getElementById('crossBody');
+    if(crossBody){
+      crossBody.querySelectorAll('tr').forEach(tr => {
+        const inputs = tr.querySelectorAll('input,select,textarea');
+        const row = Array.from(inputs).map(i => i.value);
+        if(row.some(v => v && v.trim())) state.crossDept.push(row);
+      });
+    }
+
+    return state;
+  }
+
+  function saveDailyState(){
+    try {
+      const state = collectDailyState();
+      localStorage.setItem(getTodayKey(), JSON.stringify(state));
+      showSaveIndicator();
+    } catch(e){
+      console.warn('Save failed:', e);
+    }
+  }
+
+  function debouncedSave(){
+    clearTimeout(_saveDebounce);
+    _saveDebounce = setTimeout(saveDailyState, 400);
+  }
+
+  function showSaveIndicator(){
+    const el = document.getElementById('saveIndicator');
+    if(!el) return;
+    el.textContent = '✓ Saved';
+    el.style.opacity = '1';
+    clearTimeout(el._fadeTimer);
+    el._fadeTimer = setTimeout(() => { el.style.opacity = '0.5'; el.textContent = 'Auto-save on'; }, 1500);
+  }
+
+  function restoreDailyState(){
+    // First try today's state
+    const todayRaw = localStorage.getItem(getTodayKey());
+    if(todayRaw){
+      try {
+        const state = JSON.parse(todayRaw);
+        applyState(state, false);
+        return true;
+      } catch(e){ console.warn('Restore failed:', e); }
+    }
+
+    // No today state - pull objectives from Priority Stack (most recent)
+    const psRaw = localStorage.getItem(STORAGE_PREFIX + 'priority_stack');
+    if(psRaw){
+      try {
+        const ps = JSON.parse(psRaw);
+        if(ps.objectives && Array.isArray(ps.objectives)){
+          adoptObjectivesFromPriorityStack(ps.objectives);
+        }
+      } catch(e){}
+    }
+
+    // And show yesterday's open tasks as reminder
+    showYesterdayReminder();
+    return false;
+  }
+
+  function applyState(state, mergeMode){
+    // Restore objectives
+    if(state.objectives && Array.isArray(state.objectives)){
+      vucObjectives = state.objectives;
+      renderObjectives();
+    }
+
+    // Restore Eisenhower tasks per person
+    if(state.persons){
+      Object.keys(state.persons).forEach(p => {
+        const pdata = state.persons[p];
+        ['q1','q2','q3','q4'].forEach(q => {
+          const wrap = document.getElementById('eis-' + p + '-' + q);
+          if(!wrap) return;
+          if(!mergeMode) wrap.innerHTML = '';
+          (pdata.eisenhower && pdata.eisenhower[q] ? pdata.eisenhower[q] : []).forEach(task => {
+            addEisTaskRestored(p, q, task);
+          });
+        });
+
+        // Restore blockers
+        const bwrap = document.getElementById('blockers-' + p);
+        if(bwrap){
+          if(!mergeMode) bwrap.innerHTML = '';
+          (pdata.blockers || []).forEach(text => restoreBlocker(p, text));
+        }
+      });
+    }
+
+    // Restore cross-department
+    if(state.crossDept && state.crossDept.length){
+      const crossBody = document.getElementById('crossBody');
+      if(crossBody && !mergeMode){
+        // Clear all but template structure - actually just leave existing default rows
+        // and fill them in
+        state.crossDept.forEach((row, idx) => {
+          const trs = crossBody.querySelectorAll('tr');
+          let tr = trs[idx];
+          if(!tr){
+            // Need to add a row - call existing addCrossRow
+            if(typeof addCrossRow === 'function') addCrossRow();
+            const newTrs = crossBody.querySelectorAll('tr');
+            tr = newTrs[newTrs.length - 1];
+          }
+          if(tr){
+            const inputs = tr.querySelectorAll('input,select,textarea');
+            row.forEach((v, i) => { if(inputs[i]) inputs[i].value = v; });
+          }
+        });
+      }
+    }
+  }
+
+  function adoptObjectivesFromPriorityStack(rawObjectives){
+    vucObjectives = rawObjectives.map(o => {
+      const avgPct = o.krs && o.krs.length
+        ? Math.round(o.krs.reduce((s,k)=>s+(k.pct||0),0)/o.krs.length)
+        : (o.pct || 0);
+      const status = avgPct >= 60 ? 'on-track' : avgPct >= 30 ? 'at-risk' : 'behind';
+      const dept = o.vertical === 'p' ? 'products'
+                 : o.vertical === 's' ? 'services'
+                 : o.vertical === 'f' ? 'future'
+                 : (o.department || 'company');
+      return { id:o.id, title:o.title, department:dept, pct:avgPct, status };
+    });
+    renderObjectives();
+  }
+
+  function showYesterdayReminder(){
+    const yRaw = localStorage.getItem(getYesterdayKey());
+    if(!yRaw) return;
+    try {
+      const ystate = JSON.parse(yRaw);
+      if(!ystate.persons) return;
+
+      // Collect all incomplete Q1 (Do First) tasks from yesterday
+      const incomplete = [];
+      Object.keys(ystate.persons).forEach(p => {
+        const q1Tasks = (ystate.persons[p].eisenhower && ystate.persons[p].eisenhower.q1) || [];
+        q1Tasks.forEach(t => {
+          if(!t.done && t.text){
+            incomplete.push({ person: p, text: t.text, linkedTo: t.linkedTo });
+          }
+        });
+      });
+
+      if(incomplete.length === 0) return;
+
+      // Display the reminder banner
+      const banner = document.getElementById('yesterdayBanner');
+      if(!banner) return;
+      const list = document.getElementById('yesterdayList');
+      let html = '';
+      incomplete.forEach(t => {
+        const personName = t.person.charAt(0).toUpperCase() + t.person.slice(1);
+        html += '<div class="yesterday-item">' +
+                '<span class="yesterday-person ' + t.person + '">' + personName + '</span>' +
+                '<span class="yesterday-text">' + escapeHtml(t.text) + '</span>' +
+                '</div>';
+      });
+      list.innerHTML = html;
+      banner.style.display = 'block';
+    } catch(e){ console.warn('Yesterday reminder failed:', e); }
+  }
+
+  function dismissYesterdayBanner(){
+    document.getElementById('yesterdayBanner').style.display = 'none';
+  }
+
+  function addEisTaskRestored(person, quad, taskData){
+    _eisTid++;
+    const tid = 'et' + _eisTid;
+    const wrap = document.getElementById('eis-' + person + '-' + quad);
+    const row = document.createElement('div');
+    row.className = 'eis-task-line ' + (taskData.linkedTo ? 'linked' : 'unlinked') + (taskData.done ? ' done' : '');
+    row.id = tid;
+    row.dataset.linkedTo = taskData.linkedTo || '';
+
+    let linkLabel = 'Link...';
+    let linkClass = '';
+    if(taskData.linkedTo){
+      const obj = vucObjectives.find(o => o.id === taskData.linkedTo);
+      if(obj){
+        linkLabel = '✓ ' + obj.title.substring(0,18) + (obj.title.length > 18 ? '...' : '');
+        linkClass = ' linked-active';
+      }
+    }
+
+    row.innerHTML =
+      '<button class="eis-task-check" onclick="toggleEisDone(\'' + tid + '\',\'' + person + '\',\'' + quad + '\')" title="Mark as done">' + (taskData.done ? '✓' : '') + '</button>' +
+      '<textarea class="eis-task-input" placeholder="Task..." rows="1" oninput="autoGrow(this)">' + escapeAttr(taskData.text || '') + '</textarea>' +
+      '<button class="eis-link-btn' + linkClass + '" onclick="openLinkModal(\'' + person + '\',\'' + quad + '\',\'' + tid + '\')">' + linkLabel + '</button>' +
+      '<button class="eis-task-del" onclick="removeEisTask(\'' + tid + '\',\'' + person + '\',\'' + quad + '\')">×</button>';
+    wrap.appendChild(row);
+    // Auto-grow after insertion
+    setTimeout(() => {
+      const ta = row.querySelector('.eis-task-input');
+      if(ta) autoGrow(ta);
+    }, 0);
+    refreshQuadWarning(person, quad);
+  }
+
+  function toggleEisDone(tid, person, quad){
+    const row = document.getElementById(tid);
+    if(!row) return;
+    row.classList.toggle('done');
+    const isDone = row.classList.contains('done');
+    const checkBtn = row.querySelector('.eis-task-check');
+    if(checkBtn) checkBtn.textContent = isDone ? '✓' : '';
+    debouncedSave();
+  }
+
+  function restoreBlocker(person, text){
+    if(typeof addBlocker !== 'function') return;
+    addBlocker(person);
+    const wrap = document.getElementById('blockers-' + person);
+    if(!wrap) return;
+    const rows = wrap.querySelectorAll('.blocker-row');
+    const last = rows[rows.length - 1];
+    if(last){
+      const inp = last.querySelector('input');
+      if(inp) inp.value = text;
+    }
+  }
+
+  // Hook auto-save on all inputs
+  document.addEventListener('input', function(e){
+    if(e.target.matches('input, textarea, select')){
+      debouncedSave();
+    }
+  });
+  document.addEventListener('change', function(e){
+    if(e.target.matches('input, textarea, select')){
+      debouncedSave();
+    }
+  });
+
+  // Restore on load
+  window.addEventListener('load', function(){
+    restoreDailyState();
+  });
+
+
+
+  // ═══════════════════════════════════════════════════════
+  // FRIDAY REVIEW
+  // ═══════════════════════════════════════════════════════
+  let fridayReviewActive = false;
+  let fridayObjectiveStatuses = {}; // { objId: 'done'|'partial'|'missed' }
+
+  function toggleFridayReview(){
+    fridayReviewActive = !fridayReviewActive;
+    const btn = document.getElementById('fridayToggle');
+    const section = document.getElementById('fridaySection');
+    if(fridayReviewActive){
+      btn.classList.add('active');
+      section.classList.add('show');
+      buildFridayReview();
+      section.scrollIntoView({behavior:'smooth', block:'start'});
+    } else {
+      btn.classList.remove('active');
+      section.classList.remove('show');
+    }
+  }
+
+  function getThisWeekDailyKeys(){
+    // Build keys for Monday through Thursday of this current week
+    const today = new Date();
+    const todayDow = today.getDay();
+    const thisMonday = new Date(today.getTime());
+    thisMonday.setDate(thisMonday.getDate() + (todayDow === 0 ? -6 : 1 - todayDow));
+
+    const days = [];
+    // Tue=1, Wed=2, Thu=3, Fri=4 — we want lun-jue and today
+    for(let i=0; i<=4; i++){
+      const d = new Date(thisMonday.getTime());
+      d.setDate(d.getDate() + i);
+      const dayName = ['Mon','Tue','Wed','Thu','Fri'][i];
+      days.push({
+        key: 'vuc_daily_' + d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()),
+        label: dayName,
+        date: d
+      });
+    }
+    return days;
+  }
+
+  function buildFridayReview(){
+    // Build Block 1: VUC objectives from priority_stack localStorage
+    const psRaw = localStorage.getItem('vuc_priority_stack');
+    let objectives = [];
+    if(psRaw){
+      try {
+        const ps = JSON.parse(psRaw);
+        if(ps.objectives && Array.isArray(ps.objectives)){
+          objectives = ps.objectives;
+        }
+      } catch(e){ console.warn('Failed to load priority stack:', e); }
+    }
+
+    const fObjList = document.getElementById('fObjList');
+    if(!objectives.length){
+      fObjList.innerHTML = '<div class="friday-empty">No VUC objectives set this week. Set them in the Monday Priority Stack.</div>';
+      document.getElementById('fStatObj').textContent = '0';
+      document.getElementById('fStatObjDone').textContent = '0';
+      document.getElementById('fObjStats').textContent = '0 / 0';
+    } else {
+      let html = '';
+      const deptInfo = {
+        p: {label:'Products', cls:'products'},
+        s: {label:'Services', cls:'services'},
+        f: {label:'Future', cls:'future'}
+      };
+      objectives.forEach(o => {
+        if(!o.title || !o.title.trim()) return;
+        const dept = deptInfo[o.vertical] || {label:'VUC', cls:'company'};
+        const owner = (o.owners && o.owners[0]) || 'Louis';
+        const project = o.project || 'No project';
+        const currentStatus = fridayObjectiveStatuses[o.id] || '';
+
+        html += '<div class="friday-obj-row">';
+        html += '<span class="friday-obj-tag ' + dept.cls + '">' + dept.label + '</span>';
+        html += '<div class="friday-obj-text">' + escapeHtml(o.title) + '</div>';
+        html += '<div class="friday-obj-meta">' + owner + ' · ' + escapeHtml(project) + '</div>';
+        html += '<div class="friday-obj-status">';
+        html += '<button class="friday-status-btn done' + (currentStatus==='done'?' sel':'') + '" onclick="setObjStatus(\'' + o.id + '\',\'done\')">Done</button>';
+        html += '<button class="friday-status-btn partial' + (currentStatus==='partial'?' sel':'') + '" onclick="setObjStatus(\'' + o.id + '\',\'partial\')">Partial</button>';
+        html += '<button class="friday-status-btn missed' + (currentStatus==='missed'?' sel':'') + '" onclick="setObjStatus(\'' + o.id + '\',\'missed\')">Missed</button>';
+        html += '</div>';
+        html += '</div>';
+      });
+      fObjList.innerHTML = html || '<div class="friday-empty">No objectives with content yet.</div>';
+
+      // Stats
+      const doneCount = Object.values(fridayObjectiveStatuses).filter(s => s === 'done').length;
+      document.getElementById('fStatObj').textContent = objectives.length;
+      document.getElementById('fStatObjDone').textContent = doneCount;
+      document.getElementById('fObjStats').textContent = doneCount + ' / ' + objectives.length;
+    }
+
+    // Build Block 2: Q1+Q2 tasks from each daily this week
+    const dailyKeys = getThisWeekDailyKeys();
+    const allTasks = [];
+    dailyKeys.forEach(dk => {
+      const raw = localStorage.getItem(dk.key);
+      if(!raw) return;
+      try {
+        const ds = JSON.parse(raw);
+        if(!ds.persons) return;
+        Object.keys(ds.persons).forEach(person => {
+          const pdata = ds.persons[person];
+          if(!pdata.eisenhower) return;
+          ['q1','q2'].forEach(q => {
+            (pdata.eisenhower[q] || []).forEach(t => {
+              if(t.text && t.text.trim()){
+                allTasks.push({
+                  day: dk.label,
+                  person: person,
+                  quad: q,
+                  text: t.text,
+                  done: t.done === true
+                });
+              }
+            });
+          });
+        });
+      } catch(e){ console.warn('Failed to parse daily ' + dk.key + ':', e); }
+    });
+
+    const fTaskList = document.getElementById('fTaskList');
+    if(!allTasks.length){
+      fTaskList.innerHTML = '<div class="friday-empty">No Q1 / Q2 tasks logged this week yet.</div>';
+      document.getElementById('fStatTasks').textContent = '0';
+      document.getElementById('fStatTasksDone').textContent = '0';
+      document.getElementById('fTaskStats').textContent = '0 / 0';
+    } else {
+      let html = '';
+      // Order: Mon, Tue, Wed, Thu, Fri
+      const dayOrder = ['Mon','Tue','Wed','Thu','Fri'];
+      allTasks.sort((a,b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
+      allTasks.forEach(t => {
+        html += '<div class="daily-task-row">';
+        html += '<div class="daily-task-check' + (t.done?' done':'') + '">' + (t.done ? '✓' : '') + '</div>';
+        html += '<span class="daily-task-day">' + t.day + '</span>';
+        html += '<span class="daily-task-person ' + t.person + '">' + t.person.charAt(0).toUpperCase() + t.person.slice(1) + '</span>';
+        html += '<span class="friday-obj-tag" style="background:#f3f4f6;color:#666">' + t.quad.toUpperCase() + '</span>';
+        html += '<div class="daily-task-text' + (t.done?' done':'') + '">' + escapeHtml(t.text) + '</div>';
+        html += '</div>';
+      });
+      fTaskList.innerHTML = html;
+
+      const tDone = allTasks.filter(t => t.done).length;
+      document.getElementById('fStatTasks').textContent = allTasks.length;
+      document.getElementById('fStatTasksDone').textContent = tDone;
+      document.getElementById('fTaskStats').textContent = tDone + ' / ' + allTasks.length;
+      const tPct = allTasks.length ? Math.round((tDone / allTasks.length) * 100) : 0;
+      document.getElementById('fStatTasksPct').textContent = tPct + '%';
+    }
+
+    // ── % objectives stat (using fridayObjectiveStatuses) ──
+    const objDone = Object.values(fridayObjectiveStatuses).filter(s => s === 'done').length;
+    const objPartial = Object.values(fridayObjectiveStatuses).filter(s => s === 'partial').length;
+    // Count partial as 0.5
+    const objScore = (objDone + objPartial * 0.5);
+    const objPct = objectives.length ? Math.round((objScore / objectives.length) * 100) : 0;
+    document.getElementById('fStatObjPct').textContent = objPct + '%';
+
+    // ── Block: % by department ──
+    buildDeptCompletion(objectives);
+
+    // ── Block: Distribution by founder ──
+    buildFounderDistribution(allTasks);
+
+    // ── Block: Eisenhower drift ──
+    buildEisenhowerDrift(allTasks);
+
+    // ── Restore learnings textareas from localStorage ──
+    restoreLearnings();
+  }
+
+  function buildDeptCompletion(objectives){
+    const fDeptList = document.getElementById('fDeptList');
+    const fDeptStats = document.getElementById('fDeptStats');
+    if(!objectives.length){
+      fDeptList.innerHTML = '<div class="friday-empty">No objectives to evaluate.</div>';
+      fDeptStats.textContent = '—';
+      return;
+    }
+    const deptInfo = {
+      p: {label:'Products', cls:'products'},
+      s: {label:'Services', cls:'services'},
+      f: {label:'Future',   cls:'future'}
+    };
+    let html = '';
+    let overallScore = 0;
+    let overallTotal = 0;
+    Object.keys(deptInfo).forEach(k => {
+      const dept = deptInfo[k];
+      const deptObjs = objectives.filter(o => o.vertical === k && o.title && o.title.trim());
+      if(!deptObjs.length) return;
+      let score = 0;
+      let done = 0;
+      let partial = 0;
+      let missed = 0;
+      deptObjs.forEach(o => {
+        const s = fridayObjectiveStatuses[o.id] || '';
+        if(s === 'done'){ done++; score += 1; }
+        else if(s === 'partial'){ partial++; score += 0.5; }
+        else if(s === 'missed'){ missed++; }
+      });
+      const pct = Math.round((score / deptObjs.length) * 100);
+      overallScore += score;
+      overallTotal += deptObjs.length;
+
+      html += '<div class="dept-row">';
+      html += '<div class="dept-row-label ' + dept.cls + '">' + dept.label + '</div>';
+      html += '<div class="dept-row-bar-wrap"><div class="dept-row-bar ' + dept.cls + '" style="width:' + pct + '%"></div></div>';
+      html += '<div class="dept-row-count">' + done + 'D · ' + partial + 'P · ' + missed + 'M</div>';
+      html += '<div class="dept-row-pct">' + pct + '%</div>';
+      html += '</div>';
+    });
+    fDeptList.innerHTML = html || '<div class="friday-empty">No objectives in departments yet.</div>';
+    const overallPct = overallTotal ? Math.round((overallScore / overallTotal) * 100) : 0;
+    fDeptStats.textContent = 'Overall: ' + overallPct + '%';
+  }
+
+  function buildFounderDistribution(allTasks){
+    const fFounderList = document.getElementById('fFounderList');
+    const fFounderStats = document.getElementById('fFounderStats');
+    if(!allTasks.length){
+      fFounderList.innerHTML = '<div class="friday-empty">No tasks to distribute.</div>';
+      fFounderStats.textContent = '—';
+      return;
+    }
+    const founders = ['louis','yasin','lucas'];
+    const founderNames = {louis:'Louis', yasin:'Yasin', lucas:'Lucas'};
+    // Find the maximum count to scale bars
+    let maxCount = 0;
+    founders.forEach(f => {
+      const cnt = allTasks.filter(t => t.person === f).length;
+      if(cnt > maxCount) maxCount = cnt;
+    });
+    let html = '';
+    let bestPct = 0, bestName = '';
+    founders.forEach(f => {
+      const fTasks = allTasks.filter(t => t.person === f);
+      const done = fTasks.filter(t => t.done).length;
+      const total = fTasks.length;
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      const barWidth = maxCount ? Math.round((total / maxCount) * 100) : 0;
+      if(pct > bestPct && total > 0){ bestPct = pct; bestName = founderNames[f]; }
+
+      html += '<div class="founder-row">';
+      html += '<div class="founder-avatar ' + f + '">' + (f === 'lucas' ? 'Lc' : founderNames[f].charAt(0)) + '</div>';
+      html += '<div class="founder-name">' + founderNames[f] + '</div>';
+      html += '<div class="founder-bar-wrap"><div class="founder-bar ' + f + '" style="width:' + barWidth + '%"></div></div>';
+      html += '<div class="founder-stats">' + done + ' / ' + total + ' tasks done</div>';
+      html += '<div class="founder-pct">' + pct + '%</div>';
+      html += '</div>';
+    });
+    fFounderList.innerHTML = html;
+    fFounderStats.textContent = bestName ? 'Top: ' + bestName + ' (' + bestPct + '%)' : '—';
+  }
+
+  function buildEisenhowerDrift(allTasks){
+    const fDriftBody = document.getElementById('fDriftBody');
+    const fDriftLabel = document.getElementById('fDriftLabel');
+    if(!allTasks.length){
+      fDriftBody.innerHTML = '<div class="friday-empty">No tasks to analyze.</div>';
+      fDriftLabel.textContent = '—';
+      return;
+    }
+    const q1Count = allTasks.filter(t => t.quad === 'q1').length;
+    const q2Count = allTasks.filter(t => t.quad === 'q2').length;
+    const total = q1Count + q2Count;
+    const q1Pct = total ? Math.round((q1Count / total) * 100) : 0;
+    const q2Pct = 100 - q1Pct;
+
+    let verdictClass, verdictText;
+    if(q1Pct >= 70){
+      verdictClass = 'reactive';
+      verdictText = '🔥 <b>Reactive mode</b> — Most tasks were urgent. You\'re fighting fires, not building. Aim for more Q2 (Important but Not Urgent) next week.';
+    } else if(q1Pct >= 45){
+      verdictClass = 'balanced';
+      verdictText = '⚖️ <b>Balanced</b> — Healthy mix of urgent and strategic. Keep an eye on Q1 creep next week.';
+    } else {
+      verdictClass = 'strategic';
+      verdictText = '🎯 <b>Strategic mode</b> — Most focus was on important but non-urgent work. Excellent for building long-term value.';
+    }
+
+    let html = '<div class="drift-container">';
+    html += '<div class="drift-bar">';
+    if(q1Pct > 0) html += '<div class="drift-segment q1" style="width:' + q1Pct + '%">' + (q1Pct >= 8 ? 'Q1 · ' + q1Pct + '%' : '') + '</div>';
+    if(q2Pct > 0) html += '<div class="drift-segment q2" style="width:' + q2Pct + '%">' + (q2Pct >= 8 ? 'Q2 · ' + q2Pct + '%' : '') + '</div>';
+    html += '</div>';
+    html += '<div class="drift-legend"><span>Q1: Urgent + Important (' + q1Count + ')</span><span>Q2: Important, Not Urgent (' + q2Count + ')</span></div>';
+    html += '<div class="drift-verdict ' + verdictClass + '">' + verdictText + '</div>';
+    html += '</div>';
+    fDriftBody.innerHTML = html;
+    fDriftLabel.textContent = q1Pct + '% urgent · ' + q2Pct + '% strategic';
+  }
+
+  function getFridayKey(){
+    const today = new Date();
+    return 'vuc_friday_review_' + today.getFullYear() + '-' + pad(today.getMonth()+1) + '-' + pad(today.getDate());
+  }
+
+  function saveLearnings(){
+    try {
+      const fridayKey = getFridayKey();
+      const existing = localStorage.getItem(fridayKey);
+      let data = {};
+      if(existing){ try { data = JSON.parse(existing); } catch(e){} }
+      data.date = new Date().toISOString();
+      data.objectiveStatuses = fridayObjectiveStatuses;
+      data.learnings = {
+        learnings: document.getElementById('learn-learnings').value,
+        carryovers: document.getElementById('learn-carryovers').value,
+        blockers: document.getElementById('learn-blockers').value
+      };
+      localStorage.setItem(fridayKey, JSON.stringify(data));
+    } catch(e){}
+  }
+
+  function restoreLearnings(){
+    // Try today first, then go back up to 7 days
+    const today = new Date();
+    for(let i=0; i<7; i++){
+      const d = new Date(today.getTime());
+      d.setDate(d.getDate() - i);
+      const k = 'vuc_friday_review_' + d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+      const raw = localStorage.getItem(k);
+      if(raw){
+        try {
+          const data = JSON.parse(raw);
+          if(data.learnings){
+            const L = data.learnings;
+            const le = document.getElementById('learn-learnings');
+            const ce = document.getElementById('learn-carryovers');
+            const be = document.getElementById('learn-blockers');
+            if(le && L.learnings) le.value = L.learnings;
+            if(ce && L.carryovers) ce.value = L.carryovers;
+            if(be && L.blockers) be.value = L.blockers;
+            break;
+          }
+        } catch(e){}
+      }
+    }
+  }
+
+  // Auto-save learnings on input
+  document.addEventListener('input', function(e){
+    if(e.target && e.target.classList && e.target.classList.contains('learning-text')){
+      saveLearnings();
+    }
+  });
+
+  function exportFridayWrapup(){
+    // Build comprehensive summary
+    const psRaw = localStorage.getItem('vuc_priority_stack');
+    let objectives = [];
+    if(psRaw){
+      try {
+        const ps = JSON.parse(psRaw);
+        if(ps.objectives && Array.isArray(ps.objectives)) objectives = ps.objectives;
+      } catch(e){}
+    }
+
+    const dailyKeys = getThisWeekDailyKeys();
+    const allTasks = [];
+    dailyKeys.forEach(dk => {
+      const raw = localStorage.getItem(dk.key);
+      if(!raw) return;
+      try {
+        const ds = JSON.parse(raw);
+        if(!ds.persons) return;
+        Object.keys(ds.persons).forEach(person => {
+          const pdata = ds.persons[person];
+          if(!pdata.eisenhower) return;
+          ['q1','q2','q3','q4'].forEach(q => {
+            (pdata.eisenhower[q] || []).forEach(t => {
+              if(t.text && t.text.trim()){
+                allTasks.push({day:dk.label, person, quad:q, text:t.text, done:t.done === true, linkedTo:t.linkedTo || ''});
+              }
+            });
+          });
+        });
+      } catch(e){}
+    });
+
+    // Carryover items: incomplete Q1+Q2 tasks + missed/partial objectives
+    const carryoverTasks = allTasks.filter(t => (t.quad === 'q1' || t.quad === 'q2') && !t.done);
+    const missedObjectives = objectives.filter(o => {
+      const s = fridayObjectiveStatuses[o.id];
+      return s === 'missed' || s === 'partial';
+    });
+
+    const learnings = {
+      learnings: document.getElementById('learn-learnings').value,
+      carryovers: document.getElementById('learn-carryovers').value,
+      blockers: document.getElementById('learn-blockers').value
+    };
+
+    const summary = {
+      type: 'friday_wrapup',
+      exportedAt: new Date().toISOString(),
+      week: dailyKeys[0].date.toISOString().split('T')[0] + ' to ' + dailyKeys[4].date.toISOString().split('T')[0],
+      objectives: {
+        total: objectives.length,
+        done: Object.values(fridayObjectiveStatuses).filter(s => s === 'done').length,
+        partial: Object.values(fridayObjectiveStatuses).filter(s => s === 'partial').length,
+        missed: Object.values(fridayObjectiveStatuses).filter(s => s === 'missed').length,
+        details: objectives.map(o => ({
+          id: o.id,
+          title: o.title,
+          vertical: o.vertical,
+          owners: o.owners,
+          project: o.project,
+          status: fridayObjectiveStatuses[o.id] || 'unmarked'
+        }))
+      },
+      tasks: {
+        total: allTasks.length,
+        q1q2: allTasks.filter(t => t.quad === 'q1' || t.quad === 'q2').length,
+        q1q2Done: allTasks.filter(t => (t.quad === 'q1' || t.quad === 'q2') && t.done).length,
+        all: allTasks
+      },
+      carryover: {
+        tasks: carryoverTasks,
+        missedObjectives
+      },
+      learnings
+    };
+
+    const json = JSON.stringify(summary, null, 2);
+    // Copy to clipboard
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(json).then(() => {
+        alert('✅ Friday Wrap-up copied to clipboard.\n\n' +
+              objectives.length + ' objectives reviewed\n' +
+              allTasks.length + ' tasks logged this week\n' +
+              carryoverTasks.length + ' tasks to carry over to next Monday');
+      });
+    } else {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = json;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); alert('Wrap-up copied to clipboard'); } catch(e){ alert(json); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  function setObjStatus(objId, status){
+    if(fridayObjectiveStatuses[objId] === status){
+      delete fridayObjectiveStatuses[objId];
+    } else {
+      fridayObjectiveStatuses[objId] = status;
+    }
+    // Save into localStorage under a friday-review namespace (preserving learnings)
+    saveLearnings();
+    buildFridayReview();
+  }
+
+  // Restore previous Friday review statuses if any (within last 7 days)
+  function restoreFridayStatuses(){
+    const today = new Date();
+    for(let i=0; i<7; i++){
+      const d = new Date(today.getTime());
+      d.setDate(d.getDate() - i);
+      const k = 'vuc_friday_review_' + d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+      const raw = localStorage.getItem(k);
+      if(raw){
+        try {
+          const data = JSON.parse(raw);
+          if(data.objectiveStatuses){
+            fridayObjectiveStatuses = data.objectiveStatuses;
+            return;
+          }
+        } catch(e){}
+      }
+    }
+  }
+
+  restoreFridayStatuses();
+
   updateTimerUI();
-  checkFollowUp(); // check on load if yesterday's data exists
 </script>
 </body>
 </html>
