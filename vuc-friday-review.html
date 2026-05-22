@@ -378,9 +378,10 @@ body {
   transition: all .15s;
 }
 .obj-btn:hover { color: var(--navy); border-color: var(--navy); }
-.obj-btn.done.sel { background: var(--s-bg); color: var(--s-fg); border-color: var(--green); }
+.obj-btn.done.sel    { background: var(--s-bg); color: var(--s-fg); border-color: var(--green); }
+.obj-btn.review.sel  { background: #EDE9FE; color: #5B21B6; border-color: #5B21B6; }
 .obj-btn.partial.sel { background: #FEF3C7; color: var(--amber); border-color: var(--amber); }
-.obj-btn.missed.sel { background: #FEE2E2; color: var(--red); border-color: var(--red); }
+.obj-btn.missed.sel  { background: #FEE2E2; color: var(--red); border-color: var(--red); }
 
 /* ── PROJECT TASK ROWS ── */
 .proj-group {
@@ -1164,19 +1165,51 @@ function loadFromStorage(){
       Object.keys(ds.persons).forEach(function(person){
         var pdata = ds.persons[person];
         if(!pdata.eisenhower) return;
-        ['q1','q2','q3','q4'].forEach(function(q){
-          (pdata.eisenhower[q] || []).forEach(function(t){
-            if(t.text && t.text.trim()){
+        var ei = pdata.eisenhower;
+
+        // Format A: string-based (doFirst / schedule / delegate / eliminate)
+        var quadMapStr = {
+          doFirst:  'q1',
+          schedule: 'q2',
+          delegate: 'q3',
+          eliminate:'q4'
+        };
+        Object.keys(quadMapStr).forEach(function(key){
+          if(typeof ei[key] === 'string' && ei[key].trim()){
+            ei[key].split('\n').forEach(function(line){
+              line = line.trim();
+              if(!line) return;
+              var carry = line.indexOf('\u21a9') === 0;
+              var text = line.replace(/^[\u21a9\s]+/, '').trim();
+              if(!text) return;
               allTasks.push({
                 day: dk.label,
                 person: person,
-                quad: q,
-                text: t.text,
-                done: t.done === true,
-                linkedTo: t.linkedTo || ''
+                quad: quadMapStr[key],
+                text: text,
+                done: false,
+                carry: carry
               });
-            }
-          });
+            });
+          }
+        });
+
+        // Format B: array-based (q1 / q2 / q3 / q4 with {text, done} objects)
+        ['q1','q2','q3','q4'].forEach(function(q){
+          if(Array.isArray(ei[q])){
+            ei[q].forEach(function(t){
+              if(t.text && t.text.trim()){
+                allTasks.push({
+                  day: dk.label,
+                  person: person,
+                  quad: q,
+                  text: t.text,
+                  done: t.done === true,
+                  carry: t.carry === true
+                });
+              }
+            });
+          }
         });
       });
     } catch(e){ console.warn('Daily parse failed:', e); }
@@ -1281,6 +1314,8 @@ function renderProjectTasks(){
       var tid = (t.tid || pid + '-' + idx);
       var status = projTaskStatuses[tid] || '';
       if(status === 'done') doneCount++;
+      else if(status === 'review') doneCount += 0.75;
+      else if(status === 'partial') doneCount += 0.4;
       var owner = personMap[t.pk] || (t.pk || '—');
       var ownerCls = t.pk || '';
       html += '<div class="ptask-row">';
@@ -1292,9 +1327,10 @@ function renderProjectTasks(){
       html += '</div>';
       html += '</div>';
       html += '<div class="obj-actions">';
-      html += '<button class="obj-btn done' + (status === 'done' ? ' sel' : '') + '" data-ptid="' + esc(tid) + '" data-status="done">Done</button>';
+      html += '<button class="obj-btn done'    + (status === 'done'    ? ' sel' : '') + '" data-ptid="' + esc(tid) + '" data-status="done">Done</button>';
+      html += '<button class="obj-btn review'  + (status === 'review'  ? ' sel' : '') + '" data-ptid="' + esc(tid) + '" data-status="review">Review</button>';
       html += '<button class="obj-btn partial' + (status === 'partial' ? ' sel' : '') + '" data-ptid="' + esc(tid) + '" data-status="partial">Partial</button>';
-      html += '<button class="obj-btn missed' + (status === 'missed' ? ' sel' : '') + '" data-ptid="' + esc(tid) + '" data-status="missed">Missed</button>';
+      html += '<button class="obj-btn missed'  + (status === 'missed'  ? ' sel' : '') + '" data-ptid="' + esc(tid) + '" data-status="missed">Missed</button>';
       html += '</div>';
       html += '</div>';
     });
@@ -1306,19 +1342,21 @@ function renderProjectTasks(){
 
 function renderExecStats(){
   // VUC Objectives + Project Tasks combined for the headline objectives stat
-  var objDone = 0, objPartial = 0;
+  var objDone = 0, objReview = 0, objPartial = 0;
   Object.keys(objStatuses).forEach(function(k){
-    if(objStatuses[k] === 'done') objDone++;
+    if(objStatuses[k] === 'done')    objDone++;
+    else if(objStatuses[k] === 'review')  objReview++;
     else if(objStatuses[k] === 'partial') objPartial++;
   });
-  var ptDone = 0, ptPartial = 0;
+  var ptDone = 0, ptReview = 0, ptPartial = 0;
   Object.keys(projTaskStatuses).forEach(function(k){
-    if(projTaskStatuses[k] === 'done') ptDone++;
+    if(projTaskStatuses[k] === 'done')    ptDone++;
+    else if(projTaskStatuses[k] === 'review')  ptReview++;
     else if(projTaskStatuses[k] === 'partial') ptPartial++;
   });
   var totalCommitments = objectives.length + projectTasks.filter(function(t){return t.text && t.text.trim();}).length;
   var totalDone = objDone + ptDone;
-  var totalScore = (objDone + objPartial*0.5) + (ptDone + ptPartial*0.5);
+  var totalScore = (objDone + objReview*0.75 + objPartial*0.4) + (ptDone + ptReview*0.75 + ptPartial*0.4);
   var commitPct = totalCommitments ? Math.round(totalScore / totalCommitments * 100) : 0;
   document.getElementById('statObjTotal').textContent = totalCommitments;
   document.getElementById('statObjDone').textContent = totalDone + ' achieved';
@@ -1348,19 +1386,21 @@ function renderDepartments(){
     var objs = objectives.filter(function(o){ return o.vertical === d.key && o.title && o.title.trim(); });
     if(!objs.length) return;
     var done = 0, partial = 0, missed = 0;
+    var review = 0;
     objs.forEach(function(o){
       var s = objStatuses[o.id];
       if(s === 'done') done++;
+      else if(s === 'review') review++;
       else if(s === 'partial') partial++;
       else if(s === 'missed') missed++;
     });
-    var score = done + partial * 0.5;
+    var score = done + review*0.75 + partial*0.4;
     var pct = Math.round(score / objs.length * 100);
 
     html += '<div class="dept-row">';
     html += '<div class="dept-label ' + d.cls + '">' + d.label + '</div>';
     html += '<div class="dept-bar-wrap"><div class="dept-bar ' + d.cls + '" style="width:' + pct + '%"></div></div>';
-    html += '<div class="dept-count">' + done + ' done · ' + partial + ' partial · ' + missed + ' missed</div>';
+    html += '<div class="dept-count">' + done + ' done · ' + review + ' review · ' + partial + ' partial · ' + missed + ' missed</div>';
     html += '<div class="dept-pct">' + pct + '%</div>';
     html += '</div>';
   });
@@ -1393,15 +1433,17 @@ function renderObjectives(){
     html += '<div class="obj-meta"><b>' + esc(owner) + '</b> · ' + esc(project) + '</div>';
     html += '</div>';
     html += '<div class="obj-actions">';
-    html += '<button class="obj-btn done' + (status === 'done' ? ' sel' : '') + '" data-oid="' + o.id + '" data-status="done">Done</button>';
+    html += '<button class="obj-btn done'    + (status === 'done'    ? ' sel' : '') + '" data-oid="' + o.id + '" data-status="done">Done</button>';
+    html += '<button class="obj-btn review'  + (status === 'review'  ? ' sel' : '') + '" data-oid="' + o.id + '" data-status="review">Review</button>';
     html += '<button class="obj-btn partial' + (status === 'partial' ? ' sel' : '') + '" data-oid="' + o.id + '" data-status="partial">Partial</button>';
-    html += '<button class="obj-btn missed' + (status === 'missed' ? ' sel' : '') + '" data-oid="' + o.id + '" data-status="missed">Missed</button>';
+    html += '<button class="obj-btn missed'  + (status === 'missed'  ? ' sel' : '') + '" data-oid="' + o.id + '" data-status="missed">Missed</button>';
     html += '</div>';
     html += '</div>';
   });
   list.innerHTML = html || '<div class="empty">No objectives have content yet.</div>';
   var done = Object.keys(objStatuses).filter(function(k){ return objStatuses[k] === 'done'; }).length;
-  label.textContent = done + ' / ' + visibleObjs.length + ' done';
+  var review = Object.keys(objStatuses).filter(function(k){ return objStatuses[k] === 'review'; }).length;
+  label.textContent = done + ' done · ' + review + ' review · ' + visibleObjs.length + ' total';
 }
 
 function renderTasks(){
@@ -1611,9 +1653,15 @@ function confirmImport(){
     } else {
       var imported = 0;
       if(data.persons){
-        var todayKey = 'vuc_daily_' + (new Date().toISOString().slice(0,10));
-        localStorage.setItem(todayKey, JSON.stringify(data));
+        // Try to find the date from multiple possible fields in the daily JSON
+        var dailyDate = data.date || data.savedAt || data.weekDate || null;
+        if(dailyDate) dailyDate = dailyDate.slice(0,10);
+        // If no date field, ask user via the textarea hint or fall back to today
+        if(!dailyDate) dailyDate = new Date().toISOString().slice(0,10);
+        var dailyKey = 'vuc_daily_' + dailyDate;
+        localStorage.setItem(dailyKey, JSON.stringify(data));
         imported = 1;
+        alert('✓ Daily saved under ' + dailyDate + '. If this date looks wrong, check the JSON for a "date" field.');
       } else if(typeof data === 'object'){
         Object.keys(data).forEach(function(k){
           if(k.indexOf('vuc_daily_') === 0 || k === 'vuc_priority_stack'){
