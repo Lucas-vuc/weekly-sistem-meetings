@@ -382,77 +382,6 @@ body {
 .obj-btn.partial.sel { background: #FEF3C7; color: var(--amber); border-color: var(--amber); }
 .obj-btn.missed.sel { background: #FEE2E2; color: var(--red); border-color: var(--red); }
 
-/* ── PROJECT TASK ROWS ── */
-.proj-group {
-  border-bottom: 1px solid #f4f4f4;
-}
-.proj-group:last-child { border-bottom: none; }
-.proj-group-hdr {
-  padding: 10px 18px 8px;
-  background: #fafafa;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #f4f4f4;
-}
-.proj-tag {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--navy);
-  letter-spacing: .8px;
-  text-transform: uppercase;
-  padding: 3px 9px;
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-}
-.proj-count {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: .5px;
-}
-.ptask-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 14px;
-  align-items: center;
-  padding: 12px 18px;
-  border-bottom: 1px solid #f8f8f8;
-}
-.ptask-row:last-child { border-bottom: none; }
-.ptask-body { min-width: 0; }
-.ptask-text {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--navy);
-  line-height: 1.4;
-}
-.ptask-desc {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 3px;
-  line-height: 1.4;
-  font-style: italic;
-}
-.ptask-meta {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-top: 6px;
-}
-.ptask-carry {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--amber);
-  background: #FEF3C7;
-  padding: 2px 6px;
-  border-radius: 3px;
-  letter-spacing: .4px;
-}
-
 /* ── TASK ROWS ── */
 .task-toolbar {
   padding: 10px 18px;
@@ -868,6 +797,7 @@ body {
     <span class="topbar-date" id="topbarDate">—</span>
     <button class="btn-action" onclick="openImport('weekly')">Import Priority Stack</button>
     <button class="btn-action" onclick="openImport('daily')">Import Daily</button>
+    <button class="btn-action" onclick="resetAll()" style="border-color:#B03030;color:#B03030;">Reset</button>
     <button class="btn-action primary" onclick="window.print()">Print / PDF</button>
   </div>
 </div>
@@ -887,12 +817,12 @@ body {
   <div class="exec-stats">
     <div class="stat-card">
       <div class="stat-num" id="statObjTotal">0</div>
-      <div class="stat-label">Weekly Commitments</div>
+      <div class="stat-label">VUC Objectives</div>
       <div class="stat-sub" id="statObjDone">0 achieved</div>
     </div>
     <div class="stat-card highlight">
       <div class="stat-num" id="statObjPct">0%</div>
-      <div class="stat-label">Commitments complete</div>
+      <div class="stat-label">Objectives complete</div>
     </div>
     <div class="stat-card">
       <div class="stat-num" id="statTaskTotal">0</div>
@@ -935,26 +865,9 @@ body {
     </div>
   </div>
 
-  <!-- 03 PROJECT TASKS (from Priority Stack Tab 1) -->
+  <!-- 03 TASKS -->
   <div class="section-head">
     <span class="section-num">03</span>
-    <span class="section-title">Project Tasks &mdash; Top 5</span>
-    <span class="section-mins">4 MIN</span>
-  </div>
-  <div class="section-rule"></div>
-  <div class="block">
-    <div class="block-hdr">
-      <div class="block-title">📋 Weekly Project Commitments</div>
-      <div class="block-stat" id="projTaskStat">— / —</div>
-    </div>
-    <div class="block-body" id="projTaskList">
-      <div class="empty">No project tasks loaded. Import a Priority Stack.</div>
-    </div>
-  </div>
-
-  <!-- 04 DAILY TASKS -->
-  <div class="section-head">
-    <span class="section-num">04</span>
     <span class="section-title">Daily Q1 / Q2 Tasks This Week</span>
     <span class="section-mins">3 MIN</span>
   </div>
@@ -976,9 +889,9 @@ body {
     </div>
   </div>
 
-  <!-- 05 FOUNDER -->
+  <!-- 04 FOUNDER -->
   <div class="section-head">
-    <span class="section-num">05</span>
+    <span class="section-num">04</span>
     <span class="section-title">Distribution by Founder</span>
     <span class="section-mins">2 MIN</span>
   </div>
@@ -1006,9 +919,9 @@ body {
     </div>
   </div>
 
-  <!-- 06 DRIFT -->
+  <!-- 05 DRIFT -->
   <div class="section-head">
-    <span class="section-num">06</span>
+    <span class="section-num">05</span>
     <span class="section-title">Eisenhower Drift</span>
     <span class="section-mins">1 MIN</span>
   </div>
@@ -1023,9 +936,9 @@ body {
     </div>
   </div>
 
-  <!-- 07 LEARNINGS -->
+  <!-- 06 LEARNINGS -->
   <div class="section-head">
-    <span class="section-num">07</span>
+    <span class="section-num">06</span>
     <span class="section-title">Learnings &amp; Carryovers</span>
     <span class="section-mins">2 MIN</span>
   </div>
@@ -1082,10 +995,8 @@ body {
 // STATE
 // ════════════════════════════════════════════════════════════
 var objectives = [];
-var projectTasks = [];     // Tasks from Tab 1 of Priority Stack
-var allTasks = [];         // Q1/Q2 from dailies
+var allTasks = [];
 var objStatuses = {};
-var projTaskStatuses = {}; // Done/Partial/Missed for project tasks
 var importMode = null;
 var taskFilter = 'q12';
 
@@ -1130,7 +1041,6 @@ function loadFromStorage(){
     try {
       var ps = JSON.parse(psRaw);
       if(ps.objectives && Array.isArray(ps.objectives)) objectives = ps.objectives;
-      if(ps.tasks && Array.isArray(ps.tasks)) projectTasks = ps.tasks;
     } catch(e){ console.warn('Priority Stack parse failed:', e); }
   }
 
@@ -1177,7 +1087,6 @@ function restoreFridayState(){
     try {
       var data = JSON.parse(raw);
       if(data.objectiveStatuses) objStatuses = data.objectiveStatuses;
-      if(data.projTaskStatuses) projTaskStatuses = data.projTaskStatuses;
       if(data.learnings){
         if(data.learnings.learnings) document.getElementById('learnLearnings').value = data.learnings.learnings;
         if(data.learnings.carryovers) document.getElementById('learnCarryovers').value = data.learnings.carryovers;
@@ -1194,7 +1103,6 @@ function saveFridayState(){
     localStorage.setItem(key, JSON.stringify({
       date: new Date().toISOString(),
       objectiveStatuses: objStatuses,
-      projTaskStatuses: projTaskStatuses,
       learnings: {
         learnings: document.getElementById('learnLearnings').value,
         carryovers: document.getElementById('learnCarryovers').value,
@@ -1212,98 +1120,22 @@ function render(){
   renderExecStats();
   renderDepartments();
   renderObjectives();
-  renderProjectTasks();
   renderTasks();
   renderFounders();
   renderDrift();
 }
 
-function renderProjectTasks(){
-  var list = document.getElementById('projTaskList');
-  var label = document.getElementById('projTaskStat');
-
-  // Filter only tasks with actual text
-  var visible = projectTasks.filter(function(t){ return t.text && t.text.trim(); });
-
-  if(!visible.length){
-    list.innerHTML = '<div class="empty">No project tasks loaded. Import a Priority Stack.</div>';
-    label.textContent = '— / —';
-    return;
-  }
-
-  // Map project IDs to readable names
-  var projMap = {
-    p1: {name:'SOL',                 cls:'sol'},
-    p2: {name:'VWC Ghana',           cls:'vwc'},
-    p3: {name:'Golden Camel Mining', cls:'gcm'},
-    p4: {name:'Xperience Space',     cls:'xsp'},
-    p5: {name:'IT/Software',         cls:'its'}
-  };
-  var personMap = {louis:'Louis', yasin:'Yasin', lucas:'Lucas'};
-
-  // Group by project
-  var byProject = {};
-  visible.forEach(function(t){
-    var pid = t.pi || 'other';
-    if(!byProject[pid]) byProject[pid] = [];
-    byProject[pid].push(t);
-  });
-
-  var html = '';
-  var doneCount = 0;
-  var totalCount = visible.length;
-
-  Object.keys(byProject).forEach(function(pid){
-    var pinfo = projMap[pid] || {name:'Other', cls:'other'};
-    var tasks = byProject[pid];
-    html += '<div class="proj-group">';
-    html += '<div class="proj-group-hdr"><span class="proj-tag">' + pinfo.name + '</span><span class="proj-count">' + tasks.length + ' task' + (tasks.length !== 1 ? 's' : '') + '</span></div>';
-    tasks.forEach(function(t, idx){
-      var tid = (t.tid || pid + '-' + idx);
-      var status = projTaskStatuses[tid] || '';
-      if(status === 'done') doneCount++;
-      var owner = personMap[t.pk] || (t.pk || '—');
-      var ownerCls = t.pk || '';
-      html += '<div class="ptask-row">';
-      html += '<div class="ptask-body">';
-      html += '<div class="ptask-text">' + esc(t.text) + '</div>';
-      if(t.desc) html += '<div class="ptask-desc">' + esc(t.desc) + '</div>';
-      html += '<div class="ptask-meta"><span class="task-person ' + ownerCls + '">' + owner + '</span>';
-      if(t.carry) html += '<span class="ptask-carry">↻ carried</span>';
-      html += '</div>';
-      html += '</div>';
-      html += '<div class="obj-actions">';
-      html += '<button class="obj-btn done' + (status === 'done' ? ' sel' : '') + '" data-ptid="' + esc(tid) + '" data-status="done">Done</button>';
-      html += '<button class="obj-btn partial' + (status === 'partial' ? ' sel' : '') + '" data-ptid="' + esc(tid) + '" data-status="partial">Partial</button>';
-      html += '<button class="obj-btn missed' + (status === 'missed' ? ' sel' : '') + '" data-ptid="' + esc(tid) + '" data-status="missed">Missed</button>';
-      html += '</div>';
-      html += '</div>';
-    });
-    html += '</div>';
-  });
-  list.innerHTML = html;
-  label.textContent = doneCount + ' / ' + totalCount + ' done';
-}
-
 function renderExecStats(){
-  // VUC Objectives + Project Tasks combined for the headline objectives stat
-  var objDone = 0, objPartial = 0;
+  var done = 0, partial = 0;
   Object.keys(objStatuses).forEach(function(k){
-    if(objStatuses[k] === 'done') objDone++;
-    else if(objStatuses[k] === 'partial') objPartial++;
+    if(objStatuses[k] === 'done') done++;
+    else if(objStatuses[k] === 'partial') partial++;
   });
-  var ptDone = 0, ptPartial = 0;
-  Object.keys(projTaskStatuses).forEach(function(k){
-    if(projTaskStatuses[k] === 'done') ptDone++;
-    else if(projTaskStatuses[k] === 'partial') ptPartial++;
-  });
-  var totalCommitments = objectives.length + projectTasks.filter(function(t){return t.text && t.text.trim();}).length;
-  var totalDone = objDone + ptDone;
-  var totalScore = (objDone + objPartial*0.5) + (ptDone + ptPartial*0.5);
-  var commitPct = totalCommitments ? Math.round(totalScore / totalCommitments * 100) : 0;
-  document.getElementById('statObjTotal').textContent = totalCommitments;
-  document.getElementById('statObjDone').textContent = totalDone + ' achieved';
-  document.getElementById('statObjPct').textContent = commitPct + '%';
+  var score = done + partial * 0.5;
+  var objPct = objectives.length ? Math.round(score / objectives.length * 100) : 0;
+  document.getElementById('statObjTotal').textContent = objectives.length;
+  document.getElementById('statObjDone').textContent = done + ' achieved';
+  document.getElementById('statObjPct').textContent = objPct + '%';
 
   var q12 = allTasks.filter(function(t){ return t.quad === 'q1' || t.quad === 'q2'; });
   var q12Done = q12.filter(function(t){ return t.done; }).length;
@@ -1502,28 +1334,9 @@ function setObjStatusByEl(btn){
 
 document.addEventListener('click', function(e){
   if(e.target.classList && e.target.classList.contains('obj-btn')){
-    // Check if it's a project task button or an objective button
-    var ptid = e.target.getAttribute('data-ptid');
-    if(ptid){
-      setProjTaskStatusByEl(e.target);
-    } else {
-      setObjStatusByEl(e.target);
-    }
+    setObjStatusByEl(e.target);
   }
 });
-
-function setProjTaskStatusByEl(btn){
-  var tid = btn.getAttribute('data-ptid');
-  var status = btn.getAttribute('data-status');
-  if(!tid || !status) return;
-  if(projTaskStatuses[tid] === status){
-    delete projTaskStatuses[tid];
-  } else {
-    projTaskStatuses[tid] = status;
-  }
-  saveFridayState();
-  render();
-}
 
 document.addEventListener('input', function(e){
   if(e.target.classList && e.target.classList.contains('learning-area')){
@@ -1629,20 +1442,6 @@ function exportWrapup(){
         };
       })
     },
-    projectTasks: {
-      total: projectTasks.length,
-      done: Object.keys(projTaskStatuses).filter(function(k){return projTaskStatuses[k]==='done';}).length,
-      partial: Object.keys(projTaskStatuses).filter(function(k){return projTaskStatuses[k]==='partial';}).length,
-      missed: Object.keys(projTaskStatuses).filter(function(k){return projTaskStatuses[k]==='missed';}).length,
-      details: projectTasks.map(function(t, idx){
-        var tid = t.tid || (t.pi + '-' + idx);
-        return {
-          tid: tid, text: t.text, desc: t.desc,
-          project: t.pi, owner: t.pk, carry: t.carry,
-          status: projTaskStatuses[tid] || 'unmarked'
-        };
-      })
-    },
     tasks: {
       total: allTasks.length,
       q1q2: allTasks.filter(function(t){ return t.quad === 'q1' || t.quad === 'q2'; }).length,
@@ -1662,8 +1461,7 @@ function exportWrapup(){
     navigator.clipboard.writeText(json).then(function(){
       alert('✓ Wrap-up copied to clipboard.\n\n' +
             objectives.length + ' objectives reviewed\n' +
-            projectTasks.length + ' project tasks reviewed\n' +
-            allTasks.length + ' daily tasks this week\n' +
+            allTasks.length + ' tasks this week\n' +
             carryoverTasks.length + ' tasks to carry to Monday');
     }).catch(function(){
       fallbackCopy(json);
@@ -1689,6 +1487,15 @@ function fallbackCopy(json){
 function esc(s){
   if(!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ════════════════════════════════════════════════════════════
+// RESET
+// ════════════════════════════════════════════════════════════
+function resetAll(){
+  if(!confirm('Reset all data? This cannot be undone.')) return;
+  Object.keys(localStorage).filter(k=>k.startsWith('vuc')).forEach(k=>localStorage.removeItem(k));
+  location.reload();
 }
 
 // ════════════════════════════════════════════════════════════
