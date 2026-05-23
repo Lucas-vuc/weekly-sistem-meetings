@@ -1497,15 +1497,40 @@ function setFilter(f, btn){
 function renderFounders(){
   var founders = ['louis','yasin','lucas'];
   var elNames = {louis:'Louis', yasin:'Yasin', lucas:'Lucas'};
+  var q12Tasks = allTasks.filter(function(t){ return t.quad === 'q1' || t.quad === 'q2'; });
+  var totalAll = q12Tasks.length;
+  // Check if any task has done=true — if not, show load distribution instead
+  var hasDoneState = allTasks.some(function(t){ return t.done === true; });
+
   founders.forEach(function(f){
-    var tasks = allTasks.filter(function(t){ return t.person === f; });
-    var done = tasks.filter(function(t){ return t.done; }).length;
+    var tasks = q12Tasks.filter(function(t){ return t.person === f; });
     var total = tasks.length;
-    var pct = total ? Math.round(done / total * 100) : 0;
     var name = elNames[f];
-    document.getElementById('founder' + name + 'Pct').textContent = total ? pct + '%' : '—';
-    document.getElementById('founder' + name + 'Bar').style.width = pct + '%';
-    document.getElementById('founder' + name + 'Det').textContent = total ? done + ' of ' + total + ' tasks' : 'no data';
+    var pctEl  = document.getElementById('founder' + name + 'Pct');
+    var barEl  = document.getElementById('founder' + name + 'Bar');
+    var detEl  = document.getElementById('founder' + name + 'Det');
+
+    if(total === 0){
+      pctEl.textContent = '—';
+      barEl.style.width = '0%';
+      detEl.textContent = 'no data';
+      return;
+    }
+
+    if(hasDoneState){
+      // Show completion %
+      var done = tasks.filter(function(t){ return t.done; }).length;
+      var pct = Math.round(done / total * 100);
+      pctEl.textContent = pct + '%';
+      barEl.style.width = pct + '%';
+      detEl.textContent = done + ' of ' + total + ' done';
+    } else {
+      // Show workload distribution %
+      var loadPct = totalAll ? Math.round(total / totalAll * 100) : 0;
+      pctEl.textContent = total;
+      barEl.style.width = loadPct + '%';
+      detEl.textContent = loadPct + '% of workload · ' + total + ' tasks';
+    }
   });
 }
 
