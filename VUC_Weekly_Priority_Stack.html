@@ -724,8 +724,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
   <div class="hint"><b>Rule:</b> You cannot open this week without reviewing last week. Every task committed must be marked Done, Partial, or Missed.</div>
 
   <div class="import-box">
-    <div class="import-title">Import last week's tasks</div>
-    <div class="import-desc">Paste the Summary JSON from last week's PDF (click "Export JSON" on the Summary tab to generate it), or start fresh if this is the first meeting.</div>
+    <div class="import-title">Import last week's data</div>
+    <div class="import-desc">Paste the <b>Friday Wrap-up JSON</b> (from the Friday Review → Export Wrap-up) to auto-load carryovers, objectives, and blockers. Or paste a previous Priority Stack JSON. Start fresh if this is the first meeting.</div>
     <textarea id="import-json" style="width:100%;border:1px solid #93C5FD;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;min-height:60px;display:none" placeholder="Paste JSON here..."></textarea>
     <div style="margin-top:8px">
       <button class="import-btn" onclick="togImport()">Paste JSON</button>
@@ -734,6 +734,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
     </div>
     <div class="import-info" id="import-info"></div>
   </div>
+
+  <div id="friday-context-box" style="display:none;background:#FFFEF7;border:1px solid #C49A6C;border-left:4px solid #C49A6C;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:#6B5634;line-height:1.6"></div>
 
   <div class="rev-panel" id="rev-panel" style="display:none">
     <div class="rev-title">Last week's commitments &mdash; what happened?</div>
@@ -923,18 +925,128 @@ function loadJSON(){
   if(!raw){alert('Paste JSON first');return;}
   try{
     var data=JSON.parse(raw);
-    if(!data.tasks||!Array.isArray(data.tasks))throw new Error('Invalid format');
+
+    // ── FRIDAY WRAP-UP format (type: 'friday_wrapup') ──
+    if(data.type==='friday_wrapup'){
+      loadFridayWrapup(data);
+      return;
+    }
+
+    // ── PRIORITY STACK format (type: 'weekly_priority_stack') ──
+    if(!data.tasks||!Array.isArray(data.tasks))throw new Error('Invalid format — expected tasks array or friday_wrapup type');
     previousWeek=data;
     if(data.objectives&&Array.isArray(data.objectives)){
       vucObjectives=data.objectives;
       vucObjectives.forEach(function(o){o.open=false;});
     }
     showReview();
-    showInfo('&#10003; Loaded '+data.tasks.length+' tasks from '+(data.week||'last week')+(data.objectives?' &middot; '+data.objectives.length+' VUC objectives loaded':''));
+    showInfo('&#10003; Loaded '+data.tasks.length+' tasks from '+(data.week||'last week')+(data.objectives?' &middot; '+data.objectives.length+' VUC objectives':''));
   }catch(e){
     alert('JSON invalid: '+e.message);
   }
 }
+
+function loadFridayWrapup(data){
+  // ── 1. Build previousWeek from the wrap-up so the review panel shows project tasks ──
+  var weeklyTasks=[];
+  if(data.tasks&&data.tasks.all&&Array.isArray(data.tasks.all)){
+    // Daily tasks (Q1/Q2 from dailies) — skip, not project commitments
+  }
+  if(data.projectTasks&&data.projectTasks.details&&Array.isArray(data.projectTasks.details)){
+    data.projectTasks.details.forEach(function(t){
+      if(t.text&&t.text.trim()){
+        weeklyTasks.push({
+          text: t.text,
+          pi:   t.project||'p1',
+          pk:   t.owner||'louis',
+          pn:   t.project||'p1',
+          pc:   t.owner||'louis'
+        });
+      }
+    });
+  }
+  previousWeek={tasks:weeklyTasks, week:data.week||'Last week', type:'friday_wrapup'};
+
+  // ── 2. Pre-load carryover tasks (missed + partial project tasks) ──
+  carryover=[];
+  if(data.carryover&&data.carryover.tasks&&Array.isArray(data.carryover.tasks)){
+    data.carryover.tasks.forEach(function(t){
+      if(t.text&&t.text.trim()){
+        carryover.push({
+          text:t.text,
+          pi:t.pi||t.project||'p1',
+          pk:t.pk||t.person||t.owner||'louis',
+          pn:t.pi||t.project||'p1',
+          pc:t.pk||t.person||t.owner||'louis',
+          fromStatus:'missed'
+        });
+      }
+    });
+  }
+  // Also add project tasks marked partial/missed directly
+  if(data.projectTasks&&data.projectTasks.details){
+    data.projectTasks.details.forEach(function(t){
+      var alreadyIn=carryover.some(function(c){return c.text===t.text;});
+      if(!alreadyIn&&(t.status==='missed'||t.status==='partial'||t.status==='review')&&t.text&&t.text.trim()){
+        carryover.push({
+          text:t.text,
+          pi:t.project||'p1',
+          pk:t.owner||'louis',
+          pn:t.project||'p1',
+          pc:t.owner||'louis',
+          fromStatus:t.status
+        });
+      }
+    });
+  }
+
+  // ── 3. Load VUC objectives (carry missed/partial, reset done ones) ──
+  if(data.objectives&&data.objectives.details&&Array.isArray(data.objectives.details)){
+    vucObjectives=data.objectives.details.map(function(o){
+      return {
+        id:o.id, title:o.title, vertical:o.vertical,
+        owners:o.owners, project:o.project,
+        fromStatus:o.status,
+        open:false
+      };
+    });
+  }
+
+  // ── 4. Pre-fill blockers from Friday learnings ──
+  if(data.learnings){
+    var bSection=document.getElementById('blockers-list');
+    if(bSection&&data.learnings.blockers&&data.learnings.blockers.trim()){
+      // Store for later render
+      window._fridayBlockers=data.learnings.blockers;
+    }
+    if(data.learnings.carryovers&&data.learnings.carryovers.trim()){
+      window._fridayCarryovers=data.learnings.carryovers;
+    }
+  }
+
+  // ── 5. Show review panel only if there are project tasks to review ──
+  if(weeklyTasks.length>0){
+    showReview();
+    showInfo('&#10003; Friday Wrap-up loaded &mdash; '+weeklyTasks.length+' project commitments to review &middot; '+carryover.length+' auto-carryovers &middot; '+(vucObjectives.length)+' objectives');
+  } else {
+    // No project tasks in wrap-up — skip review, go straight to tasks
+    reviewConfirmed=true;
+    renderP();
+    sw('tasks',document.querySelectorAll('.nav button')[1]);
+    showInfo('&#10003; Friday Wrap-up loaded &mdash; '+carryover.length+' carryover tasks &middot; '+vucObjectives.length+' objectives pre-loaded');
+  }
+
+  // ── 6. Show Friday context banner ──
+  var ctx='';
+  if(data.learnings&&data.learnings.learnings) ctx+='<b>Last week\'s learning:</b> '+escH(data.learnings.learnings.slice(0,180))+(data.learnings.learnings.length>180?'…':'')+'<br>';
+  if(data.learnings&&data.learnings.carryovers) ctx+='<b>Carryovers noted:</b> '+escH(data.learnings.carryovers.slice(0,180))+(data.learnings.carryovers.length>180?'…':'');
+  if(ctx){
+    var box=document.getElementById('friday-context-box');
+    if(box){box.innerHTML=ctx;box.style.display='block';}
+  }
+}
+
+function escH(s){ return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''; }
 
 function startFresh(){
   previousWeek={tasks:[],week:'No previous data'};
@@ -973,6 +1085,7 @@ function showReview(){
         html+='<button class="rev-btn done" onclick="setRevStatus(this,\'done\',\''+rid+'\')">Done</button>';
         html+='<button class="rev-btn partial" onclick="setRevStatus(this,\'partial\',\''+rid+'\')">Partial</button>';
         html+='<button class="rev-btn missed" onclick="setRevStatus(this,\'missed\',\''+rid+'\')">Missed</button>';
+        html+='<button class="rev-btn" style="background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb;margin-left:4px;padding:2px 7px" onclick="removeRevTask(this)" title="Remove this task from review">✕</button>';
         html+='</div></div>';
       });
     }
@@ -988,6 +1101,15 @@ function setRevStatus(btn,status,rid){
   btn.classList.add('sel');
   btn.closest('.rev-task-line').setAttribute('data-status',status);
   updateRevSummary();
+}
+
+function removeRevTask(btn){
+  var line=btn.closest('.rev-task-line');
+  if(line){
+    line.style.transition='opacity .2s';
+    line.style.opacity='0';
+    setTimeout(function(){ line.remove(); updateRevSummary(); }, 200);
+  }
 }
 
 function updateRevSummary(){

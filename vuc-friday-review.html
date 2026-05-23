@@ -1053,7 +1053,10 @@ body {
     <div class="export-hint">
       <b style="color:#fff">Export the wrap-up</b> · Save the week as a JSON. Paste it into next Monday's Priority Stack to load carryovers automatically.
     </div>
-    <button class="btn-export-big" onclick="exportWrapup()">📦 Export Friday Wrap-up</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-export-big" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)" onclick="resetReview()">Reset Review</button>
+      <button class="btn-export-big" onclick="exportWrapup()">📦 Export Friday Wrap-up</button>
+    </div>
   </div>
 
 </div>
@@ -1784,6 +1787,18 @@ function exportWrapup(){
   } else {
     fallbackCopy(json);
   }
+}
+
+function resetReview(){
+  if(!confirm('Reset all statuses and learnings for this week? This cannot be undone.')) return;
+  objStatuses = {};
+  projTaskStatuses = {};
+  document.getElementById('learnLearnings').value = '';
+  document.getElementById('learnCarryovers').value = '';
+  document.getElementById('learnBlockers').value = '';
+  var key = getFridayKey();
+  localStorage.removeItem(key);
+  render();
 }
 
 function fallbackCopy(json){
