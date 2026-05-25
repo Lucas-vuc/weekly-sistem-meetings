@@ -288,6 +288,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .dept-hdr.products{background:linear-gradient(90deg,#DBEAFE 0%,#EFF6FF 100%)}
 .dept-hdr.services{background:linear-gradient(90deg,#DCFCE7 0%,#F0FDF4 100%)}
 .dept-hdr.future{background:linear-gradient(90deg,#EDE9FE 0%,#F5F3FF 100%)}
+.dept-hdr.company{background:linear-gradient(90deg,#FFFEF7 0%,#FEF9EC 100%);border-top:2px solid #C49A6C}
 .dept-name{
   font-size:13px;
   font-weight:700;
@@ -297,6 +298,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .dept-hdr.products .dept-name{color:#1E40AF}
 .dept-hdr.services .dept-name{color:#15803D}
 .dept-hdr.future .dept-name{color:#5B21B6}
+.dept-hdr.company .dept-name{color:#92400E}
 .dept-stats{
   font-size:11px;
   font-family:monospace;
@@ -306,6 +308,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .dept-hdr.products .dept-stats{color:#1E40AF}
 .dept-hdr.services .dept-stats{color:#15803D}
 .dept-hdr.future .dept-stats{color:#5B21B6}
+.dept-hdr.company .dept-stats{color:#92400E}
 .owner-group{
   border-bottom:1px solid #f0f0f0;
 }
@@ -815,7 +818,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 <!-- TAB 3: EISENHOWER -->
 <div class="tab" id="tab-eis">
   <div class="sl">Drag each task to the right quadrant</div>
-  <div class="hint"><b>Q1:</b> Do this week, no excuses. <b>Q2:</b> Schedule a specific time. <b>Q3:</b> Delegate. <b>Q4:</b> Remove (you'll be asked why). <b>Q1 limit:</b> 4 tasks per person — more turns red as a warning.</div>
+  <div class="hint"><b>Q1:</b> Do this week, no excuses. <b>Q2:</b> Schedule a specific time. <b>Q3:</b> Coordinate. <b>Q4:</b> Remove (you'll be asked why). <b>Q1 limit:</b> 4 tasks per person — more turns red as a warning.</div>
 
   <div class="inbox" id="inbox">
     <div class="inbox-label">Unsorted tasks &mdash; drag to a quadrant below</div>
@@ -833,7 +836,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
       <div class="eis-tasks" id="q2t"></div>
     </div>
     <div class="eis-q q3" id="q3" ondragover="dO(event)" ondragleave="dL(event)" ondrop="dD(event,'q3')">
-      <div class="eis-label q3-l">Q3: Delegate <span class="eis-sub">&mdash; urgent, not important</span><span class="eis-count" id="q3c">0</span></div>
+      <div class="eis-label q3-l">Q3: Coordinate <span class="eis-sub">&mdash; urgent, not important</span><span class="eis-count" id="q3c">0</span></div>
       <div class="eis-tasks" id="q3t"></div>
     </div>
     <div class="eis-q q4" id="q4" ondragover="dO(event)" ondragleave="dL(event)" ondrop="dD(event,'q4')">
@@ -852,7 +855,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 <div class="tab" id="tab-sum">
   <div class="sl">Weekly commitments by person &mdash; share with the team</div>
   <div id="sum-content"></div>
-  <div class="footer"><b>After this meeting:</b> each person adds their Q1 and Q2 tasks to their personal Jira board with the project prefix in brackets (e.g. [SOL] Deliver budget). Q3 tasks get delegated. Q4 tasks don&rsquo;t enter Jira but the reasons are recorded here.</div>
+  <div class="footer"><b>After this meeting:</b> each person adds their Q1 and Q2 tasks to their personal Jira board with the project prefix in brackets (e.g. [SOL] Deliver budget). Q3 tasks get coordinated. Q4 tasks don&rsquo;t enter Jira but the reasons are recorded here.</div>
   <div class="btn-row">
     <button class="btn btn-s" onclick="sw('eis',document.querySelectorAll('.nav button')[3])">&larr; Back</button>
     <button class="btn btn-p" onclick="window.print()">Print / PDF</button>
@@ -1075,7 +1078,7 @@ function showReview(){
     } else {
       pTasks.forEach(function(t,i){
         var rid='rev-'+pe.key+'-'+i;
-        var qLabels={q1:'Q1: do first',q2:'Q2: schedule',q3:'Q3: delegate',q4:'Q4: skipped'};
+        var qLabels={q1:'Q1: do first',q2:'Q2: schedule',q3:'Q3: coordinate',q4:'Q4: skipped'};
         var qCls={q1:'qb1',q2:'qb2',q3:'qb3',q4:'qb4'};
         html+='<div class="rev-task-line" data-rid="'+rid+'" data-task="'+encodeURIComponent(JSON.stringify(t))+'">';
         html+='<span class="q-badge '+(qCls[t.q]||'qb4')+'">'+(qLabels[t.q]||t.q||'?')+'</span>';
@@ -1471,7 +1474,7 @@ document.getElementById('inbox').addEventListener('drop',function(e){
 
 // ===== SUMMARY =====
 function buildSummary(){
-  var ql={q1:'Do first',q2:'Schedule',q3:'Delegate',q4:"Don't do"};
+  var ql={q1:'Do first',q2:'Schedule',q3:'Coordinate',q4:"Don't do"};
   var qc={q1:'#7F1D1D',q2:'#1E40AF',q3:'#78350F',q4:'#999'};
   var h='';
 
@@ -1658,10 +1661,10 @@ var _void = 0;
 var _vkid = 0;
 
 var VOBJ_VERTS = [
-  {v:'p',l:'Products',cls:'ovt-p'},
-  {v:'s',l:'Services',cls:'ovt-s'},
-  {v:'f',l:'Future',cls:'ovt-f'},
-  {v:'co',l:'Company-wide',cls:'ovt-co'}
+  {v:'p', l:'Products',    cls:'ovt-p'},
+  {v:'s', l:'Services',    cls:'ovt-s'},
+  {v:'f', l:'Future',      cls:'ovt-f'},
+  {v:'c', l:'VUC General', cls:'ovt-co'}
 ];
 var VOBJ_HORIZONS = [
   {h:'30',l:'30 Days',cls:'oht-30'},
@@ -1743,17 +1746,23 @@ function renderObj(){
 
   // Show "Company-wide" objectives (no specific dept) only if any exist
   var companyObjs = filtered.filter(function(o){return o.vertical !== 'p' && o.vertical !== 's' && o.vertical !== 'f';});
+  h += '<div class="dept-group">';
+  h += '<div class="dept-hdr company">';
+  h += '<div class="dept-name">VUC General</div>';
+  h += '<div class="dept-stats">';
   if(companyObjs.length > 0){
-    h += '<div class="dept-group">';
-    h += '<div class="dept-hdr" style="background:linear-gradient(90deg,#F3F4F6 0%,#FAFAFA 100%)">';
-    h += '<div class="dept-name" style="color:#555">Company-wide</div>';
-    h += '<div class="dept-stats" style="color:#666">'+companyObjs.length+' objective'+(companyObjs.length!==1?'s':'')+'</div>';
-    h += '</div>';
-    companyObjs.forEach(function(o){
-      h += objCardHTML(o, objIndex++);
-    });
-    h += '</div>';
+    h += companyObjs.length + ' objective' + (companyObjs.length !== 1 ? 's' : '');
+  } else {
+    h += '<span style="opacity:.6">No objectives yet</span>';
   }
+  h += '</div></div>';
+  companyObjs.forEach(function(o){
+    h += objCardHTML(o, objIndex++);
+  });
+  h += '<div class="dept-add-row" onclick="addObj(\'c\')">';
+  h += '+ Add objective to VUC General';
+  h += '</div>';
+  h += '</div>';
 
   list.innerHTML = h;
   addSlot.innerHTML = ''; // No longer needed - add buttons are inside each dept
