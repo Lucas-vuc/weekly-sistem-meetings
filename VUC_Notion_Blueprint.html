@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VUC OS — Notion Blueprint v4</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafbfc;
+    --surface: #ffffff;
+    --surface-2: #f6f8fa;
+    --border: #d8dee4;
+    --border-strong: #afb8c1;
+    --text: #0d1117;
+    --text-2: #57606a;
+    --text-3: #8b949e;
+    --sidebar: #0f1620;
+    --sidebar-2: #1a2332;
+    --sidebar-text: #c9d1d9;
+    --sidebar-muted: #6e7681;
+    --sidebar-active: #1f2937;
+    --accent: #b8860b;
+    --accent-soft: rgba(184,134,11,0.1);
+    --success: #1a7f37;
+    --success-bg: #dafbe1;
+    --warning: #9a6700;
+    --warning-bg: #fff8c5;
+    --danger: #cf222e;
+    --danger-bg: #ffebe9;
+    --info: #0969da;
+    --info-bg: #ddf4ff;
+    --neutral: #57606a;
+    --neutral-bg: #eaeef2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+  .app { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 248px;
+    background: var(--sidebar);
+    color: var(--sidebar-text);
+    border-right: 1px solid #000;
+    overflow-y: auto;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    flex-shrink: 0;
+    padding-bottom: 24px;
+  }
+  .sidebar::-webkit-scrollbar { width: 6px; }
+  .sidebar::-webkit-scrollbar-thumb { background: #2d333b; border-radius: 3px; }
+  .ws-header {
+    padding: 18px 16px 14px;
+    border-bottom: 1px solid #1f2937;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ws-mark {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--accent) 0%, #8b6914 100%);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 13px;
+    letter-spacing: -0.5px;
+  }
+  .ws-title { font-size: 13px; font-weight: 600; color: #fff; line-height: 1.2; }
+  .ws-sub { font-size: 10px; color: var(--sidebar-muted); margin-top: 2px; letter-spacing: 0.3px; text-transform: uppercase; }
+  .sb-group { margin-top: 14px; }
+  .sb-label {
+    padding: 6px 16px 4px;
+    font-size: 10px;
+    color: var(--sidebar-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+  }
+  .sb-item {
+    padding: 6px 16px 6px 20px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--sidebar-text);
+    font-size: 13px;
+    border-left: 2px solid transparent;
+    transition: background 0.08s;
+  }
+  .sb-item:hover { background: var(--sidebar-2); }
+  .sb-item.active { background: var(--sidebar-active); border-left-color: var(--accent); color: #fff; font-weight: 500; }
+  .sb-icon { width: 14px; text-align: center; flex-shrink: 0; opacity: 0.7; font-size: 12px; }
+  .sb-item.active .sb-icon { opacity: 1; }
+  .sb-item.archived { opacity: 0.45; font-style: italic; }
+  .sb-pin {
+    display: inline-block;
+    margin-left: auto;
+    width: 5px; height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    max-width: calc(100vw - 248px);
+  }
+  .page {
+    display: none;
+    padding: 32px 48px 96px;
+    max-width: 1280px;
+  }
+  .page.active { display: block; }
+
+  .breadcrumb {
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .page-title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 20px;
+  }
+  .page-meta {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    padding: 10px 0 12px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin: 0 0 24px;
+    font-size: 12px;
+    color: var(--text-2);
+  }
+  .page-meta .meta-label { color: var(--text-3); text-transform: uppercase; letter-spacing: 0.6px; font-size: 10px; font-weight: 600; margin-right: 6px; }
+
+  h2.section {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-3);
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3.sub {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 18px 0 8px;
+  }
+  p { color: var(--text); margin-bottom: 8px; }
+  p.muted { color: var(--text-2); font-size: 12px; }
+
+  /* TABLES */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 8px 0 16px;
+  }
+  .panel-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    flex-wrap: wrap;
+  }
+  .panel-head .title { font-size: 12px; font-weight: 600; color: var(--text); }
+  .panel-head .filter {
+    font-size: 11px; color: var(--text-2);
+    padding: 2px 8px; background: var(--neutral-bg); border-radius: 10px;
+  }
+  .panel-head .actions { margin-left: auto; display: flex; gap: 6px; }
+  .tabs { display: flex; gap: 0; }
+  .tab {
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--text-2);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .tab.active { background: var(--surface); color: var(--text); font-weight: 500; border: 1px solid var(--border); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  thead th {
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 500;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 10.5px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--surface-2);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--surface-2); }
+  td.num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; text-align: right; }
+
+  /* STATUS DOTS + PILLS */
+  .dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .dot.green { background: var(--success); }
+  .dot.yellow { background: var(--warning); }
+  .dot.red { background: var(--danger); }
+  .dot.blue { background: var(--info); }
+  .dot.gray { background: var(--neutral); }
+
+  .tag {
+    display: inline-flex; align-items: center;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.6;
+    border: 1px solid transparent;
+  }
+  .tag-success { background: var(--success-bg); color: var(--success); }
+  .tag-warning { background: var(--warning-bg); color: var(--warning); }
+  .tag-danger { background: var(--danger-bg); color: var(--danger); }
+  .tag-info { background: var(--info-bg); color: var(--info); }
+  .tag-neutral { background: var(--neutral-bg); color: var(--neutral); }
+  .tag-accent { background: var(--accent-soft); color: var(--accent); border-color: rgba(184,134,11,0.2); }
+
+  .person {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; color: var(--text);
+  }
+  .avatar {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    color: white;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .avatar.lucas { background: #1f6feb; }
+  .avatar.yasin { background: #bf3989; }
+  .avatar.louis { background: #1a7f37; }
+  .avatar.emmanuel { background: #9a6700; }
+
+  /* CALLOUTS */
+  .callout {
+    display: flex; gap: 12px;
+    padding: 12px 14px;
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    border-radius: 4px;
+    margin: 12px 0;
+    border: 1px solid var(--border);
+    border-left-width: 3px;
+    border-left-color: var(--accent);
+    font-size: 12.5px;
+  }
+  .callout.info { border-left-color: var(--info); }
+  .callout.success { border-left-color: var(--success); }
+  .callout.warning { border-left-color: var(--warning); }
+  .callout.danger { border-left-color: var(--danger); }
+  .callout-icon { font-size: 14px; opacity: 0.75; flex-shrink: 0; padding-top: 2px; }
+
+  /* KPI WIDGETS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 8px 0 20px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    position: relative;
+  }
+  .kpi-label {
+    font-size: 10.5px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+  .kpi-meta {
+    font-size: 11px;
+    color: var(--text-2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .kpi-target { color: var(--text-3); }
+  .delta-up { color: var(--success); font-weight: 500; }
+  .delta-down { color: var(--danger); font-weight: 500; }
+  .delta-flat { color: var(--text-3); }
+
+  /* CHARTS */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 8px 0 16px;
+  }
+  .chart-card h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* SECTION GRID */
+  .row { display: grid; gap: 14px; margin: 12px 0; }
+  .row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .row.cols-2-1 { grid-template-columns: 2fr 1fr; }
+
+  /* KANBAN */
+  .kanban {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 8px 0 16px;
+  }
+  .kb-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 10px;
+    min-height: 180px;
+  }
+  .kb-col.q1 { border-top-color: var(--danger); }
+  .kb-col.q2 { border-top-color: var(--warning); }
+  .kb-col.q3 { border-top-color: var(--info); }
+  .kb-col.q4 { border-top-color: var(--neutral); }
+  .kb-col h4 {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .kb-card {
+    background: var(--surface-2);
+    border-radius: 3px;
+    padding: 7px 9px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+  }
+  .kb-card .meta {
+    display: flex; gap: 5px; margin-top: 5px;
+    align-items: center; flex-wrap: wrap;
+  }
+
+  /* PORTFOLIO MATRIX */
+  .matrix-grid {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow-x: auto;
+  }
+  .qkill-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin: 8px 0;
+  }
+  .qkill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+    font-size: 11px;
+  }
+  .qkill .q-label { color: var(--text-3); margin-bottom: 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .qkill .q-text { font-weight: 600; color: var(--text); font-size: 12px; }
+
+  .decision-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .d-disregard { background: #f3f4f6; color: #6b7280; }
+  .d-park { background: var(--neutral-bg); color: var(--neutral); }
+  .d-queue { background: var(--info-bg); color: var(--info); }
+  .d-pursue { background: var(--success-bg); color: var(--success); }
+  .d-execute { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+
+  .score-bar {
+    display: inline-block;
+    width: 80px;
+    height: 6px;
+    background: var(--neutral-bg);
+    border-radius: 3px;
+    overflow: hidden;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .score-bar-fill {
+    height: 100%;
+    background: var(--accent);
+  }
+
+  /* DETAILS / COLLAPSIBLES */
+  details {
+    border-bottom: 1px solid var(--border);
+  }
+  details:last-child { border-bottom: none; }
+  details summary {
+    cursor: pointer;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: var(--text);
+    list-style: none;
+    user-select: none;
+    display: flex; align-items: center; gap: 8px;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before {
+    content: '▸';
+    color: var(--text-3);
+    font-size: 9px;
+    transition: transform 0.15s;
+  }
+  details[open] summary::before { transform: rotate(90deg); }
+  details .details-body { padding: 0 14px 12px; }
+
+  /* COMMENT */
+  .comment {
+    background: var(--warning-bg);
+    border-left: 2px solid var(--warning);
+    padding: 8px 12px;
+    margin: 6px 0;
+    font-size: 12px;
+    border-radius: 3px;
+  }
+  .comment .author { font-weight: 600; }
+  .comment .time { color: var(--text-3); font-size: 11px; }
+
+  /* MOBILE */
+  @media (max-width: 880px) {
+    .sidebar { width: 100%; position: relative; height: auto; }
+    .app { flex-direction: column; }
+    .main { max-width: 100%; }
+    .page { padding: 24px 16px; }
+    .row.cols-2, .row.cols-3, .row.cols-2-1 { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .kanban { grid-template-columns: 1fr 1fr; }
+    .qkill-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* SVG CHART STYLES */
+  .svg-chart { width: 100%; height: auto; display: block; }
+  .grid-line { stroke: var(--border); stroke-width: 1; }
+  .axis-text { font-size: 10px; fill: var(--text-3); font-family: 'JetBrains Mono', monospace; }
+  .bar-fill { fill: var(--accent); }
+  .bar-target { fill: none; stroke: var(--text-3); stroke-width: 2; stroke-dasharray: 3 2; }
+  .line-stroke { fill: none; stroke: var(--accent); stroke-width: 2; }
+  .line-area { fill: var(--accent-soft); }
+  .line-dot { fill: var(--accent); }
+
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="ws-header">
+    <div class="ws-mark">V</div>
+    <div>
+      <div class="ws-title">VUC OS</div>
+      <div class="ws-sub">Blueprint · v4</div>
+    </div>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-label">Start here</div>
+    <div class="sb-item active" onclick="show(event,'exec')"><span class="sb-icon">◆</span>Executive Summary</div>
+    <div class="sb-item" onclick="show(event,'coverage')"><span class="sb-icon">◇</span>Coverage Matrix</div>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-label">Permanent views</div>
+    <div class="sb-item" onclick="show(event,'portfolio')"><span class="sb-icon">▣</span>Portfolio Matrix<span class="sb-pin"></span></div>
+    <div class="sb-item" onclick="show(event,'top5-live')"><span class="sb-icon">▲</span>Top 5 Live</div>
+    <div class="sb-item" onclick="show(event,'kpi-live')"><span class="sb-icon">▦</span>KPI Dashboard</div>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-label">Meetings (6)</div>
+    <div class="sb-item" onclick="show(event,'m-bimonthly')"><span class="sb-icon">◐</span>Bi-monthly Strategic</div>
+    <div class="sb-item" onclick="show(event,'m-monthly')"><span class="sb-icon">◑</span>Monthly Objectives</div>
+    <div class="sb-item" onclick="show(event,'m-monday')"><span class="sb-icon">◉</span>Weekly · Monday</div>
+    <div class="sb-item" onclick="show(event,'m-daily')"><span class="sb-icon">◎</span>Daily Meeting</div>
+    <div class="sb-item" onclick="show(event,'m-friday')"><span class="sb-icon">◯</span>Friday Review</div>
+    <div class="sb-item" onclick="show(event,'m-vwc')"><span class="sb-icon">◈</span>VWC Weekly</div>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-label">Databases</div>
+    <div class="sb-item" onclick="show(event,'db-projects')"><span class="sb-icon">·</span>Projects</div>
+    <div class="sb-item" onclick="show(event,'db-mobj')"><span class="sb-icon">·</span>Monthly Objectives</div>
+    <div class="sb-item" onclick="show(event,'db-q12')"><span class="sb-icon">·</span>Q1–Q2 Stack</div>
+    <div class="sb-item" onclick="show(event,'db-kpis')"><span class="sb-icon">·</span>KPIs</div>
+    <div class="sb-item" onclick="show(event,'db-vwc')"><span class="sb-icon">·</span>VWC Objectives</div>
+    <div class="sb-item" onclick="show(event,'db-blockers')"><span class="sb-icon">·</span>Blockers</div>
+    <div class="sb-item" onclick="show(event,'db-ro')"><span class="sb-icon">·</span>R&amp;O Register</div>
+    <div class="sb-item" onclick="show(event,'db-decision')"><span class="sb-icon">·</span>Decision Engine</div>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-label">Personal &amp; Boards</div>
+    <div class="sb-item" onclick="show(event,'p-lucas')"><span class="sb-icon">·</span>My Week — Lucas</div>
+    <div class="sb-item" onclick="show(event,'p-others')"><span class="sb-icon">·</span>Other founders</div>
+    <div class="sb-item" onclick="show(event,'b-vuc')"><span class="sb-icon">·</span>VUC Board</div>
+    <div class="sb-item" onclick="show(event,'b-vwc')"><span class="sb-icon">·</span>VWC Board</div>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-label">Archived (Future branch)</div>
+    <div class="sb-item archived" onclick="show(event,'db-ideas')"><span class="sb-icon">·</span>Ideas</div>
+    <div class="sb-item archived" onclick="show(event,'m-pipeline')"><span class="sb-icon">·</span>Pipeline Review</div>
+    <div class="sb-item archived" onclick="show(event,'m-incubation')"><span class="sb-icon">·</span>Incubation</div>
+    <div class="sb-item archived" onclick="show(event,'m-ideas')"><span class="sb-icon">·</span>Ideas Session</div>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-label">Reference</div>
+    <div class="sb-item" onclick="show(event,'glossary')"><span class="sb-icon">·</span>Glossary &amp; Rules</div>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ====== EXECUTIVE SUMMARY ====== -->
+<section class="page active" id="exec">
+  <div class="breadcrumb">Workspace overview</div>
+  <h1 class="page-title">Executive Summary</h1>
+  <p class="page-sub">A single operating system for VUC and VWC. Replaces Jira, eliminates JSON sneakernet, brings the team into one source of truth.</p>
+  <div class="page-meta">
+    <div><span class="meta-label">Version</span>v4 · 2026-05-26</div>
+    <div><span class="meta-label">Founders</span>Louis · Yasin · Lucas · Emmanuel</div>
+    <div><span class="meta-label">Future branch</span>Paused</div>
+    <div><span class="meta-label">Maintainer</span>Lucas</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Active meetings</div>
+      <div class="kpi-value">6</div>
+      <div class="kpi-meta"><span class="kpi-target">+ 2 live monitors</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Permanent views</div>
+      <div class="kpi-value">3</div>
+      <div class="kpi-meta"><span class="kpi-target">Portfolio · Top 5 · KPIs</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Databases</div>
+      <div class="kpi-value">8</div>
+      <div class="kpi-meta"><span class="kpi-target">7 active · 1 archived</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Founders covered</div>
+      <div class="kpi-value">4</div>
+      <div class="kpi-meta"><span class="kpi-target">Emmanuel: VWC only</span></div>
+    </div>
+  </div>
+
+  <h2 class="section">Objective Cascade</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Layer</th><th>Cadence</th><th>Produces</th><th>Feeds</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bi-monthly Strategic</strong></td><td>Every 2 months</td><td>Ratified Top 5 · Decision Engine scores</td><td>Monthly</td></tr>
+        <tr><td><strong>Monthly Objectives</strong></td><td>1st Monday / month</td><td>Monthly objectives · KPI review</td><td>Weekly · Monday</td></tr>
+        <tr><td><strong>Weekly · Monday</strong></td><td>Every Monday</td><td>Q1–Q2 stack · weekly tasks</td><td>Daily Meeting</td></tr>
+        <tr><td><strong>Daily Meeting</strong></td><td>Tue–Thu</td><td>Status toggles · new blockers</td><td>Friday Review</td></tr>
+        <tr><td><strong>Friday Review</strong></td><td>Every Friday</td><td>Carry-overs · learnings</td><td>Next Weekly · Monday</td></tr>
+        <tr><td><strong>VWC Weekly</strong></td><td>Tue AM (isolated track)</td><td>Pillar objectives · Ghana pulse</td><td>VWC pillars (self-loop)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Participation Matrix</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Meeting</th><th>Louis</th><th>Yasin</th><th>Lucas</th><th>Emmanuel</th></tr></thead>
+      <tbody>
+        <tr><td>Bi-monthly Strategic</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot gray"></span>—</td></tr>
+        <tr><td>Monthly Objectives</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot gray"></span>—</td></tr>
+        <tr><td>Weekly · Monday</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot gray"></span>—</td></tr>
+        <tr><td>Daily Meeting (Tue–Thu)</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot gray"></span>—</td></tr>
+        <tr><td>Friday Review</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot gray"></span>—</td></tr>
+        <tr><td>VWC Weekly (Tue AM)</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td><td><span class="dot green"></span>Yes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">What This Replaces</h2>
+  <div class="row cols-3">
+    <div class="callout danger">
+      <div class="callout-icon">×</div>
+      <div><strong>Jira</strong><br>No more double-entry. The meeting writes directly to the database. Source of truth lives where work is decided.</div>
+    </div>
+    <div class="callout danger">
+      <div class="callout-icon">×</div>
+      <div><strong>JSON sneakernet</strong><br>No export → DM → import. All meeting tools read and write the same shared databases in real time.</div>
+    </div>
+    <div class="callout danger">
+      <div class="callout-icon">×</div>
+      <div><strong>Future branch (paused)</strong><br>Ideas / Pipeline / Incubation archived. Data preserved, no active triage until reactivated.</div>
+    </div>
+  </div>
+
+  <h2 class="section">What This Adds (vs. previous system)</h2>
+  <div class="row cols-2">
+    <div class="callout success">
+      <div class="callout-icon">+</div>
+      <div><strong>Real-time multi-user editing</strong>. Founders see changes instantly without refresh or import.</div>
+    </div>
+    <div class="callout success">
+      <div class="callout-icon">+</div>
+      <div><strong>Permanent Portfolio Matrix view</strong>. Decision Engine scoring (6 Quick Kill filters + 8 dimensions) accessible any time, not only during the Bi-monthly.</div>
+    </div>
+    <div class="callout success">
+      <div class="callout-icon">+</div>
+      <div><strong>Top 5 Live</strong>. Scores editable continuously with 2-founder ratification and full audit log.</div>
+    </div>
+    <div class="callout success">
+      <div class="callout-icon">+</div>
+      <div><strong>KPI Dashboard live</strong>. Target vs actual, trend, alerts. Auto-feeds Monthly Part 1.</div>
+    </div>
+    <div class="callout success">
+      <div class="callout-icon">+</div>
+      <div><strong>Linked objectives</strong>. Weekly tasks → Monthly Objective → Top 5 Project. Progress rolls up automatically.</div>
+    </div>
+    <div class="callout success">
+      <div class="callout-icon">+</div>
+      <div><strong>Mobile + offline</strong>. Notion native apps for iOS/Android. Critical for Emmanuel on-site in Ghana.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== COVERAGE MATRIX ====== -->
+<section class="page" id="coverage">
+  <div class="breadcrumb">Verification</div>
+  <h1 class="page-title">Coverage Matrix</h1>
+  <p class="page-sub">Every component of the current system mapped to its Notion equivalent. Nothing falls through.</p>
+
+  <h2 class="section">Meetings</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Current HTML</th><th>Notion equivalent</th><th>Database(s) touched</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>VUC_Weekly_Priority_Stack.html</td><td>Weekly · Monday — Top 5 expand + VUC General by dept + Eisenhower</td><td>Monthly Obj (r) · Q1–Q2 Stack · Blockers</td><td><span class="tag tag-success">covered</span></td></tr>
+        <tr><td>vuc-daily-meeting.html</td><td>Daily Meeting — Eisenhower today + Mode indicator</td><td>Q1–Q2 Stack · Blockers</td><td><span class="tag tag-success">covered</span></td></tr>
+        <tr><td>VWC_Weekly_Meeting.html</td><td>VWC Weekly — Prev Week → Ghana Pulse → 4 Pillars → Sites Improvement → Eisenhower → Actions</td><td>VWC Objectives · Blockers · KPIs (VWC)</td><td><span class="tag tag-success">covered</span></td></tr>
+        <tr><td>vuc-friday-review.html</td><td>Friday Review — Done/Partial/Missed + learnings + carry → next Monday</td><td>Q1–Q2 Stack · Blockers · Monthly Obj (progress)</td><td><span class="tag tag-success">covered</span></td></tr>
+        <tr><td>VUC_Monthly_Strategic_Review.html (split)</td><td>Bi-monthly Strategic — Decision Engine review + Top 5 ratification</td><td>Decision Engine · Projects (Top5)</td><td><span class="tag tag-info">refactored</span></td></tr>
+        <tr><td>+ new Monthly</td><td>Monthly Objectives — Part 1 KPI review · Part 2 set objectives</td><td>KPIs (r) · Monthly Obj (rw)</td><td><span class="tag tag-accent">new</span></td></tr>
+        <tr><td>VUC_Pipeline_Review.html</td><td>Pipeline Review</td><td>Ideas (paused)</td><td><span class="tag tag-neutral">archived</span></td></tr>
+        <tr><td>VUC_Incubation_Meeting.html</td><td>Incubation</td><td>Ideas (paused)</td><td><span class="tag tag-neutral">archived</span></td></tr>
+        <tr><td>VUC_Ideas_Session.html</td><td>Ideas Session</td><td>Ideas (paused)</td><td><span class="tag tag-neutral">archived</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Permanent Views (new)</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>View</th><th>Purpose</th><th>Data source</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Portfolio Matrix</strong></td><td>Quick Kill Filter (6 questions) + 8-dimension scoring + decisions. Accessible permanently, not only during Bi-monthly.</td><td>Decision Engine DB</td></tr>
+        <tr><td><strong>Top 5 Live</strong></td><td>Real-time ranking + pending score changes awaiting ratification + audit log</td><td>Decision Engine DB (Top 5 filter)</td></tr>
+        <tr><td><strong>KPI Dashboard</strong></td><td>All KPIs target vs actual + trend + alerts for off-target</td><td>KPIs DB</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Databases</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Database</th><th>Purpose</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Projects</td><td>Approved → Active → Completed / Parked / Killed</td><td><span class="tag tag-success">covered</span></td></tr>
+        <tr><td>Monthly Objectives</td><td>Bridge between Monthly meeting and Weekly · Monday</td><td><span class="tag tag-accent">new</span></td></tr>
+        <tr><td>Q1–Q2 Stack</td><td>Weekly tasks with Eisenhower quadrant, owner, status</td><td><span class="tag tag-success">covered</span></td></tr>
+        <tr><td>KPIs</td><td>Tracked indicators with target / actual / history</td><td><span class="tag tag-accent">new</span></td></tr>
+        <tr><td>VWC Objectives</td><td>4 pillars (P1–P4), weekly only</td><td><span class="tag tag-success">covered</span></td></tr>
+        <tr><td>Blockers</td><td>Open → Resolved with &lt;48h SLA formula</td><td><span class="tag tag-success">covered</span></td></tr>
+        <tr><td>R&amp;O Register</td><td>Risks &amp; Opportunities tracked</td><td><span class="tag tag-success">covered</span></td></tr>
+        <tr><td>Decision Engine</td><td>Live-editable with 2-founder ratification</td><td><span class="tag tag-info">refactored</span></td></tr>
+        <tr><td>Ideas</td><td>Future branch — paused</td><td><span class="tag tag-neutral">archived</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Operating Rules</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Rule</th><th>Enforcement in Notion</th></tr></thead>
+      <tbody>
+        <tr><td>Every ticket has a named owner</td><td>Owner field required; rows with empty owner highlighted in red</td></tr>
+        <tr><td>Urgency in description</td><td>Urgency select (Low/Med/High) + free text field</td></tr>
+        <tr><td>VWC tickets stay on VWC board</td><td>Separate VWC Objectives DB; Q1–Q2 Stack does not accept VWC tag</td></tr>
+        <tr><td>Emmanuel participates only in VWC Weekly</td><td>Emmanuel filtered out of all VUC views; visible only in VWC Weekly + VWC Objectives + VWC KPIs</td></tr>
+        <tr><td>Blockers resolved &lt;48h or flagged</td><td>Formula <span class="mono">DaysOpen</span>; auto view "Stale Blockers" if &gt; 2 days</td></tr>
+        <tr><td>R&amp;O escalation only in meetings</td><td>Status change permitted only from Monthly page; DB direct edit locked</td></tr>
+        <tr><td>Decision Engine — live editable with ratification</td><td>Score changes enter as "Proposed"; require @-mention + 2nd founder sign-off; audit log permanent</td></tr>
+        <tr><td>Monthly Objective links to Top 5 project</td><td>Relation field required; or explicit "Out of Top 5 — justify" checkbox</td></tr>
+        <tr><td>Weekly task links to Monthly Objective</td><td>Soft suggested; warning if empty on create</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====== PORTFOLIO MATRIX ====== -->
+<section class="page" id="portfolio">
+  <div class="breadcrumb">Permanent View · pinned</div>
+  <h1 class="page-title">Portfolio Matrix</h1>
+  <p class="page-sub">Decision Engine in full. Quick Kill Filter then 8-dimension scoring. Editable at any time with 2-founder ratification. Replicates the validated logic from VUC_Monthly_Strategic_Review.html.</p>
+  <div class="page-meta">
+    <div><span class="meta-label">Source of truth</span>Decision Engine DB</div>
+    <div><span class="meta-label">Edit rule</span>Live + ratification</div>
+    <div><span class="meta-label">Formal review</span>Bi-monthly Strategic</div>
+  </div>
+
+  <h2 class="section">Stage 1 — Quick Kill Filter</h2>
+  <p class="muted">Six binary gates. A project must pass <strong>all six</strong> to enter scoring. Any "No" sends the project to DISREGARD until the gate is resolved.</p>
+  <div class="qkill-grid">
+    <div class="qkill"><div class="q-label">Gate 1</div><div class="q-text">Capital available?</div></div>
+    <div class="qkill"><div class="q-label">Gate 2</div><div class="q-text">Payback ≤ 48 mo?</div></div>
+    <div class="qkill"><div class="q-label">Gate 3</div><div class="q-text">IRR ≥ 15%?</div></div>
+    <div class="qkill"><div class="q-label">Gate 4</div><div class="q-text">No fatal risk?</div></div>
+    <div class="qkill"><div class="q-label">Gate 5</div><div class="q-text">Team capacity?</div></div>
+    <div class="qkill"><div class="q-label">Gate 6</div><div class="q-text">Strategic fit?</div></div>
+  </div>
+
+  <h2 class="section">Stage 2 — Eight-Dimension Scoring</h2>
+  <p class="muted">Each surviving project is scored on the 8 dimensions. Composite score normalized 0–1. Real scores below sourced from <strong>May 2026 Monthly Strategic Review</strong>. Per-dimension scores not exposed in the source PDF (composite only) — left blank for now, will populate once Notion DB is live.</p>
+  <div class="panel">
+    <div class="panel-head">
+      <div class="title">Scoring Matrix · Current Period</div>
+      <div class="filter">Filter: Quick Kill = Passed</div>
+      <div class="actions"><div class="tab active">Score view</div><div class="tab">Radar view</div><div class="tab">Audit log</div></div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Owner</th>
+          <th class="num">Strat</th>
+          <th class="num">Prof</th>
+          <th class="num">Scale</th>
+          <th class="num">Risk</th>
+          <th class="num">Capital</th>
+          <th class="num">Payback</th>
+          <th class="num">Innov</th>
+          <th class="num">Team</th>
+          <th class="num">Score</th>
+          <th>Decision</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>VUC Consulting SOL</strong></td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:83%"></span></span><strong>0.83</strong></td><td><span class="decision-pill d-execute">Execute now</span></td></tr>
+        <tr><td><strong>IT / Dashboard</strong></td><td><span class="person"><span class="avatar yasin">Y</span>Yasin</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:72%"></span></span><strong>0.72</strong></td><td><span class="decision-pill d-execute">Execute now</span></td></tr>
+        <tr><td><strong>VUC Golden Camel Mining</strong></td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:72%"></span></span><strong>0.72</strong></td><td><span class="decision-pill d-execute">Execute now</span></td></tr>
+        <tr><td><strong>VWC Ghana</strong></td><td><span class="person"><span class="avatar emmanuel">E</span>Emmanuel</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:70%"></span></span><strong>0.70</strong></td><td><span class="decision-pill d-execute">Execute now</span></td></tr>
+        <tr><td><strong>VWC Congo</strong></td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:69%"></span></span><strong>0.69</strong></td><td><span class="decision-pill d-execute">Execute now</span></td></tr>
+        <tr><td>VUC Avocado</td><td><span class="person"><span class="avatar yasin">Y</span>Yasin</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:61%"></span></span><strong>0.61</strong></td><td><span class="decision-pill d-pursue">Pursue</span></td></tr>
+        <tr><td>VWC Solar Ghana</td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:60%"></span></span><strong>0.60</strong></td><td><span class="decision-pill d-pursue">Pursue</span></td></tr>
+        <tr><td>VUC CronosPath</td><td><span class="person"><span class="avatar yasin">Y</span>Yasin</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:59%"></span></span><strong>0.59</strong></td><td><span class="decision-pill d-pursue">Pursue</span></td></tr>
+        <tr><td>Xperience Space</td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:58%"></span></span><strong>0.58</strong></td><td><span class="decision-pill d-pursue">Pursue</span></td></tr>
+        <tr><td>VWC Juice</td><td><span class="person"><span class="avatar yasin">Y</span>Yasin</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:57%"></span></span><strong>0.57</strong></td><td><span class="decision-pill d-pursue">Pursue</span></td></tr>
+        <tr style="opacity:0.7;"><td>VUC Prezence AI</td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:54%"></span></span><strong>0.54</strong></td><td><span class="decision-pill d-park">Park</span></td></tr>
+        <tr style="opacity:0.7;"><td>VUC Mushroom</td><td><span class="person"><span class="avatar yasin">Y</span>Yasin</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:54%"></span></span><strong>0.54</strong></td><td><span class="decision-pill d-park">Park</span></td></tr>
+        <tr style="opacity:0.7;"><td>VUC Pilot Social Media</td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:53%"></span></span><strong>0.53</strong></td><td><span class="decision-pill d-park">Park</span></td></tr>
+        <tr style="opacity:0.7;"><td>VWC Residential Kumasi</td><td><span class="person"><span class="avatar lucas">L</span>Lucas</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:53%"></span></span><strong>0.53</strong></td><td><span class="decision-pill d-park">Park</span></td></tr>
+        <tr style="opacity:0.7;"><td>VUC IT/Dashboard</td><td><span class="person"><span class="avatar lucas">L</span>Lucas</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><span class="score-bar"><span class="score-bar-fill" style="width:53%"></span></span><strong>0.53</strong></td><td><span class="decision-pill d-park">Park</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Decision Ladder</h2>
+  <div class="row cols-3">
+    <div class="panel">
+      <div class="panel-head"><div class="title">Decision tiers</div></div>
+      <div style="padding:12px 14px; font-size:12px;">
+        <div style="margin-bottom:8px;"><span class="decision-pill d-execute">Execute now</span> — score ≥ 7.5, Top 5 candidate</div>
+        <div style="margin-bottom:8px;"><span class="decision-pill d-pursue">Pursue</span> — score 7.0–7.4, active but not Top 5</div>
+        <div style="margin-bottom:8px;"><span class="decision-pill d-queue">Queue</span> — score 6.5–6.9, waiting on resource</div>
+        <div style="margin-bottom:8px;"><span class="decision-pill d-park">Park</span> — score &lt; 6.5, defer 1 quarter</div>
+        <div><span class="decision-pill d-disregard">Disregard</span> — failed Quick Kill gate</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="title">Top 5 — May 2026 (real)</div></div>
+      <div style="padding:12px 14px; font-size:12px;">
+        <ol style="margin-left:18px; line-height:1.9;">
+          <li>VUC Consulting SOL · Louis <span class="mono" style="color:var(--text-3);">0.83</span></li>
+          <li>IT / Dashboard · Yasin <span class="mono" style="color:var(--text-3);">0.72</span></li>
+          <li>VUC Golden Camel Mining · Louis <span class="mono" style="color:var(--text-3);">0.72</span></li>
+          <li>VWC Ghana · Emmanuel <span class="mono" style="color:var(--text-3);">0.70</span></li>
+          <li>VWC Congo · Louis <span class="mono" style="color:var(--text-3);">0.69</span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="title">R&amp;O linked review</div></div>
+      <div style="padding:12px 14px; font-size:12px;">
+        <p class="muted">R&amp;O register fully reviewed during Bi-monthly Strategic. Decision changes that affect Risk dimension recorded here automatically.</p>
+        <p style="margin-top:8px;"><strong>3 open</strong> · 1 escalated · 2 monitored</p>
+        <p><a style="color:var(--info);" href="#" onclick="show(event,'db-ro')">→ Open R&amp;O Register</a></p>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section">Score Audit Log</h2>
+  <div class="panel">
+    <div style="padding:14px; text-align:center; color:var(--text-3); font-size:12px;">No in-cycle changes yet. Last ratification: <strong>2026-05-04 Monthly Strategic Review</strong> · all 15 scores set in that session. Audit log populates as founders propose changes via Top 5 Live between Bi-monthly sessions.</div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div>Any founder can propose a score change at any time. Notion @-mention triggers a second founder to ratify within 14 days. Unresolved proposals appear on Top 5 Live as pending. The Bi-monthly Strategic ratifies any accumulated changes in formal session.</div>
+  </div>
+</section>
+
+<!-- ====== TOP 5 LIVE ====== -->
+<section class="page" id="top5-live">
+  <div class="breadcrumb">Permanent View</div>
+  <h1 class="page-title">Top 5 Live</h1>
+  <p class="page-sub">Real-time portfolio ranking. Continuously editable with 2-founder ratification. Pending changes shown in-line.</p>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Top 5 stability</div><div class="kpi-value">—</div><div class="kpi-meta">Pending KPI def</div></div>
+    <div class="kpi"><div class="kpi-label">Pending changes</div><div class="kpi-value">0</div><div class="kpi-meta">None awaiting ratification</div></div>
+    <div class="kpi"><div class="kpi-label">Avg score</div><div class="kpi-value">0.73</div><div class="kpi-meta">May 2026 ratified</div></div>
+    <div class="kpi"><div class="kpi-label">Last ratification</div><div class="kpi-value">May 04</div><div class="kpi-meta">Monthly Strategic</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="title">Live Ranking — May 2026 (real)</div>
+      <div class="actions"><div class="tab active">Ranking</div><div class="tab">Pending (0)</div><div class="tab">Audit log</div></div>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Project</th><th>Owner</th><th class="num">Score</th><th>Trend</th><th>Last change</th><th>Pending</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1</td><td><strong>VUC Consulting SOL</strong></td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td class="num"><strong>0.83</strong></td><td><span class="dot gray"></span>→</td><td class="mono">May 04 · Monthly</td><td>—</td></tr>
+        <tr><td class="mono">2</td><td><strong>IT / Dashboard</strong></td><td><span class="person"><span class="avatar yasin">Y</span>Yasin</span></td><td class="num"><strong>0.72</strong></td><td><span class="dot gray"></span>→</td><td class="mono">May 04 · Monthly</td><td>—</td></tr>
+        <tr><td class="mono">3</td><td><strong>VUC Golden Camel Mining</strong></td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td class="num"><strong>0.72</strong></td><td><span class="dot gray"></span>→</td><td class="mono">May 04 · Monthly</td><td>—</td></tr>
+        <tr><td class="mono">4</td><td><strong>VWC Ghana</strong></td><td><span class="person"><span class="avatar emmanuel">E</span>Emmanuel</span></td><td class="num"><strong>0.70</strong></td><td><span class="dot gray"></span>→</td><td class="mono">May 04 · Monthly</td><td>—</td></tr>
+        <tr><td class="mono">5</td><td><strong>VWC Congo</strong></td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td class="num"><strong>0.69</strong></td><td><span class="dot gray"></span>→</td><td class="mono">May 04 · Monthly</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="muted" style="margin-top:12px;">Audit log will populate as founders propose score changes in-cycle. As of May 26 there are no pending ratifications. Source: VUC — Monthly Strategic Review · 04/05/2026.</p>
+</section>
+
+<!-- ====== KPI DASHBOARD ====== -->
+<section class="page" id="kpi-live">
+  <div class="breadcrumb">Permanent View</div>
+  <h1 class="page-title">KPI Dashboard</h1>
+  <p class="page-sub">All tracked indicators with target vs actual, six-month trend, and alerts for off-target metrics.</p>
+
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div>KPI values <strong>blank by design</strong>. The founders will define which KPIs to track once the system has 2–3 weeks of real meeting data. Until then, this page is a placeholder with the structure ready to populate.</div>
+  </div>
+
+  <h2 class="section">VUC Indicators (to define)</h2>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">KPI 1</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+    <div class="kpi"><div class="kpi-label">KPI 2</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+    <div class="kpi"><div class="kpi-label">KPI 3</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+    <div class="kpi"><div class="kpi-label">KPI 4</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+  </div>
+
+  <h2 class="section">VWC Indicators (Ghana — to define with Emmanuel)</h2>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Kg mined / week</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+    <div class="kpi"><div class="kpi-label">Kg processed / week</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+    <div class="kpi"><div class="kpi-label">Recovery rate</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+    <div class="kpi"><div class="kpi-label">Site uptime</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+  </div>
+  <p class="muted">Emmanuel reports KPIs <strong>every Tuesday via Teams meeting</strong>. Once Notion is live, those numbers feed this dashboard directly via the VWC Weekly page.</p>
+
+  <h2 class="section">Trend chart (placeholder)</h2>
+  <div class="chart-card">
+    <h4>Trend visualization · activates with 6 weeks of data</h4>
+    <div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:12px;border:1px dashed var(--border);border-radius:4px;">
+      No data yet · Notion will auto-plot once weekly KPI rows accumulate.
+    </div>
+  </div>
+
+  <h2 class="section">Active Alerts</h2>
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div>No alerts yet. Once KPIs are defined and 2–3 readings recorded, alerts trigger automatically for off-target metrics.</div>
+  </div>
+</section>
+
+<!-- ====== BI-MONTHLY STRATEGIC ====== -->
+<section class="page" id="m-bimonthly">
+  <div class="breadcrumb">Meeting · every 2 months</div>
+  <h1 class="page-title">Bi-monthly Strategic</h1>
+  <p class="page-sub">Formal review of the Decision Engine matrix and ratification of Top 5 for the next cycle.</p>
+  <div class="page-meta">
+    <div><span class="meta-label">Cadence</span>Every 2 months · 1st Monday · 2 hours</div>
+    <div><span class="meta-label">Attendees</span>Louis · Yasin · Lucas</div>
+    <div><span class="meta-label">Writes to</span>Decision Engine · Projects (Top 5 label)</div>
+  </div>
+
+  <h2 class="section">Step 1 — Review accumulated score changes</h2>
+  <p class="muted">Auto-pull from Decision Engine audit log: every score change since the last Bi-monthly.</p>
+  <div class="panel">
+    <div style="padding:14px; text-align:center; color:var(--text-3); font-size:12px;">No in-cycle changes since 2026-05-04. Score baseline as ratified in that session is current.</div>
+  </div>
+
+  <h2 class="section">Step 2 — Deep score review (full portfolio)</h2>
+  <p class="muted">Walk through every project that passed Quick Kill. Re-validate each dimension. Embedded reference to Portfolio Matrix.</p>
+  <p><a style="color:var(--info);" href="#" onclick="show(event,'portfolio')">→ Open Portfolio Matrix</a></p>
+
+  <h2 class="section">Step 3 — Ratify Top 5 for next cycle</h2>
+  <p class="muted">Auto-ranking by composite score. Founders confirm or manually override (with comment).</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>#</th><th>Project</th><th>Owner</th><th class="num">Score</th><th>Ratified</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1</td><td>VUC Consulting SOL</td><td>Louis</td><td class="num">0.83</td><td><span class="tag tag-success">Confirmed</span></td></tr>
+        <tr><td class="mono">2</td><td>IT / Dashboard</td><td>Yasin</td><td class="num">0.72</td><td><span class="tag tag-success">Confirmed</span></td></tr>
+        <tr><td class="mono">3</td><td>VUC Golden Camel Mining</td><td>Louis</td><td class="num">0.72</td><td><span class="tag tag-success">Confirmed</span></td></tr>
+        <tr><td class="mono">4</td><td>VWC Ghana</td><td>Emmanuel</td><td class="num">0.70</td><td><span class="tag tag-success">Confirmed</span></td></tr>
+        <tr><td class="mono">5</td><td>VWC Congo</td><td>Louis</td><td class="num">0.69</td><td><span class="tag tag-success">Confirmed</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Step 4 — Cascade to Monthly</h2>
+  <p>The ratified Top 5 becomes the input frame for the next two Monthly Objectives meetings. Each new Monthly Objective must link back to one of these 5.</p>
+
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div>Top 5 is not frozen between Bi-monthly sessions. Use Top 5 Live for in-cycle changes; this meeting ratifies the accumulated cycle and resets the baseline.</div>
+  </div>
+</section>
+
+<!-- ====== MONTHLY OBJECTIVES ====== -->
+<section class="page" id="m-monthly">
+  <div class="breadcrumb">Meeting · monthly</div>
+  <h1 class="page-title">Monthly Objectives Meeting</h1>
+  <p class="page-sub">Part 1 reviews last month's KPIs and objective performance. Part 2 sets the strategic objectives for the month ahead.</p>
+  <div class="page-meta">
+    <div><span class="meta-label">Cadence</span>1st Monday of month · 2 hours</div>
+    <div><span class="meta-label">Attendees</span>Louis · Yasin · Lucas</div>
+    <div><span class="meta-label">Inputs</span>KPIs DB · Monthly Objectives (prev month)</div>
+    <div><span class="meta-label">Output</span>Monthly Objectives (next month)</div>
+  </div>
+
+  <h2 class="section">Part 1 · Review of last month</h2>
+
+  <h3 class="sub">1.1 — KPI snapshot</h3>
+  <div class="callout info"><div class="callout-icon">i</div><div>KPIs to define. Placeholder structure below — values populate once founders agree on which metrics to track.</div></div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">KPI 1</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+    <div class="kpi"><div class="kpi-label">KPI 2</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+    <div class="kpi"><div class="kpi-label">KPI 3</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+    <div class="kpi"><div class="kpi-label">KPI 4</div><div class="kpi-value">—</div><div class="kpi-meta">target —</div></div>
+  </div>
+
+  <h3 class="sub">1.2 — Monthly Objectives outcome (April)</h3>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Objective</th><th>Owner</th><th>Linked Top 5</th><th class="num">Progress</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Close 3 qualified investors for SOL</td><td><span class="person"><span class="avatar yasin">Y</span>Yasin</span></td><td>SOL Consulting</td><td class="num">100%</td><td><span class="tag tag-success">Achieved</span></td></tr>
+        <tr><td>Business Plan v2 chapters 1–5 finalized</td><td><span class="person"><span class="avatar lucas">L</span>Lucas</span></td><td>Business Plan</td><td class="num">80%</td><td><span class="tag tag-warning">Partial</span></td></tr>
+        <tr><td>Pitch Deck ready for investor outreach</td><td><span class="person"><span class="avatar lucas">L</span>Lucas</span></td><td>Pitch Deck</td><td class="num">40%</td><td><span class="tag tag-danger">Missed</span></td></tr>
+        <tr><td>Map 5 potential Golden Camel partners</td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td>Golden Camel v2</td><td class="num">100%</td><td><span class="tag tag-success">Achieved</span></td></tr>
+        <tr><td>Saudi partnership exploratory call</td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td>Investor Network</td><td class="num">100%</td><td><span class="tag tag-success">Achieved</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="sub">1.3 — Visualizations (placeholders)</h3>
+  <div class="row cols-2">
+    <div class="chart-card">
+      <h4>Monthly Objective Achievement · last 6 months</h4>
+      <div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:12px;border:1px dashed var(--border);border-radius:4px;">Activates with 3+ months of data</div>
+    </div>
+    <div class="chart-card">
+      <h4>Portfolio Allocation · Top 5 by vertical</h4>
+      <div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:12px;border:1px dashed var(--border);border-radius:4px;">Activates with Top 5 vertical tags populated</div>
+    </div>
+  </div>
+
+  <h3 class="sub">1.4 — KPI trend chart (placeholder)</h3>
+  <div class="chart-card">
+    <h4>KPI trend</h4>
+    <div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:12px;border:1px dashed var(--border);border-radius:4px;">Activates with 6 weeks of KPI readings</div>
+  </div>
+
+  <h3 class="sub">1.5 — Learnings (narrative)</h3>
+  <p class="muted">Free-form discussion block. What patterns appeared, what's changing, what to adjust.</p>
+
+  <h2 class="section">Part 2 · Set Monthly Objectives for next month</h2>
+
+  <h3 class="sub">2.1 — Active Top 5 (input frame)</h3>
+  <p class="muted">Each Monthly Objective must link to one of these five (or explicitly justify as out-of-Top-5).</p>
+
+  <h3 class="sub">2.2 — Define 4–6 objectives</h3>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Objective (June draft)</th><th>Owner</th><th>Linked Top 5</th><th>Success criteria</th></tr></thead>
+      <tbody>
+        <tr><td>Pitch Deck v2 final with proof of traction</td><td><span class="person"><span class="avatar lucas">L</span>Lucas</span></td><td>Pitch Deck refresh</td><td>3 investors sign NDA</td></tr>
+        <tr><td>Business Plan v2 fully finalized (all chapters)</td><td><span class="person"><span class="avatar lucas">L</span>Lucas</span></td><td>Business Plan</td><td>10/10 chapters peer-reviewed</td></tr>
+        <tr><td>SOL onboard 2 new paying clients</td><td><span class="person"><span class="avatar yasin">Y</span>Yasin</span></td><td>SOL Consulting Q2</td><td>2 SOWs signed</td></tr>
+        <tr><td>Investor Network 8 calls + 2 LOIs</td><td><span class="person"><span class="avatar louis">L</span>Louis</span></td><td>Investor Network</td><td>8 calls + 2 LOI</td></tr>
+        <tr><td>Plant Config Audit complete + report</td><td><span class="person"><span class="avatar yasin">Y</span>Yasin</span></td><td>Plant Config Audit</td><td>Final report delivered</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="sub">2.3 — Cascade to Weekly Monday</h3>
+  <p>Once committed, these objectives auto-appear as the input frame on every Weekly · Monday this month. Each weekly task gets the option to link upward.</p>
+
+  <div class="callout success">
+    <div class="callout-icon">+</div>
+    <div>The Progress % column on each objective updates automatically via Notion formula: (Done tasks linked to this objective) ÷ (Total tasks linked). So by the next Monthly, the achievement rates above are not estimated — they are derived from real execution.</div>
+  </div>
+</section>
+
+<!-- ====== WEEKLY MONDAY ====== -->
+<section class="page" id="m-monday">
+  <div class="breadcrumb">Meeting · weekly</div>
+  <h1 class="page-title">Weekly · Monday</h1>
+  <p class="page-sub">Translate active Monthly Objectives and Friday carry-overs into a concrete Q1–Q2 stack for this week.</p>
+  <div class="page-meta">
+    <div><span class="meta-label">Cadence</span>Monday 09:00 · 60 min</div>
+    <div><span class="meta-label">Attendees</span>Louis · Yasin · Lucas</div>
+    <div><span class="meta-label">Inputs</span>Monthly Objectives · Friday carry-overs</div>
+    <div><span class="meta-label">Output</span>Q1–Q2 Stack for this week</div>
+  </div>
+
+  <p class="muted">Data below is <strong>real</strong> from Weekly Priority Stack 2026-05-25 PDF. Project tags: [VUC Cons] = VUC Consulting SOL · [Golden C] = VUC Golden Camel Mining · [Xperienc] = Xperience Space · [IT/Softw] = IT / Dashboard · [VUC Prod] / [VUC Serv] = VUC general.</p>
+
+  <h2 class="section">Step 1 — Carry-overs from previous week (auto)</h2>
+  <p class="muted">Any task marked CARRY in the source. Auto-pulled.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Task</th><th>Owner</th><th>Project</th><th>Decision</th></tr></thead>
+      <tbody>
+        <tr><td>Data base cleanup</td><td>Louis</td><td>VUC Consulting SOL</td><td>Q1 — carry</td></tr>
+        <tr><td>Send CVs</td><td>Yasin</td><td>VUC Consulting SOL</td><td>Q1 — carry</td></tr>
+        <tr><td>Final presentation of dashboard</td><td>Yasin</td><td>VUC Consulting SOL</td><td>Q1 — carry</td></tr>
+        <tr><td>Area revenue aproximation</td><td>Yasin</td><td>Xperience Space</td><td>Q2 — carry</td></tr>
+        <tr><td>Follow ups</td><td>Lucas</td><td>VUC Golden Camel Mining</td><td>Q2 — carry</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Step 2 — Top 5 Projects · weekly tasks (real, W22 · 2026-05-25)</h2>
+  <div class="panel">
+    <details open><summary>#1 · VUC Consulting SOL — Louis (0.83)</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Owner</th><th>Quadrant</th></tr></thead>
+          <tbody>
+            <tr><td>Data base cleanup (CARRY)</td><td>Louis</td><td><span class="tag tag-danger">Q1</span></td></tr>
+            <tr><td>Stakeholder MGMT</td><td>Louis</td><td><span class="tag tag-warning">Q2</span></td></tr>
+            <tr><td>Send CVs (CARRY)</td><td>Yasin</td><td><span class="tag tag-danger">Q1</span></td></tr>
+            <tr><td>Final presentation of dashboard (CARRY)</td><td>Yasin</td><td><span class="tag tag-danger">Q1</span></td></tr>
+            <tr><td>Get in contact with Veronica</td><td>Lucas</td><td><span class="tag tag-warning">Q2</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details open><summary>#2 · IT / Dashboard — Yasin (0.72)</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Owner</th><th>Quadrant</th></tr></thead>
+          <tbody>
+            <tr><td>Onboard of Lumina</td><td>Louis</td><td><span class="tag tag-warning">Q2</span></td></tr>
+            <tr><td>Working on the company Agentic system · research &amp; use case</td><td>Yasin</td><td><span class="tag tag-warning">Q2</span></td></tr>
+            <tr><td>MVP for Prezence AI (CARRY · obsolete)</td><td>Yasin</td><td><span class="tag tag-neutral">Q4 · drop</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details open><summary>#3 · VUC Golden Camel Mining — Louis (0.72)</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Owner</th><th>Quadrant</th></tr></thead>
+          <tbody>
+            <tr><td>Send out offtake agreement to AMG</td><td>Louis</td><td><span class="tag tag-danger">Q1</span></td></tr>
+            <tr><td>Mature private leads &amp; cold call leads</td><td>Louis</td><td><span class="tag tag-danger">Q1</span></td></tr>
+            <tr><td>IFZA escalate</td><td>Louis</td><td><span class="tag tag-danger">Q1</span></td></tr>
+            <tr><td>Contact Neb Servic</td><td>Yasin</td><td><span class="tag tag-danger">Q1</span></td></tr>
+            <tr><td>Process evaluation for the artisanal Ghana mining</td><td>Yasin</td><td><span class="tag tag-warning">Q2</span></td></tr>
+            <tr><td>Follow ups (CARRY)</td><td>Lucas</td><td><span class="tag tag-warning">Q2</span></td></tr>
+            <tr><td>Prepare meeting with Campine</td><td>Lucas</td><td><span class="tag tag-warning">Q2</span></td></tr>
+            <tr><td>Improving investor match research (CARRY · low impact)</td><td>Yasin</td><td><span class="tag tag-neutral">Q4 · drop</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details open><summary>#4 · VWC Ghana — Emmanuel (0.70)</summary>
+      <div class="details-body">
+        <p class="muted">Owned by Emmanuel · objectives managed via VWC Weekly Tuesday. Not in this VUC Monday view.</p>
+      </div>
+    </details>
+    <details open><summary>#5 · VWC Congo — Louis (0.69)</summary>
+      <div class="details-body">
+        <p class="muted">Not active in current week — no tasks in 2026-05-25 source.</p>
+      </div>
+    </details>
+  </div>
+
+  <h2 class="section">Step 3 — VUC Weekly Objectives · by vertical</h2>
+  <p class="muted">Strategic objectives committed for the week, grouped by vertical (Products · Services · Future). These are above the project task level — they're the outcomes the company wants this week regardless of which Top 5 project they sit under. Same source structure as Friday Review's "Completion by Department".</p>
+
+  <div class="row cols-3">
+    <div class="panel">
+      <div class="panel-head"><div class="title" style="color:#1E40AF;">PRODUCTS</div></div>
+      <table>
+        <thead><tr><th>Objective</th><th>Owner</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Reach avocado professor Edward Calys-Tagoe for documents</td><td>Louis</td><td><span class="dot gray"></span>Open</td></tr>
+          <tr><td colspan="3" style="color:var(--text-3); font-style:italic; padding:8px 12px;">+ Add objective</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="title" style="color:#15803D;">SERVICES</div></div>
+      <table>
+        <thead><tr><th>Objective</th><th>Owner</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Due diligence of United-Living company</td><td>Louis</td><td><span class="dot gray"></span>Open</td></tr>
+          <tr><td colspan="3" style="color:var(--text-3); font-style:italic; padding:8px 12px;">+ Add objective</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="title" style="color:#5B21B6;">FUTURE</div></div>
+      <table>
+        <thead><tr><th>Objective</th><th>Owner</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td colspan="3" style="color:var(--text-3); font-style:italic; padding:8px 12px;">+ Add objective</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2 class="section">Step 4 — VUC General objectives for the week</h2>
+  <p class="muted">Cross-cutting, non-vertical commitments. Things the company commits to regardless of which product/service line is involved (operational, governance, finance, hiring, infrastructure, etc.).</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Objective</th><th>Owner</th><th>Category</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td colspan="4" style="color:var(--text-3); font-style:italic; padding:8px 12px;">+ Add objective</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">Source data: structure preserved from <code>VUC_Weekly_Priority_Stack.html</code> Section 2 ("VUC Objectives") and Friday Review "Completion by Department" (Products / Services / Future). Real entries seed during go-live week.</p>
+
+  <h2 class="section">Step 5 — Other VUC projects (non-Top 5 but active)</h2>
+  <div class="panel">
+    <details open><summary>Xperience Space — Louis (0.58 · Pursue)</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Owner</th><th>Quadrant</th></tr></thead>
+          <tbody>
+            <tr><td>Call Paul Bellamy</td><td>Louis</td><td><span class="tag tag-warning">Q2</span></td></tr>
+            <tr><td>Area revenue aproximation (CARRY)</td><td>Yasin</td><td><span class="tag tag-warning">Q2</span></td></tr>
+            <tr><td>Website build on hold (CARRY · external dep)</td><td>Yasin</td><td><span class="tag tag-neutral">Q4 · drop</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details><summary>VUC Services (recruiting / general)</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Owner</th><th>Quadrant</th></tr></thead>
+          <tbody>
+            <tr><td>Reach out to potential hires</td><td>Lucas</td><td><span class="tag tag-warning">Q2</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+
+  <h2 class="section">Step 6 — Eisenhower Matrix (real aggregate · W22)</h2>
+  <div class="kanban">
+    <div class="kb-col q1"><h4>Q1 · Do First (7)</h4>
+      <div class="kb-card">[VUC Cons] Data base cleanup CARRY<div class="meta"><span class="person"><span class="avatar louis">L</span></span></div></div>
+      <div class="kb-card">[Golden C] Offtake to AMG<div class="meta"><span class="person"><span class="avatar louis">L</span></span></div></div>
+      <div class="kb-card">[Golden C] Mature private leads<div class="meta"><span class="person"><span class="avatar louis">L</span></span></div></div>
+      <div class="kb-card">[Golden C] IFZA escalate<div class="meta"><span class="person"><span class="avatar louis">L</span></span></div></div>
+      <div class="kb-card">[VUC Cons] Send CVs CARRY<div class="meta"><span class="person"><span class="avatar yasin">Y</span></span></div></div>
+      <div class="kb-card">[VUC Cons] Dashboard presentation CARRY<div class="meta"><span class="person"><span class="avatar yasin">Y</span></span></div></div>
+      <div class="kb-card">[Golden C] Contact Neb Servic<div class="meta"><span class="person"><span class="avatar yasin">Y</span></span></div></div>
+    </div>
+    <div class="kb-col q2"><h4>Q2 · Schedule (10)</h4>
+      <div class="kb-card">[VUC Cons] Stakeholder MGMT<div class="meta"><span class="person"><span class="avatar louis">L</span></span></div></div>
+      <div class="kb-card">[Xperienc] Call Paul Bellamy<div class="meta"><span class="person"><span class="avatar louis">L</span></span></div></div>
+      <div class="kb-card">[IT/Softw] Onboard Lumina<div class="meta"><span class="person"><span class="avatar louis">L</span></span></div></div>
+      <div class="kb-card">[Xperienc] Area revenue aprox CARRY<div class="meta"><span class="person"><span class="avatar yasin">Y</span></span></div></div>
+      <div class="kb-card">[IT/Softw] Agentic system research<div class="meta"><span class="person"><span class="avatar yasin">Y</span></span></div></div>
+      <div class="kb-card">[Golden C] Process eval Ghana mining<div class="meta"><span class="person"><span class="avatar yasin">Y</span></span></div></div>
+      <div class="kb-card">[VUC Cons] Contact Veronica<div class="meta"><span class="person"><span class="avatar lucas">L</span></span></div></div>
+      <div class="kb-card">[Golden C] follow ups CARRY<div class="meta"><span class="person"><span class="avatar lucas">L</span></span></div></div>
+      <div class="kb-card">[Golden C] Prepare Campine meeting<div class="meta"><span class="person"><span class="avatar lucas">L</span></span></div></div>
+      <div class="kb-card">[VUC Serv] Reach out potential hires<div class="meta"><span class="person"><span class="avatar lucas">L</span></span></div></div>
+    </div>
+    <div class="kb-col q3"><h4>Q3 · Coordinate (0)</h4>
+      <p class="muted" style="font-size:10.5px;">No tasks in source.</p>
+    </div>
+    <div class="kb-col q4"><h4>Q4 · Don't Do (3 · with reasons)</h4>
+      <div class="kb-card">[Golden C] Investor match research<div class="meta"><span class="tag tag-neutral">Low impact</span></div></div>
+      <div class="kb-card">[Xperienc] Website build<div class="meta"><span class="tag tag-neutral">External dep</span></div></div>
+      <div class="kb-card">[IT/Softw] Prezence AI MVP<div class="meta"><span class="tag tag-neutral">Obsolete</span></div></div>
+    </div>
+  </div>
+  <p class="muted">Source: <code>WEEKLY_meetings/Monday's Priority/2026-05-25/VUC — Weekly Priority Stack.pdf</code></p>
+</section>
+
+<!-- ====== DAILY MEETING ====== -->
+<section class="page" id="m-daily">
+  <div class="breadcrumb">Meeting · Tue–Thu</div>
+  <h1 class="page-title">Daily Meeting</h1>
+  <p class="page-sub">Fifteen minutes. Status toggle, blockers, Eisenhower drift check.</p>
+  <div class="page-meta">
+    <div><span class="meta-label">Cadence</span>Tue–Thu 09:30 · 15 min</div>
+    <div><span class="meta-label">Attendees</span>Louis · Yasin · Lucas (Emmanuel does not attend)</div>
+    <div><span class="meta-label">Writes to</span>Q1–Q2 Stack · Blockers</div>
+  </div>
+
+  <h2 class="section">Step 0 — Reminders (read-only)</h2>
+  <p class="muted">Active Monthly and Weekly objectives. Today's tasks should derive from these. Only ad-hoc point-in-time work bypasses them — and gets logged as such.</p>
+  <div class="row cols-2">
+    <div class="panel">
+      <div class="panel-head"><div class="title">Active Monthly Objectives (May)</div></div>
+      <table>
+        <thead><tr><th>Objective</th><th>Owner</th><th class="num">Progress</th></tr></thead>
+        <tbody>
+          <tr><td>Pitch Deck v2 closed + 3 NDA</td><td>Lucas</td><td class="num">40%</td></tr>
+          <tr><td>Business Plan v2 ch. 1–5 final</td><td>Lucas</td><td class="num">80%</td></tr>
+          <tr><td>SOL onboard 2 paying clients</td><td>Yasin</td><td class="num">50%</td></tr>
+          <tr><td>Investor Network — 8 calls + 2 LOI</td><td>Louis</td><td class="num">60%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="title">Weekly Objectives (W21) by founder</div></div>
+      <table>
+        <thead><tr><th>Owner</th><th>Weekly objective</th></tr></thead>
+        <tbody>
+          <tr><td>Lucas</td><td>Close pitch deck investor section + Business Plan exec summary</td></tr>
+          <tr><td>Yasin</td><td>Close SOW client B · Tech deck slides 1–5 · SOL diagnostic doc</td></tr>
+          <tr><td>Louis</td><td>3 investor calls scheduled · 2 LOI follow-ups · Saudi intro call</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div><strong>Derivation rule:</strong> if a task you're about to add today does NOT link to a Monthly Objective or Weekly Objective above, flag it as ad-hoc with reason (operational fire, calendar-driven, external request). Friday Review aggregates the ad-hoc rate as a signal.</div>
+  </div>
+
+  <h2 class="section">Today's priorities (Q1 + Q2 focus)</h2>
+  <p class="muted">Q1 = Do First (urgent + important). Q2 = Schedule (important not urgent). Every row links to a parent Weekly objective via "From" column.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Task</th><th>Owner</th><th>Quad</th><th>Status</th><th>From</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>Pitch deck investor section</td><td><span class="person"><span class="avatar lucas">L</span></span></td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot yellow"></span>In progress</td><td><span class="tag tag-neutral">Mo: Pitch Deck v2 NDA</span></td><td>—</td></tr>
+        <tr><td>Business Plan exec summary</td><td><span class="person"><span class="avatar lucas">L</span></span></td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot green"></span>Done</td><td><span class="tag tag-neutral">Mo: BP ch. 1–5</span></td><td>—</td></tr>
+        <tr><td>Tech deck slides 1–5</td><td><span class="person"><span class="avatar yasin">Y</span></span></td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot red"></span>Blocked</td><td><span class="tag tag-neutral">Wk: cross-dep Pitch Deck</span></td><td>Awaiting plant config data</td></tr>
+        <tr><td>Investor call A prep</td><td><span class="person"><span class="avatar louis">L</span></span></td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot green"></span>Done</td><td><span class="tag tag-neutral">Mo: Investor Network</span></td><td>—</td></tr>
+        <tr><td>SOL diagnostic doc</td><td><span class="person"><span class="avatar yasin">Y</span></span></td><td><span class="tag tag-warning">Q2</span></td><td><span class="dot yellow"></span>In progress</td><td><span class="tag tag-neutral">Mo: SOL 2 clients</span></td><td>—</td></tr>
+        <tr><td>External: Auditor request — financial doc</td><td><span class="person"><span class="avatar lucas">L</span></span></td><td><span class="tag tag-warning">Q2</span></td><td><span class="dot gray"></span>Pending</td><td><span class="tag tag-warning">Ad-hoc · external</span></td><td>Calendar-driven</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Yesterday's "Do First" still open</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Task</th><th>Owner</th><th>Status</th><th>Decision</th></tr></thead>
+      <tbody>
+        <tr><td>Pitch deck investor section</td><td>Lucas</td><td><span class="dot yellow"></span>In progress</td><td>Continue Q1 today</td></tr>
+        <tr><td>Tech deck slides 1–5</td><td>Yasin</td><td><span class="dot red"></span>Blocked</td><td>Escalate · 32d open</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Eisenhower Matrix · Today</h2>
+  <p class="muted">Drag &amp; drop between quadrants if priorities shifted. Mode indicator shows whether the day skews Strategic, Reactive, or Balanced.</p>
+  <div style="display:flex; gap:10px; margin:6px 0 12px; align-items:center;">
+    <span class="kpi-label" style="margin:0;">Mode</span>
+    <span class="tag tag-warning">Reactive · 5 Q1 / 2 Q2</span>
+    <span class="muted" style="font-size:11px;">Target: Balanced</span>
+  </div>
+  <div class="kanban">
+    <div class="kb-col q1"><h4>Q1 · Do First</h4>
+      <div class="kb-card">Pitch deck investor section<div class="meta"><span class="person"><span class="avatar lucas">L</span></span><span class="tag tag-warning">in prog</span></div></div>
+      <div class="kb-card">Business Plan exec summary<div class="meta"><span class="person"><span class="avatar lucas">L</span></span><span class="tag tag-success">done</span></div></div>
+      <div class="kb-card">Tech deck slides 1–5<div class="meta"><span class="person"><span class="avatar yasin">Y</span></span><span class="tag tag-danger">blocked</span></div></div>
+      <div class="kb-card">Investor call A prep<div class="meta"><span class="person"><span class="avatar louis">L</span></span><span class="tag tag-success">done</span></div></div>
+      <div class="kb-card">LOI follow-up × 2<div class="meta"><span class="person"><span class="avatar louis">L</span></span><span class="tag tag-neutral">pending</span></div></div>
+    </div>
+    <div class="kb-col q2"><h4>Q2 · Schedule</h4>
+      <div class="kb-card">SOL diagnostic doc<div class="meta"><span class="person"><span class="avatar yasin">Y</span></span><span class="tag tag-warning">in prog</span></div></div>
+      <div class="kb-card">Cash runway projection<div class="meta"><span class="person"><span class="avatar lucas">L</span></span><span class="tag tag-neutral">pending</span></div></div>
+    </div>
+    <div class="kb-col q3"><h4>Q3 · Coordinate / Delegate</h4>
+      <div class="kb-card">IT tech stack review<div class="meta"><span class="person"><span class="avatar yasin">Y</span></span><span class="tag tag-info">Delegate?</span></div></div>
+      <div class="kb-card">Brand asset cleanup<div class="meta"><span class="person"><span class="avatar louis">L</span></span><span class="tag tag-info">Delegated · vendor</span></div></div>
+    </div>
+    <div class="kb-col q4"><h4>Q4 · Drop (with reason)</h4>
+      <div class="kb-card">Generic networking event<div class="meta"><span class="tag tag-neutral">Reason: low ROI</span></div></div>
+    </div>
+  </div>
+
+  <h2 class="section">Q3 / Q4 tracking · so nothing is forgotten</h2>
+  <p class="muted">Q3 (delegated/coordinate) and Q4 (dropped) tasks are persisted, not deleted. Q3 needs a delegate-to and a check-in date. Q4 logs a reason. Both are surfaced again in Friday Review and aggregated patterns are reviewed in Monthly.</p>
+  <div class="row cols-2">
+    <div class="panel">
+      <div class="panel-head"><div class="title">Q3 — Delegated / coordinating (still mine to follow up)</div></div>
+      <table>
+        <thead><tr><th>Task</th><th>Owner</th><th>Delegated to</th><th>Check-in</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>IT tech stack review</td><td>Yasin</td><td>Internal IT (TBD)</td><td>Fri</td><td><span class="dot gray"></span>Open</td></tr>
+          <tr><td>Brand asset cleanup</td><td>Louis</td><td>External vendor</td><td>Next Wed</td><td><span class="dot yellow"></span>In prog</td></tr>
+          <tr><td>Maintenance log SOP</td><td>Yasin</td><td>Emmanuel (via VWC)</td><td>Tue VWC</td><td><span class="dot gray"></span>Open</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="title">Q4 — Dropped (reason log)</div></div>
+      <table>
+        <thead><tr><th>Task</th><th>Date dropped</th><th>Owner</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>Generic networking event</td><td class="mono">2026-05-26</td><td>Louis</td><td>Low ROI vs target investors</td></tr>
+          <tr><td>Re-design logo (deprioritized)</td><td class="mono">2026-05-21</td><td>Lucas</td><td>Not in Top 5 path</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2 class="section">Blockers</h2>
+  <p class="muted">Auto-pull from Blockers DB. If new appears, create row + @-mention the unblocker. If unresolved by EOD, it stays visible tomorrow.</p>
+
+  <h2 class="section">Link task to objective</h2>
+  <p class="muted">Any unlinked task triggers a warning. Owner can link to a Monthly Objective, or explicitly tag as Q3/Q4 reason.</p>
+
+  <h2 class="section">Today's metrics</h2>
+  <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="kpi"><div class="kpi-label">Tasks completed</div><div class="kpi-value">2 / 7</div><div class="kpi-meta">29%</div></div>
+    <div class="kpi"><div class="kpi-label">Objectives moved</div><div class="kpi-value">0 / 4</div><div class="kpi-meta">No closures yet</div></div>
+    <div class="kpi"><div class="kpi-label">Blockers open</div><div class="kpi-value" style="color:var(--danger);">1</div><div class="kpi-meta">XCHO-31 · 32d</div></div>
+  </div>
+</section>
+
+<!-- ====== FRIDAY REVIEW ====== -->
+<section class="page" id="m-friday">
+  <div class="breadcrumb">Meeting · weekly</div>
+  <h1 class="page-title">Friday Review</h1>
+  <p class="page-sub">Close the week. Score what got done, capture learnings, hand carry-overs to next Monday.</p>
+  <div class="page-meta">
+    <div><span class="meta-label">Cadence</span>Friday 16:00 · 45 min</div>
+    <div><span class="meta-label">Attendees</span>Louis · Yasin · Lucas</div>
+    <div><span class="meta-label">Inputs</span>Weekly · Monday + all Daily Meetings this week</div>
+    <div><span class="meta-label">Output</span>Carry-overs for next Monday · Monthly Objective progress update</div>
+  </div>
+
+  <h2 class="section">Step 1 — All daily tasks · accumulated Mon → Thu</h2>
+  <p class="muted">Auto-pull from Q1–Q2 Stack: every task that was open or touched any day this week. Grouped by owner so each founder can verify their own first.</p>
+  <div class="panel">
+    <details open><summary>Lucas — 8 tasks total · 4 done · 1 partial · 1 missed · 2 carry-over</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Quad</th><th>Day(s)</th><th>From</th><th>Final status</th></tr></thead>
+          <tbody>
+            <tr><td>Business Plan exec summary</td><td>Q1</td><td>Tue</td><td>Mo: BP ch.1–5</td><td><span class="tag tag-success">Done</span></td></tr>
+            <tr><td>Pitch deck investor section</td><td>Q1</td><td>Tue–Thu</td><td>Mo: Pitch Deck NDA</td><td><span class="tag tag-warning">Partial</span></td></tr>
+            <tr><td>Polish ch. 5</td><td>Q2</td><td>Wed</td><td>Mo: BP ch.1–5</td><td><span class="tag tag-success">Done</span></td></tr>
+            <tr><td>Draft ch. 6</td><td>Q2</td><td>Thu</td><td>Mo: BP ch.1–5</td><td><span class="tag tag-warning">Partial</span></td></tr>
+            <tr><td>Cash runway projection</td><td>Q2</td><td>Thu</td><td>Wk: Finance</td><td><span class="tag tag-success">Done</span></td></tr>
+            <tr><td>FX hedging review</td><td>Q2</td><td>Thu</td><td>Wk: Finance</td><td><span class="tag tag-danger">Missed</span></td></tr>
+            <tr><td>Organigram VWC draft v2</td><td>Q1</td><td>Tue</td><td>Mo: VWC Org</td><td><span class="tag tag-success">Done</span></td></tr>
+            <tr><td>Auditor request (ad-hoc)</td><td>Q2</td><td>Wed</td><td><span class="tag tag-warning">ad-hoc</span></td><td><span class="tag tag-success">Done</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details open><summary>Yasin — 6 tasks · 3 done · 1 partial · 2 missed</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Quad</th><th>Day(s)</th><th>From</th><th>Final status</th></tr></thead>
+          <tbody>
+            <tr><td>SOL — Close SOW client B</td><td>Q1</td><td>Tue</td><td>Mo: SOL 2 clients</td><td><span class="tag tag-success">Done</span></td></tr>
+            <tr><td>SOL — 3 investor calls scheduled</td><td>Q1</td><td>Tue</td><td>Mo: Investor</td><td><span class="tag tag-success">Done</span></td></tr>
+            <tr><td>Tech deck slides 1–5</td><td>Q1</td><td>Wed–Thu</td><td>Wk: Cross-dep</td><td><span class="tag tag-danger">Missed</span></td></tr>
+            <tr><td>SOL onboarding kit v3</td><td>Q2</td><td>Wed</td><td>Mo: SOL</td><td><span class="tag tag-warning">Partial</span></td></tr>
+            <tr><td>SOL diagnostic doc</td><td>Q2</td><td>Wed</td><td>Wk: SOL Dept</td><td><span class="tag tag-success">Done</span></td></tr>
+            <tr><td>Plant audit T3–4 (VWC bleed-over)</td><td>Q1</td><td>Wed</td><td>VWC P2</td><td><span class="tag tag-danger">Missed</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details open><summary>Louis — 5 tasks · 3 done · 2 partial</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Quad</th><th>Day(s)</th><th>From</th><th>Final status</th></tr></thead>
+          <tbody>
+            <tr><td>Investor calls × 3 scheduled</td><td>Q1</td><td>Tue–Thu</td><td>Mo: Investor Network</td><td><span class="tag tag-success">Done</span></td></tr>
+            <tr><td>LOI follow-up × 2</td><td>Q1</td><td>Wed</td><td>Mo: Investor Network</td><td><span class="tag tag-warning">Partial</span></td></tr>
+            <tr><td>Saudi partnership intro call</td><td>Q1</td><td>Wed</td><td>Wk: Strategy</td><td><span class="tag tag-success">Done</span></td></tr>
+            <tr><td>Map 3 ME VCs</td><td>Q2</td><td>Thu</td><td>Wk: Strategy</td><td><span class="tag tag-success">Done</span></td></tr>
+            <tr><td>Golden Camel outreach batch 2</td><td>Q2</td><td>Thu</td><td>Mo: GC partners</td><td><span class="tag tag-warning">Partial</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+
+  <h2 class="section">Step 2 — Weekly Objectives status · per founder</h2>
+  <p class="muted">For each founder, was their weekly commitment met? Roll-up of the tasks above against the weekly objective they served.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Owner</th><th>Weekly Objective</th><th>Contributing tasks</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Lucas</td><td>Close Pitch Deck investor section + tech</td><td>1/2 partial</td><td><span class="tag tag-warning">Partial</span></td></tr>
+        <tr><td>Lucas</td><td>Polish ch. 5 + draft ch. 6</td><td>1 done + 1 partial</td><td><span class="tag tag-warning">Partial</span></td></tr>
+        <tr><td>Lucas</td><td>Cash runway + FX hedging</td><td>1 done + 1 missed</td><td><span class="tag tag-warning">Partial</span></td></tr>
+        <tr><td>Yasin</td><td>Close SOW client B</td><td>1/1 done</td><td><span class="tag tag-success">Achieved</span></td></tr>
+        <tr><td>Yasin</td><td>Tech deck slides 1–5 for Lucas</td><td>0/1 missed (blocked)</td><td><span class="tag tag-danger">Missed</span></td></tr>
+        <tr><td>Yasin</td><td>SOL diagnostic doc</td><td>1/1 done</td><td><span class="tag tag-success">Achieved</span></td></tr>
+        <tr><td>Louis</td><td>3 investor calls + 2 LOI follow-up</td><td>3 done + 1 partial</td><td><span class="tag tag-warning">Partial</span></td></tr>
+        <tr><td>Louis</td><td>Saudi partnership call</td><td>1/1 done</td><td><span class="tag tag-success">Achieved</span></td></tr>
+        <tr><td>Louis</td><td>Golden Camel outreach batch 2</td><td>5/10 partial</td><td><span class="tag tag-warning">Partial</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Step 3 — Monthly Objective uplift (auto)</h2>
+  <p class="muted">For each active Monthly Objective, the % advanced this week, derived from the linked weekly tasks marked Done.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Monthly Objective</th><th>Owner</th><th>Before week</th><th>After week</th><th>Δ</th></tr></thead>
+      <tbody>
+        <tr><td>Pitch Deck v2 closed + 3 NDA</td><td>Lucas</td><td class="num">30%</td><td class="num">40%</td><td><span class="tag tag-success">+10pp</span></td></tr>
+        <tr><td>Business Plan v2 ch.1–5</td><td>Lucas</td><td class="num">65%</td><td class="num">80%</td><td><span class="tag tag-success">+15pp</span></td></tr>
+        <tr><td>SOL onboard 2 clients</td><td>Yasin</td><td class="num">30%</td><td class="num">50%</td><td><span class="tag tag-success">+20pp</span></td></tr>
+        <tr><td>Investor Network 8 calls + 2 LOI</td><td>Louis</td><td class="num">45%</td><td class="num">60%</td><td><span class="tag tag-success">+15pp</span></td></tr>
+        <tr><td>Plant Config Audit complete</td><td>Yasin</td><td class="num">65%</td><td class="num">65%</td><td><span class="tag tag-neutral">0</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Step 4 — Score the week</h2>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Q1 completion</div><div class="kpi-value">7 / 12</div><div class="kpi-meta">58%</div></div>
+    <div class="kpi"><div class="kpi-label">Q2 completion</div><div class="kpi-value">4 / 7</div><div class="kpi-meta">57%</div></div>
+    <div class="kpi"><div class="kpi-label">Ad-hoc rate</div><div class="kpi-value">1 / 19</div><div class="kpi-meta">5% (good · low)</div></div>
+    <div class="kpi"><div class="kpi-label">Monthly Obj uplift</div><div class="kpi-value">+12pp</div><div class="kpi-meta">avg across 5 obj</div></div>
+  </div>
+
+  <h2 class="section">Step 5 — Q3 / Q4 review · don't lose what was delegated or dropped</h2>
+  <div class="row cols-2">
+    <div class="panel">
+      <div class="panel-head"><div class="title">Q3 — Delegated this week (open follow-ups)</div></div>
+      <table>
+        <thead><tr><th>Task</th><th>Delegated to</th><th>Check-in</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>IT tech stack review</td><td>Internal IT (TBD)</td><td>Next Fri</td><td><span class="dot gray"></span>Open</td></tr>
+          <tr><td>Brand asset cleanup</td><td>External vendor</td><td>Next Wed</td><td><span class="dot yellow"></span>In prog</td></tr>
+          <tr><td>Maintenance log SOP</td><td>Emmanuel (VWC)</td><td>Next Tue VWC</td><td><span class="dot gray"></span>Open</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="title">Q4 — Dropped this week (reason log)</div></div>
+      <table>
+        <thead><tr><th>Task</th><th>Owner</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>Generic networking event</td><td>Louis</td><td>Low ROI vs target investors</td></tr>
+          <tr><td>Re-design logo</td><td>Lucas</td><td>Not in Top 5 path</td></tr>
+          <tr><td>Reply to cold pitch deck X</td><td>Lucas</td><td>Off-thesis</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div>Q3 items stay alive until status = Closed. Q4 logs accumulate per month and are aggregated in the Monthly meeting Part 1 — patterns indicate strategic drift (e.g. too many networking events dropped → maybe the broader strategy needs adjustment).</div>
+  </div>
+
+  <h2 class="section">Step 6 — Learnings (narrative)</h2>
+  <ul style="margin-left:18px; line-height:1.8;">
+    <li>Eisenhower drift: 3 tasks ended up in Q1 that were Q2 on Monday — tighter planning needed.</li>
+    <li>Yasin under bandwidth — reassess load for next week.</li>
+    <li>Tech deck blocker for Pitch Deck still unresolved at 32 days — escalate to Bi-monthly agenda.</li>
+    <li>Ad-hoc rate 5% is healthy — discipline holding.</li>
+  </ul>
+
+  <h2 class="section">Step 7 — Carry-overs for next Monday</h2>
+  <p class="muted">Anything Partial or Missed is auto-moved to next Monday's "Carry-overs" view.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Task</th><th>Owner</th><th>From quad</th><th>Suggested next quad</th></tr></thead>
+      <tbody>
+        <tr><td>Pitch deck investor section</td><td>Lucas</td><td>Q1</td><td>Q1 · unblock first</td></tr>
+        <tr><td>Draft ch. 6 (Business Plan)</td><td>Lucas</td><td>Q2</td><td>Q2 · continue</td></tr>
+        <tr><td>FX hedging review</td><td>Lucas</td><td>Q2</td><td>Q2 · re-schedule</td></tr>
+        <tr><td>Tech deck for Lucas</td><td>Yasin</td><td>Q1</td><td>Q1 · re-escalate</td></tr>
+        <tr><td>SOL onboarding kit v3</td><td>Yasin</td><td>Q2</td><td>Q2 · continue</td></tr>
+        <tr><td>Plant audit T3–4</td><td>Yasin</td><td>Q1</td><td>To VWC Weekly P2</td></tr>
+        <tr><td>LOI follow-up</td><td>Louis</td><td>Q1</td><td>Q1 · continue</td></tr>
+        <tr><td>Golden Camel outreach</td><td>Louis</td><td>Q2</td><td>Q2 · continue</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====== VWC WEEKLY ====== -->
+<section class="page" id="m-vwc">
+  <div class="breadcrumb">Meeting · weekly · isolated VWC track</div>
+  <h1 class="page-title">VWC Weekly</h1>
+  <p class="page-sub">Ghana operations cadence. Only meeting Emmanuel attends.</p>
+  <div class="page-meta">
+    <div><span class="meta-label">Cadence</span>Tuesday 08:00 GMT · 60 min</div>
+    <div><span class="meta-label">Attendees</span>Louis · Yasin · Lucas · <strong>Emmanuel</strong></div>
+    <div><span class="meta-label">Flow</span>Previous Week → Ghana Pulse → Four Pillars → Sites Improvement → Eisenhower → Actions</div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div>Weekly objectives only. Month / 90-day horizons are owned by other meetings; nothing of that horizon is set here.</div>
+  </div>
+
+  <h2 class="section">Pillar definitions</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Pillar</th><th>Owner</th><th>Scope</th></tr></thead>
+      <tbody>
+        <tr><td><strong>P1</strong></td><td>Louis</td><td>Strategy &amp; Investors</td></tr>
+        <tr><td><strong>P2</strong></td><td>Yasin</td><td>CTO / Technical</td></tr>
+        <tr><td><strong>P3</strong></td><td>Lucas</td><td>Growth &amp; Presentation</td></tr>
+        <tr><td><strong>P4</strong></td><td>Emmanuel</td><td>Ghana Operations (on-site)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Step 1 — Close last week (placeholder · feeds from real prev-week data)</h2>
+  <p class="muted">Will auto-pull the previous week's VWC objectives from the VWC Objectives DB (currently XCHO Jira project). No invented data shown here.</p>
+  <div class="panel"><div style="padding:14px; text-align:center; color:var(--text-3); font-size:12px;">Pending real data ingestion from XCHO Jira project (19 open issues).</div></div>
+
+  <h2 class="section">Step 2 — Ghana Operations Pulse (input from Emmanuel · Teams Tuesday)</h2>
+  <p class="muted">Emmanuel reports production figures live in the Tuesday Teams call. Metric structure agreed but values blank until first reading is captured directly into Notion.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Metric</th><th class="num">Last week</th><th class="num">This week</th><th class="num">Target</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Kg mined</strong></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="dot gray"></span>—</td></tr>
+        <tr><td><strong>Kg processed</strong></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="dot gray"></span>—</td></tr>
+        <tr><td><strong>Operating days</strong></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="dot gray"></span>—</td></tr>
+        <tr><td><strong>Recovery rate</strong></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="dot gray"></span>—</td></tr>
+        <tr><td><strong>Site uptime</strong></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="dot gray"></span>—</td></tr>
+        <tr><td><strong>Main issue</strong></td><td colspan="4">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Step 3 — Weekly objectives per pillar (placeholder)</h2>
+  <p class="muted">Each pillar owner sets weekly deliverables in the meeting. Real values will be entered live in Notion; current XCHO Jira tickets will be migrated as initial seed.</p>
+  <div class="panel">
+    <details open><summary>P1 · Louis — this week</summary>
+      <div class="details-body"><p class="muted" style="padding:8px 0;">— to be populated in next VWC Weekly —</p></div>
+    </details>
+    <details open><summary>P2 · Yasin — this week</summary>
+      <div class="details-body"><p class="muted" style="padding:8px 0;">— to be populated in next VWC Weekly —</p></div>
+    </details>
+    <details open><summary>P3 · Lucas — this week</summary>
+      <div class="details-body"><p class="muted" style="padding:8px 0;">— to be populated in next VWC Weekly —</p></div>
+    </details>
+    <details open><summary>P4 · Emmanuel — this week</summary>
+      <div class="details-body"><p class="muted" style="padding:8px 0;">— to be populated in next VWC Weekly —</p></div>
+    </details>
+  </div>
+
+  <h2 class="section">Step 4 — Sites Improvement (placeholder)</h2>
+  <p class="muted">Any owner can suggest changes, improvements, or file site requests. Triaged in-meeting into: weekly objective · R&amp;O register · rejected with reason.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Suggestion / Request</th><th>From</th><th>Type</th><th>Decision</th></tr></thead>
+      <tbody>
+        <tr><td colspan="4" style="text-align:center; color:var(--text-3); font-size:12px; padding:14px;">— no entries yet —</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Step 5 — Eisenhower (weekly objectives)</h2>
+  <p class="muted">Aggregate of pillar weekly objectives from Step 3. Activates once Step 3 has entries.</p>
+  <div class="kanban">
+    <div class="kb-col q1"><h4>Q1 · Do First</h4><p class="muted" style="font-size:10.5px;">—</p></div>
+    <div class="kb-col q2"><h4>Q2 · Schedule</h4><p class="muted" style="font-size:10.5px;">—</p></div>
+    <div class="kb-col q3"><h4>Q3 · Coordinate</h4><p class="muted" style="font-size:10.5px;">—</p></div>
+    <div class="kb-col q4"><h4>Q4 · Drop</h4><p class="muted" style="font-size:10.5px;">—</p></div>
+  </div>
+
+  <h2 class="section">Step 6 — Cross-pillar actions &amp; Weekly summary</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Pillar A needs</th><th>From Pillar B</th><th>What</th><th>By</th></tr></thead>
+      <tbody>
+        <tr><td colspan="4" style="text-align:center; color:var(--text-3); font-size:12px; padding:14px;">— no dependencies logged yet —</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</section>
+
+<!-- ====== DB: PROJECTS ====== -->
+<section class="page" id="db-projects">
+  <div class="breadcrumb">Database</div>
+  <h1 class="page-title">Projects</h1>
+  <p class="page-sub">All projects across verticals with status, owner, and Top 5 designation.</p>
+  <div class="panel">
+    <div class="panel-head"><div class="title">All projects</div><div class="actions"><div class="tab active">All</div><div class="tab">Top 5</div><div class="tab">Active</div><div class="tab">By vertical</div></div></div>
+    <table>
+      <thead><tr><th>Name</th><th>Vertical</th><th>Owner</th><th>Status</th><th>Top 5</th><th>Subtasks</th><th class="num">Score</th></tr></thead>
+      <tbody>
+        <tr><td><strong>SOL Consulting Q2</strong></td><td><span class="tag tag-info">Services</span></td><td>Yasin</td><td><span class="tag tag-success">Active</span></td><td><span class="tag tag-accent">Top 5</span></td><td>5 / 8</td><td class="num">8.6</td></tr>
+        <tr><td><strong>Investor Network</strong></td><td><span class="tag tag-info">Services</span></td><td>Louis</td><td><span class="tag tag-success">Active</span></td><td><span class="tag tag-accent">Top 5</span></td><td>—</td><td class="num">8.0</td></tr>
+        <tr><td><strong>Business Plan v2</strong></td><td><span class="tag tag-warning">Products</span></td><td>Lucas</td><td><span class="tag tag-success">Active</span></td><td><span class="tag tag-accent">Top 5</span></td><td>3 / 7</td><td class="num">7.8</td></tr>
+        <tr><td><strong>Plant Config Audit</strong></td><td><span class="tag tag-warning">Products</span></td><td>Yasin</td><td><span class="tag tag-success">Active</span></td><td><span class="tag tag-accent">Top 5</span></td><td>2 / 4</td><td class="num">7.7</td></tr>
+        <tr><td><strong>Golden Camel v2</strong></td><td><span class="tag tag-info">Services</span></td><td>Louis</td><td><span class="tag tag-success">Active</span></td><td><span class="tag tag-accent">Top 5</span></td><td>—</td><td class="num">7.6</td></tr>
+        <tr><td>Pitch Deck refresh</td><td><span class="tag tag-info">Services</span></td><td>Lucas</td><td><span class="tag tag-success">Active</span></td><td>—</td><td>2 / 6</td><td class="num">6.8</td></tr>
+        <tr><td>Recovery Optimization</td><td><span class="tag tag-warning">Products</span></td><td>Yasin</td><td><span class="tag tag-success">Active</span></td><td>—</td><td>—</td><td class="num">6.9</td></tr>
+        <tr style="opacity:0.6;"><td>SAMI Consulting</td><td><span class="tag tag-info">Services</span></td><td>Yasin</td><td><span class="tag tag-neutral">Parked</span></td><td>—</td><td>—</td><td class="num">5.0</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====== DB: MONTHLY OBJECTIVES ====== -->
+<section class="page" id="db-mobj">
+  <div class="breadcrumb">Database</div>
+  <h1 class="page-title">Monthly Objectives</h1>
+  <p class="page-sub">Bridge between the Monthly meeting and the Weekly · Monday. Each row links to a Top 5 project and is fed by weekly tasks.</p>
+  <div class="panel">
+    <div class="panel-head"><div class="title">Current month (May)</div></div>
+    <table>
+      <thead><tr><th>Objective</th><th>Owner</th><th>Linked Top 5</th><th>Success criteria</th><th class="num">Progress</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Pitch Deck v2 closed + 3 NDA</td><td>Lucas</td><td>Pitch Deck refresh</td><td>3 investors sign NDA</td><td class="num">40%</td><td><span class="tag tag-warning">In progress</span></td></tr>
+        <tr><td>Business Plan v2 chapters 1–5 final</td><td>Lucas</td><td>Business Plan</td><td>5/5 peer-reviewed</td><td class="num">80%</td><td><span class="tag tag-warning">In progress</span></td></tr>
+        <tr><td>SOL onboard 2 paying clients</td><td>Yasin</td><td>SOL Consulting Q2</td><td>2 SOWs signed</td><td class="num">50%</td><td><span class="tag tag-warning">In progress</span></td></tr>
+        <tr><td>Investor Network — 8 calls + 2 LOI</td><td>Louis</td><td>Investor Network</td><td>8 calls + 2 LOI</td><td class="num">60%</td><td><span class="tag tag-warning">In progress</span></td></tr>
+        <tr><td>Golden Camel — 5 partners mapped</td><td>Louis</td><td>Golden Camel v2</td><td>5 names + intros</td><td class="num">100%</td><td><span class="tag tag-success">Achieved</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3 class="sub">Properties</h3>
+  <p class="muted">Objective · Owner · Month · Linked Top 5 Project (relation) · Success criteria · Progress % (formula) · Linked Weekly Tasks (relation) · Status · Carry to next month (boolean)</p>
+</section>
+
+<!-- ====== DB: Q1-Q2 STACK ====== -->
+<section class="page" id="db-q12">
+  <div class="breadcrumb">Database</div>
+  <h1 class="page-title">Q1–Q2 Stack</h1>
+  <p class="page-sub">Weekly tasks with Eisenhower quadrant. Read and written by Monday, Daily, Friday.</p>
+  <div class="panel">
+    <div class="panel-head"><div class="title">Current week (W21)</div><div class="actions"><div class="tab active">List</div><div class="tab">Eisenhower</div><div class="tab">By owner</div><div class="tab">By project</div></div></div>
+    <table>
+      <thead><tr><th>Task</th><th>Owner</th><th>Project</th><th>Quad</th><th>Status</th><th>Day</th></tr></thead>
+      <tbody>
+        <tr><td>SOL close SOW B</td><td>Yasin</td><td>SOL Consulting</td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot yellow"></span>In prog</td><td>Tue</td></tr>
+        <tr><td>Pitch deck investor section</td><td>Lucas</td><td>Pitch Deck</td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot yellow"></span>In prog</td><td>Tue</td></tr>
+        <tr><td>Tech deck slides 1–5</td><td>Yasin</td><td>VWC</td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot red"></span>Blocked</td><td>Thu</td></tr>
+        <tr><td>Investor calls × 3</td><td>Louis</td><td>Investor Network</td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot gray"></span>Pending</td><td>Tue–Thu</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====== DB: KPIs ====== -->
+<section class="page" id="db-kpis">
+  <div class="breadcrumb">Database</div>
+  <h1 class="page-title">KPIs</h1>
+  <p class="page-sub">Tracked indicators with target, actual, frequency, and history. Feeds the live KPI Dashboard and Monthly Part 1.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>KPI</th><th>Category</th><th>Owner</th><th class="num">Target</th><th class="num">Current</th><th>Frequency</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>Q1 weekly completion %</td><td><span class="tag tag-info">VUC</span></td><td>Lucas</td><td class="num">75%</td><td class="num">68%</td><td>weekly auto</td><td>Q1–Q2 Stack formula</td></tr>
+        <tr><td>Investor calls / month</td><td><span class="tag tag-info">VUC</span></td><td>Louis</td><td class="num">15</td><td class="num">12</td><td>weekly manual</td><td>Louis input</td></tr>
+        <tr><td>LOIs signed / month</td><td><span class="tag tag-info">VUC</span></td><td>Louis</td><td class="num">2</td><td class="num">1</td><td>weekly manual</td><td>Louis input</td></tr>
+        <tr><td>Avg blocker resolution (days)</td><td><span class="tag tag-info">VUC</span></td><td>Lucas</td><td class="num">2</td><td class="num">3.2</td><td>auto</td><td>Blockers DB formula</td></tr>
+        <tr><td>SOL new clients / month</td><td><span class="tag tag-info">VUC</span></td><td>Yasin</td><td class="num">1</td><td class="num">2</td><td>weekly manual</td><td>Yasin input</td></tr>
+        <tr><td>Tons processed (Ghana) / wk</td><td><span class="tag tag-warning">VWC</span></td><td>Emmanuel</td><td class="num">120</td><td class="num">108</td><td>weekly</td><td>Emmanuel input</td></tr>
+        <tr><td>Recovery rate %</td><td><span class="tag tag-warning">VWC</span></td><td>Yasin</td><td class="num">72%</td><td class="num">69%</td><td>weekly</td><td>Yasin input</td></tr>
+        <tr><td>Site uptime (Ghana)</td><td><span class="tag tag-warning">VWC</span></td><td>Emmanuel</td><td class="num">95%</td><td class="num">96%</td><td>weekly</td><td>Emmanuel input</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====== DB: VWC OBJECTIVES ====== -->
+<section class="page" id="db-vwc">
+  <div class="breadcrumb">Database</div>
+  <h1 class="page-title">VWC Objectives</h1>
+  <p class="page-sub">Ghana operations objectives organized by four pillars. Equivalent of the XCHO Jira project.</p>
+  <div class="kanban">
+    <div class="kb-col" style="border-top-color:var(--info);"><h4>P1 · Louis</h4>
+      <div class="kb-card">Investor Network<div class="meta"><span class="tag tag-warning">In prog</span></div></div>
+      <div class="kb-card">Expose for processing plant<div class="meta"><span class="tag tag-warning">Week obj</span></div></div>
+      <div class="kb-card">Brochure structure feedback<div class="meta"><span class="tag tag-neutral">Backlog</span></div></div>
+    </div>
+    <div class="kb-col" style="border-top-color:var(--danger);"><h4>P2 · Yasin</h4>
+      <div class="kb-card">Plant Configuration Audit<div class="meta"><span class="tag tag-warning">In prog</span></div></div>
+      <div class="kb-card">Recovery Optimisation<div class="meta"><span class="tag tag-neutral">Backlog</span></div></div>
+      <div class="kb-card">Geological Assessment<div class="meta"><span class="tag tag-neutral">Backlog</span></div></div>
+    </div>
+    <div class="kb-col" style="border-top-color:var(--success);"><h4>P3 · Lucas</h4>
+      <div class="kb-card">Business Plan<div class="meta"><span class="tag tag-warning">In prog</span></div></div>
+      <div class="kb-card">Pitch deck<div class="meta"><span class="tag tag-warning">In prog</span></div></div>
+      <div class="kb-card">Organigram VWC<div class="meta"><span class="tag tag-warning">In prog</span></div></div>
+    </div>
+    <div class="kb-col" style="border-top-color:var(--warning);"><h4>P4 · Emmanuel</h4>
+      <div class="kb-card">Ghana Operational Baseline<div class="meta"><span class="tag tag-warning">In prog</span></div></div>
+      <div class="kb-card">Make videos for documentary<div class="meta"><span class="tag tag-warning">In prog</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== DB: BLOCKERS ====== -->
+<section class="page" id="db-blockers">
+  <div class="breadcrumb">Database</div>
+  <h1 class="page-title">Blockers</h1>
+  <p class="page-sub">Open → Resolved. Anything past 48h gets flagged automatically via DaysOpen formula.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Title</th><th>Owner</th><th>Blocks</th><th>Target</th><th class="num">Days open</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr style="background:var(--danger-bg);"><td><strong>Tech deck for Lucas</strong></td><td>Yasin</td><td>→ Pitch Deck</td><td class="mono">2026-04-23</td><td class="num"><strong>32</strong></td><td><span class="tag tag-danger">Stale</span></td></tr>
+        <tr><td>Final investor list</td><td>Louis</td><td>→ Investor Network</td><td class="mono">2026-05-27</td><td class="num">1</td><td><span class="tag tag-warning">Open</span></td></tr>
+        <tr><td>Ghana site photos for brochure</td><td>Emmanuel</td><td>→ Brochure</td><td class="mono">2026-05-30</td><td class="num">3</td><td><span class="tag tag-warning">Open · stale</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====== DB: R&O ====== -->
+<section class="page" id="db-ro">
+  <div class="breadcrumb">Database</div>
+  <h1 class="page-title">R&amp;O Register</h1>
+  <p class="page-sub">Risks and opportunities tracked. Escalation only via Monthly meeting.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Title</th><th>Type</th><th>Probability</th><th>Impact</th><th>Owner</th><th>Stage</th><th>Mitigation</th></tr></thead>
+      <tbody>
+        <tr><td>Mining license renewal Ghana</td><td><span class="tag tag-danger">Risk</span></td><td>Medium</td><td>High</td><td>Emmanuel</td><td><span class="tag tag-warning">Monitoring</span></td><td>Filing 60d before</td></tr>
+        <tr><td>Australia gold partnership</td><td><span class="tag tag-success">Opportunity</span></td><td>High</td><td>High</td><td>Lucas</td><td><span class="tag tag-info">Actioned</span></td><td>Pitch refresh + Jun mtg</td></tr>
+        <tr><td>FX exposure GHS/USD</td><td><span class="tag tag-danger">Risk</span></td><td>High</td><td>Medium</td><td>Lucas</td><td><span class="tag tag-warning">Monitoring</span></td><td>Hedging in review</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====== DB: DECISION ENGINE ====== -->
+<section class="page" id="db-decision">
+  <div class="breadcrumb">Database · driven by Portfolio Matrix</div>
+  <h1 class="page-title">Decision Engine</h1>
+  <p class="page-sub">Score data for each project across the 8 dimensions. Editable continuously with 2-founder ratification. Full audit log retained.</p>
+  <p><a style="color:var(--info);" href="#" onclick="show(event,'portfolio')">→ Open Portfolio Matrix (primary view)</a></p>
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div>This database powers the Portfolio Matrix permanent view. Direct edits here require 2-founder ratification; for normal use, work from Portfolio Matrix or Top 5 Live.</div>
+  </div>
+</section>
+
+<!-- ====== PERSONAL LUCAS ====== -->
+<section class="page" id="p-lucas">
+  <div class="breadcrumb">Personal · auto-filtered Owner = Lucas</div>
+  <h1 class="page-title">My Week — Lucas</h1>
+  <p class="page-sub">Three time horizons (day · week · month) — each grouped by project so the cascade is visible at a glance.</p>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Today · Q1 done</div><div class="kpi-value">2 / 4</div><div class="kpi-meta">50%</div></div>
+    <div class="kpi"><div class="kpi-label">Week · Q1 done</div><div class="kpi-value">3 / 7</div><div class="kpi-meta">43% · Wed mid-day</div></div>
+    <div class="kpi"><div class="kpi-label">Month · objectives</div><div class="kpi-value">2 / 5</div><div class="kpi-meta">2 on-track · 1 behind</div></div>
+    <div class="kpi"><div class="kpi-label">Blockers</div><div class="kpi-value" style="color:var(--danger);">1</div><div class="kpi-meta">Tech deck · 32d</div></div>
+  </div>
+
+  <h2 class="section">Monthly Objectives (May) · by project</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Project</th><th>Monthly Objective</th><th class="num">Progress</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pitch Deck refresh</strong></td><td>Pitch Deck v2 closed + 3 NDA signed</td><td class="num">40%</td><td><span class="tag tag-warning">Behind</span></td></tr>
+        <tr><td><strong>Business Plan v2</strong></td><td>Chapters 1–5 finalized (peer-reviewed)</td><td class="num">80%</td><td><span class="tag tag-success">On track</span></td></tr>
+        <tr><td><strong>VWC Ghana</strong></td><td>Organigram VWC v2 + Ghana ops section in BP</td><td class="num">55%</td><td><span class="tag tag-warning">Partial</span></td></tr>
+        <tr><td><strong>Cross / Finance</strong></td><td>Cash runway projection updated + FX hedging plan</td><td class="num">20%</td><td><span class="tag tag-warning">Behind</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Weekly Objectives (W21) · by project</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Project</th><th>Weekly Objective</th><th>Quadrant</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pitch Deck refresh</strong></td><td>Close investor section + tech section</td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot red"></span>Blocked</td></tr>
+        <tr><td><strong>Business Plan v2</strong></td><td>Polish ch. 5 + draft ch. 6</td><td><span class="tag tag-warning">Q2</span></td><td><span class="dot gray"></span>Pending</td></tr>
+        <tr><td><strong>VWC Ghana</strong></td><td>Organigram VWC v2 draft</td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot yellow"></span>In prog (carry)</td></tr>
+        <tr><td><strong>Cross / Finance</strong></td><td>Cash runway projection + FX hedging review</td><td><span class="tag tag-warning">Q2</span></td><td><span class="dot gray"></span>Pending</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">Daily Tasks (today, Tue May 26) · by project</h2>
+  <div class="panel">
+    <details open><summary>Pitch Deck refresh</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Quad</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Pitch deck investor section</td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot yellow"></span>In prog</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details open><summary>Business Plan v2</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Quad</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Business Plan exec summary</td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot green"></span>Done</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details><summary>VWC Ghana</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Quad</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Organigram VWC draft v2 (carry)</td><td><span class="tag tag-danger">Q1</span></td><td><span class="dot yellow"></span>In prog</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details><summary>Ad-hoc / external</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Task</th><th>Quad</th><th>Status</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td>Auditor request — financial doc</td><td><span class="tag tag-warning">Q2</span></td><td><span class="dot gray"></span>Pending</td><td>External · calendar-driven</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+
+  <h2 class="section">Q3 / Q4 — my history (so nothing is lost)</h2>
+  <div class="row cols-2">
+    <div class="panel">
+      <div class="panel-head"><div class="title">Q3 — what I delegated</div></div>
+      <table>
+        <thead><tr><th>Task</th><th>Delegated to</th><th>Check-in</th></tr></thead>
+        <tbody>
+          <tr><td>Brand identity refresh</td><td>External agency</td><td>Jun 03</td></tr>
+          <tr><td>Bookkeeping monthly close</td><td>Accountant</td><td>Mon</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="title">Q4 — what I dropped (with reason)</div></div>
+      <table>
+        <thead><tr><th>Task</th><th>Date</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>Re-design logo</td><td class="mono">May 21</td><td>Not in Top 5 path</td></tr>
+          <tr><td>Reply to cold pitch deck X</td><td class="mono">May 18</td><td>Off-thesis</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2 class="section">Active projects · subtask roll-up</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Project</th><th>Status</th><th>Subtasks</th><th>Top 5</th><th class="num">Score</th></tr></thead>
+      <tbody>
+        <tr><td>Business Plan v2</td><td><span class="tag tag-success">Active</span></td><td>3 / 7</td><td><span class="tag tag-accent">Top 5</span></td><td class="num">7.8</td></tr>
+        <tr><td>Pitch Deck refresh</td><td><span class="tag tag-success">Active</span></td><td>2 / 6</td><td>—</td><td class="num">6.8</td></tr>
+        <tr><td>Green Gold Documentary</td><td><span class="tag tag-warning">Approved</span></td><td>0 / 4</td><td>—</td><td class="num">6.2</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">My R&amp;O register</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Title</th><th>Type</th><th>Stage</th></tr></thead>
+      <tbody>
+        <tr><td>Australia gold partnership</td><td><span class="tag tag-success">Opportunity</span></td><td><span class="tag tag-info">Actioned</span></td></tr>
+        <tr><td>FX exposure GHS/USD</td><td><span class="tag tag-danger">Risk</span></td><td><span class="tag tag-warning">Monitoring</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====== PERSONAL OTHERS ====== -->
+<section class="page" id="p-others">
+  <div class="breadcrumb">Personal · each founder has identical template</div>
+  <h1 class="page-title">Louis · Yasin · Emmanuel</h1>
+  <p class="page-sub">Same three-horizon structure (Daily / Weekly / Monthly by project) as Lucas. Auto-filtered per owner. Below: a summary of what each one sees.</p>
+
+  <h2 class="section">Louis — Strategy &amp; Investors</h2>
+  <div class="row cols-2">
+    <div class="panel">
+      <div class="panel-head"><div class="title">Monthly objectives (May)</div></div>
+      <table>
+        <thead><tr><th>Project</th><th>Objective</th><th class="num">Progress</th></tr></thead>
+        <tbody>
+          <tr><td>Investor Network</td><td>8 calls + 2 LOIs</td><td class="num">60%</td></tr>
+          <tr><td>Golden Camel</td><td>5 partners mapped</td><td class="num">100%</td></tr>
+          <tr><td>VWC P1</td><td>Brochure structure finalized</td><td class="num">70%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="title">Weekly objectives (W21)</div></div>
+      <table>
+        <thead><tr><th>Project</th><th>Objective</th></tr></thead>
+        <tbody>
+          <tr><td>Investor Network</td><td>3 investor calls scheduled + 2 LOI follow-up</td></tr>
+          <tr><td>Investor Network</td><td>Saudi partnership intro call</td></tr>
+          <tr><td>Golden Camel</td><td>Outreach batch 2 (Thu)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2 class="section">Yasin — CTO / Consulting</h2>
+  <div class="row cols-2">
+    <div class="panel">
+      <div class="panel-head"><div class="title">Monthly objectives (May)</div></div>
+      <table>
+        <thead><tr><th>Project</th><th>Objective</th><th class="num">Progress</th></tr></thead>
+        <tbody>
+          <tr><td>VUC Consulting SOL</td><td>Onboard 2 paying clients</td><td class="num">50%</td></tr>
+          <tr><td>VWC P2</td><td>Plant Config Audit complete + report</td><td class="num">65%</td></tr>
+          <tr><td>VWC P2</td><td>Recovery Optimization data analysis</td><td class="num">40%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="title">Open blockers (he owns)</div></div>
+      <table>
+        <thead><tr><th>Blocker</th><th class="num">Days open</th></tr></thead>
+        <tbody>
+          <tr style="background:var(--danger-bg);"><td><strong>Tech deck for Lucas</strong></td><td class="num">32 · stale</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2 class="section">Emmanuel — Ghana Operations · restricted view</h2>
+  <div class="callout warning">
+    <div class="callout-icon">|</div>
+    <div><strong>Restricted access</strong>. Emmanuel only sees: VWC Weekly page · VWC Objectives (P4) · Blockers (his rows) · KPIs (Category = VWC). He does NOT see Q1–Q2 Stack, Daily, Weekly Monday, Friday Review, Monthly, Bi-monthly.</div>
+  </div>
+  <div class="row cols-2">
+    <div class="panel">
+      <div class="panel-head"><div class="title">VWC P4 — weekly objectives</div></div>
+      <table>
+        <thead><tr><th>Objective</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Plant config raw data turbine 4 (carry)</td><td><span class="dot red"></span>Missed</td></tr>
+          <tr><td>Site videos batch 2</td><td><span class="dot yellow"></span>In prog</td></tr>
+          <tr><td>Maintenance log update</td><td><span class="dot gray"></span>Pending</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="title">VWC KPIs he reports</div></div>
+      <table>
+        <thead><tr><th>KPI</th><th class="num">Current</th></tr></thead>
+        <tbody>
+          <tr><td>Kg mined / wk</td><td class="num">3,120</td></tr>
+          <tr><td>Kg processed / wk</td><td class="num">2,890</td></tr>
+          <tr><td>Operating days</td><td class="num">6.5</td></tr>
+          <tr><td>Site uptime</td><td class="num">97%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ====== VUC BOARD ====== -->
+<section class="page" id="b-vuc">
+  <div class="breadcrumb">Board view</div>
+  <h1 class="page-title">VUC Board</h1>
+  <p class="page-sub">Kanban over Projects DB, grouped by Status. Used in Bi-monthly and Monthly.</p>
+  <div class="kanban">
+    <div class="kb-col"><h4>Approved / Queued</h4>
+      <div class="kb-card">Green Gold Documentary<div class="meta"><span class="person"><span class="avatar lucas">L</span></span></div></div>
+    </div>
+    <div class="kb-col q1"><h4>Active Execution</h4>
+      <div class="kb-card">SOL Consulting Q2<div class="meta"><span class="person"><span class="avatar yasin">Y</span></span><span class="tag tag-accent">Top 5</span></div></div>
+      <div class="kb-card">Pitch Deck refresh<div class="meta"><span class="person"><span class="avatar lucas">L</span></span></div></div>
+      <div class="kb-card">Business Plan v2<div class="meta"><span class="person"><span class="avatar lucas">L</span></span><span class="tag tag-accent">Top 5</span></div></div>
+      <div class="kb-card">Investor Network<div class="meta"><span class="person"><span class="avatar louis">L</span></span><span class="tag tag-accent">Top 5</span></div></div>
+      <div class="kb-card">Plant Config Audit<div class="meta"><span class="person"><span class="avatar yasin">Y</span></span><span class="tag tag-accent">Top 5</span></div></div>
+      <div class="kb-card">Golden Camel v2<div class="meta"><span class="person"><span class="avatar louis">L</span></span><span class="tag tag-accent">Top 5</span></div></div>
+    </div>
+    <div class="kb-col q2"><h4>Completed</h4>
+      <div class="kb-card">Brand identity refresh<div class="meta"><span class="person"><span class="avatar louis">L</span></span></div></div>
+    </div>
+    <div class="kb-col q4"><h4>Parked / Killed</h4>
+      <div class="kb-card" style="opacity:0.6;">SAMI Consulting<div class="meta"><span class="tag tag-neutral">Parked</span></div></div>
+      <div class="kb-card" style="opacity:0.5;">VC Matchmaking v3<div class="meta"><span class="tag tag-neutral">Killed</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== VWC BOARD ====== -->
+<section class="page" id="b-vwc">
+  <div class="breadcrumb">Board view</div>
+  <h1 class="page-title">VWC Board — Pillars</h1>
+  <p class="page-sub">Kanban over VWC Objectives DB, grouped by Pillar.</p>
+  <div class="kanban">
+    <div class="kb-col" style="border-top-color:var(--info);"><h4>P1 · Louis</h4>
+      <div class="kb-card">Investor Network</div>
+      <div class="kb-card">Brochure structure</div>
+      <div class="kb-card">Spokesperson visit</div>
+      <div class="kb-card">Expose plant</div>
+    </div>
+    <div class="kb-col" style="border-top-color:var(--danger);"><h4>P2 · Yasin</h4>
+      <div class="kb-card">Plant Config Audit</div>
+      <div class="kb-card">Recovery Optimization</div>
+      <div class="kb-card">Geological Assessment</div>
+    </div>
+    <div class="kb-col" style="border-top-color:var(--success);"><h4>P3 · Lucas</h4>
+      <div class="kb-card">Business Plan</div>
+      <div class="kb-card">Pitch Deck</div>
+      <div class="kb-card">Organigram</div>
+      <div class="kb-card">Green Gold doc</div>
+    </div>
+    <div class="kb-col" style="border-top-color:var(--warning);"><h4>P4 · Emmanuel</h4>
+      <div class="kb-card">Ghana Baseline</div>
+      <div class="kb-card">Make videos</div>
+      <div class="kb-card">Process videos</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== ARCHIVED PAGES ====== -->
+<section class="page" id="db-ideas">
+  <div class="breadcrumb">Database · archived</div>
+  <h1 class="page-title">Ideas <span style="font-size:13px;color:var(--text-3);font-weight:400;">— paused</span></h1>
+  <div class="callout warning">
+    <div class="callout-icon">||</div>
+    <div>Database frozen. Records preserved. No active write operations. To reactivate, re-enable the three meetings of the Future branch (Pipeline Review, Incubation, Ideas Session) from workspace settings.</div>
+  </div>
+</section>
+<section class="page" id="m-pipeline">
+  <div class="breadcrumb">Meeting · archived</div>
+  <h1 class="page-title">Pipeline Review <span style="font-size:13px;color:var(--text-3);font-weight:400;">— paused</span></h1>
+  <p class="muted">Tuesday PM review of new Ideas against the 4-requirement gate. Currently paused.</p>
+</section>
+<section class="page" id="m-incubation">
+  <div class="breadcrumb">Meeting · archived</div>
+  <h1 class="page-title">Incubation <span style="font-size:13px;color:var(--text-3);font-weight:400;">— paused</span></h1>
+  <p class="muted">Bi-weekly Thursday deep review of Incubation-stage ideas with Fit × Feasibility scoring. Currently paused.</p>
+</section>
+<section class="page" id="m-ideas">
+  <div class="breadcrumb">Meeting · archived</div>
+  <h1 class="page-title">Ideas Session <span style="font-size:13px;color:var(--text-3);font-weight:400;">— paused</span></h1>
+  <p class="muted">Friday quick-add of new Ideas. Currently paused.</p>
+</section>
+
+<!-- ====== GLOSSARY ====== -->
+<section class="page" id="glossary">
+  <div class="breadcrumb">Reference</div>
+  <h1 class="page-title">Glossary &amp; Operating Rules</h1>
+
+  <h2 class="section">Operating rules (v4)</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>#</th><th>Rule</th><th>Enforcement</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1</td><td>Every ticket has a named owner</td><td>Owner field required; empty rows highlight red</td></tr>
+        <tr><td class="mono">2</td><td>Urgency captured in description</td><td>Urgency select (Low/Med/High) + textarea</td></tr>
+        <tr><td class="mono">3</td><td>VWC tickets stay on VWC board</td><td>VWC Objectives DB separate; Q1–Q2 Stack rejects VWC tag</td></tr>
+        <tr><td class="mono">4</td><td>Emmanuel participates only in VWC Weekly</td><td>Filter excludes him from all VUC views</td></tr>
+        <tr><td class="mono">5</td><td>Blockers resolved &lt; 48h or flagged</td><td>Formula DaysOpen; auto view "Stale Blockers"</td></tr>
+        <tr><td class="mono">6</td><td>R&amp;O escalation only in meetings</td><td>Stage change locked outside Monthly page</td></tr>
+        <tr><td class="mono">7</td><td>Decision Engine — live with ratification</td><td>Score changes require 2nd founder sign-off; audit log retained</td></tr>
+        <tr><td class="mono">8</td><td>Monthly Objective links to a Top 5 project</td><td>Relation required, or explicit "Out of Top 5" justification</td></tr>
+        <tr><td class="mono">9</td><td>Weekly task links to a Monthly Objective</td><td>Soft warning if unlinked on create</td></tr>
+        <tr><td class="mono">10</td><td>Future branch (Ideas / Pipeline / Incubation) is paused</td><td>Re-enable from settings; affects Bi-monthly Strategic agenda</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section">External tools coexisting with Notion</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Tool</th><th>Role</th><th>Integration with Notion</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Microsoft Teams</strong></td><td>Comms · meeting calls · decision channel (#decisions)</td><td>Post-meeting summary auto-shared to Teams; Notion mentions notify Teams</td></tr>
+        <tr><td><strong>Outlook</strong></td><td>Email · calendar</td><td>Notion calendar sync (manual paste links for now)</td></tr>
+        <tr><td><strong>SharePoint</strong></td><td>Document vault (legal, HR, contracts, static docs)</td><td>Notion embeds SharePoint links; Notion does NOT replace SharePoint for static docs</td></tr>
+        <tr><td><strong>Jira</strong></td><td>Current state of record (to be deprecated)</td><td>Phase 1 parallel run; deprecate at end of week 1 if Notion adoption flows</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted"><strong>Emmanuel cadence:</strong> reports Ghana operations every Tuesday via Teams meeting. Those numbers flow into the VWC Weekly Notion page during/after the call, then auto-feed KPIs DB and VWC Objectives DB.</p>
+
+  <h2 class="section">Setup &amp; rollout</h2>
+  <ul style="margin-left:18px; line-height:1.8;">
+    <li><strong>Plan:</strong> Notion Team plan — $10/user/mo × 4 = $40/mo.</li>
+    <li><strong>Setup workshop:</strong> 2–3 hours with Lucas + Yasin to build databases + properties.</li>
+    <li><strong>Template population:</strong> ~4 hours additional to populate meeting page templates.</li>
+    <li><strong>Adoption:</strong> Run 1 week in parallel with current HTMLs + Jira. If flow validates, retire Jira at end of week 1.</li>
+    <li><strong>Data migration:</strong> One-time import of 19 open XCHO Jira tickets into VWC Objectives DB, preserving legacy keys in a "Legacy Jira Key" field.</li>
+  </ul>
+
+  <h2 class="section">Out of scope (for later)</h2>
+  <ul style="margin-left:18px; line-height:1.8;">
+    <li>Formula details (DaysOpen, Score, Completion rate) — written when workspace is built for real.</li>
+    <li>Per-user permission tuning — refined in workshop.</li>
+    <li>External integrations (Calendar sync, Slack notifications, API-fed KPIs) — Phase 2.</li>
+  </ul>
+
+  <div class="callout success">
+    <div class="callout-icon">+</div>
+    <div>Review all sidebar pages. If something from your current workflow is missing or mis-mapped, note it. Once validated we move from blueprint to actual workspace setup.</div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+function show(e, id) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  const page = document.getElementById(id);
+  if (page) page.classList.add('active');
+  if (e && e.currentTarget && e.currentTarget.classList && e.currentTarget.classList.contains('sb-item')) {
+    e.currentTarget.classList.add('active');
+  } else {
+    // Mark matching sidebar item
+    document.querySelectorAll('.sb-item').forEach(i => {
+      if (i.getAttribute('onclick') && i.getAttribute('onclick').includes("'" + id + "'")) {
+        i.classList.add('active');
+      }
+    });
+  }
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
