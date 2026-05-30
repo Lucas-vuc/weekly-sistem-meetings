@@ -78,13 +78,13 @@ svg { width: 100%; max-width: 1024px; height: auto; display: block; margin: 0 au
 .node-vwc { fill: rgba(184,134,11,0.06); stroke: var(--vwc); stroke-width: 1.5; }
 .node-monitor { fill: rgba(9,105,218,0.04); stroke: var(--info); stroke-width: 1.2; stroke-dasharray: 4 3; }
 .node-strategic { fill: rgba(26,127,55,0.05); stroke: var(--success); stroke-width: 1.5; }
-.node-title { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; fill: var(--text); }
-.node-sub { font-family: 'Inter', sans-serif; font-size: 9.5px; fill: var(--text-3); }
+.node-title { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; fill: var(--text); }
+.node-sub { font-family: 'Inter', sans-serif; font-size: 10.5px; fill: var(--text-3); }
+.lane-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; fill: var(--text-3); letter-spacing: 1px; }
 .arrow { stroke: var(--text-3); stroke-width: 1.4; fill: none; }
 .arrow-strong { stroke: var(--accent); stroke-width: 1.8; fill: none; }
-.arrow-vwc { stroke: var(--vwc); stroke-width: 1.5; fill: none; stroke-dasharray: 4 3; }
-.arrow-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--text-3); }
-.legend-box { fill: var(--surface); stroke: var(--border); }
+.arrow-text { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; fill: var(--text-2); }
+.divider { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 3; }
 
 footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-3); font-size: 12px; }
 </style>
@@ -111,117 +111,98 @@ footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--border
 <p class="sub">The system runs on six meetings. Each one consumes the output of the previous and produces the input for the next.</p>
 
 <div class="svg-wrap">
-<svg viewBox="0 0 1024 520" xmlns="http://www.w3.org/2000/svg">
-  <!-- ROW 1: Strategic -->
-  <g>
-    <rect class="node-strategic" x="40"  y="30"  width="200" height="80" rx="8"/>
-    <text class="node-title"     x="60"  y="58">Bi-monthly Strategic</text>
-    <text class="node-sub"       x="60"  y="76">every 2 months</text>
-    <text class="node-sub"       x="60"  y="90">→ ratifies Top 5 + Portfolio</text>
-
-    <rect class="node-strategic" x="290" y="30"  width="200" height="80" rx="8"/>
-    <text class="node-title"     x="310" y="58">Monthly Objectives</text>
-    <text class="node-sub"       x="310" y="76">1st Monday of month</text>
-    <text class="node-sub"       x="310" y="90">→ KPI review + set obj.</text>
-  </g>
-
-  <!-- ROW 2: Weekly + Daily + Friday -->
-  <g>
-    <rect class="node-bg" x="40"  y="180" width="200" height="80" rx="8"/>
-    <text class="node-title" x="60"  y="208">Weekly · Monday</text>
-    <text class="node-sub"   x="60"  y="226">every Monday 09:00</text>
-    <text class="node-sub"   x="60"  y="240">→ Q1–Q2 stack for the week</text>
-
-    <rect class="node-bg" x="290" y="180" width="200" height="80" rx="8"/>
-    <text class="node-title" x="310" y="208">Daily Meeting</text>
-    <text class="node-sub"   x="310" y="226">Tue, Wed, Thu · 15 min</text>
-    <text class="node-sub"   x="310" y="240">→ status + new blockers</text>
-
-    <rect class="node-bg" x="540" y="180" width="200" height="80" rx="8"/>
-    <text class="node-title" x="560" y="208">Friday Review</text>
-    <text class="node-sub"   x="560" y="226">every Friday 16:00</text>
-    <text class="node-sub"   x="560" y="240">→ carry-overs + learnings</text>
-  </g>
-
-  <!-- VWC standalone -->
-  <g>
-    <rect class="node-vwc" x="790" y="180" width="200" height="80" rx="8"/>
-    <text class="node-title" x="810" y="208">VWC Weekly</text>
-    <text class="node-sub"   x="810" y="226">Tue 08:00 GMT · Teams</text>
-    <text class="node-sub"   x="810" y="240">→ pillar objectives + pulse</text>
-  </g>
-
-  <!-- ROW 3: Permanent monitors -->
-  <g>
-    <rect class="node-monitor" x="40"  y="350" width="200" height="80" rx="8"/>
-    <text class="node-title" x="60"  y="378">Portfolio Matrix</text>
-    <text class="node-sub"   x="60"  y="396">always open · pinned</text>
-    <text class="node-sub"   x="60"  y="410">Quick Kill + 8 dimensions</text>
-
-    <rect class="node-monitor" x="290" y="350" width="200" height="80" rx="8"/>
-    <text class="node-title" x="310" y="378">Top 5 Live</text>
-    <text class="node-sub"   x="310" y="396">always open · pinned</text>
-    <text class="node-sub"   x="310" y="410">scores editable with ratify</text>
-
-    <rect class="node-monitor" x="540" y="350" width="200" height="80" rx="8"/>
-    <text class="node-title" x="560" y="378">KPI Dashboard</text>
-    <text class="node-sub"   x="560" y="396">always open · pinned</text>
-    <text class="node-sub"   x="560" y="410">target vs actual · trends</text>
-  </g>
-
-  <!-- Arrows row 1: Bi-monthly → Monthly -->
-  <path class="arrow-strong" d="M 240 70 L 290 70" marker-end="url(#arr)"/>
-  <text class="arrow-text" x="247" y="62">ratified Top 5</text>
-
-  <!-- Arrow Monthly → Weekly Monday -->
-  <path class="arrow-strong" d="M 350 110 L 350 145 L 140 145 L 140 180" marker-end="url(#arr)"/>
-  <text class="arrow-text" x="190" y="138">monthly objectives</text>
-
-  <!-- Weekly → Daily -->
-  <path class="arrow" d="M 240 220 L 290 220" marker-end="url(#arr)"/>
-  <text class="arrow-text" x="247" y="212">Q1–Q2 stack</text>
-
-  <!-- Daily → Friday -->
-  <path class="arrow" d="M 490 220 L 540 220" marker-end="url(#arr)"/>
-  <text class="arrow-text" x="500" y="212">daily status</text>
-
-  <!-- Friday → next Monday (loop back) -->
-  <path class="arrow" d="M 640 180 L 640 145 L 140 145" marker-end="url(#arr)"/>
-  <text class="arrow-text" x="385" y="158">carry-overs · loop ↺</text>
-
-  <!-- Monthly ← Friday (achievement uplift feeds Monthly) -->
-  <path class="arrow" d="M 640 260 L 640 295 L 390 295 L 390 110" stroke-dasharray="3 3" marker-end="url(#arr)"/>
-  <text class="arrow-text" x="450" y="288">monthly obj. uplift</text>
-
-  <!-- VWC standalone (no arrows in/out — isolated) -->
-  <text class="arrow-text" x="810" y="280" style="font-style:italic;">isolated track · Emmanuel + 3 founders</text>
-
-  <!-- Monitors feed everything (dashed arrows up) -->
-  <path class="arrow-strong" d="M 140 350 L 140 320 L 140 260" stroke-dasharray="2 3" marker-end="url(#arr)"/>
-  <path class="arrow-strong" d="M 390 350 L 390 320" stroke-dasharray="2 3" marker-end="url(#arr)"/>
-  <path class="arrow-strong" d="M 640 350 L 640 260" stroke-dasharray="2 3" marker-end="url(#arr)"/>
-  <text class="arrow-text" x="160" y="335">read by all meetings</text>
-
-  <!-- Marker -->
+<svg viewBox="0 0 1200 620" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-3)"/>
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/>
+    </marker>
+    <marker id="arrAcc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b8860b"/>
     </marker>
   </defs>
 
-  <!-- Legend -->
-  <g transform="translate(790, 30)">
-    <rect class="legend-box" x="0" y="0" width="200" height="120" rx="6"/>
-    <text class="node-title" x="14" y="20">Legend</text>
-    <rect x="14" y="32" width="18" height="12" class="node-strategic"/>
-    <text class="node-sub" x="38" y="42">Strategic / monthly</text>
-    <rect x="14" y="50" width="18" height="12" class="node-bg"/>
-    <text class="node-sub" x="38" y="60">Weekly execution</text>
-    <rect x="14" y="68" width="18" height="12" class="node-vwc"/>
-    <text class="node-sub" x="38" y="78">VWC track (separate)</text>
-    <rect x="14" y="86" width="18" height="12" class="node-monitor"/>
-    <text class="node-sub" x="38" y="96">Permanent monitors</text>
-  </g>
+  <!-- LANE LABELS -->
+  <text class="lane-label" x="20" y="80">STRATEGIC</text>
+  <text class="lane-label" x="20" y="260">EXECUTION</text>
+  <text class="lane-label" x="20" y="455">PERMANENT</text>
+  <text class="lane-label" x="20" y="471" style="font-size:9px;">MONITORS</text>
+
+  <!-- ============ STRATEGIC LANE ============ -->
+  <rect class="node-strategic" x="160" y="40" width="220" height="80" rx="8"/>
+  <text class="node-title" x="180" y="68">Bi-monthly Strategic</text>
+  <text class="node-sub"   x="180" y="86">every 2 months</text>
+  <text class="node-sub"   x="180" y="102">ratifies Top 5 + Portfolio</text>
+
+  <rect class="node-strategic" x="460" y="40" width="220" height="80" rx="8"/>
+  <text class="node-title" x="480" y="68">Monthly Objectives</text>
+  <text class="node-sub"   x="480" y="86">1st Monday of month</text>
+  <text class="node-sub"   x="480" y="102">KPI review + set objectives</text>
+
+  <!-- Bi-monthly → Monthly -->
+  <path class="arrow-strong" d="M 380 80 L 455 80" marker-end="url(#arrAcc)"/>
+  <text class="arrow-text" x="395" y="73">cascades</text>
+
+  <!-- ============ Strategic → Execution (L-shape down) ============ -->
+  <path class="arrow-strong" d="M 570 120 L 570 175 L 270 175 L 270 215" marker-end="url(#arrAcc)"/>
+  <text class="arrow-text" x="320" y="168">monthly objectives</text>
+
+  <!-- ============ EXECUTION LANE ============ -->
+  <rect class="node-bg" x="160" y="220" width="220" height="80" rx="8"/>
+  <text class="node-title" x="180" y="248">Weekly · Monday</text>
+  <text class="node-sub"   x="180" y="266">Monday 09:00 · 60 min</text>
+  <text class="node-sub"   x="180" y="282">Q1–Q2 stack for the week</text>
+
+  <rect class="node-bg" x="460" y="220" width="220" height="80" rx="8"/>
+  <text class="node-title" x="480" y="248">Daily Meeting</text>
+  <text class="node-sub"   x="480" y="266">Tue · Wed · Thu · 15 min</text>
+  <text class="node-sub"   x="480" y="282">status + new blockers</text>
+
+  <rect class="node-bg" x="760" y="220" width="220" height="80" rx="8"/>
+  <text class="node-title" x="780" y="248">Friday Review</text>
+  <text class="node-sub"   x="780" y="266">Friday 16:00 · 45 min</text>
+  <text class="node-sub"   x="780" y="282">learnings + carry-overs</text>
+
+  <!-- Weekly → Daily -->
+  <path class="arrow" d="M 380 260 L 455 260" marker-end="url(#arr)"/>
+  <text class="arrow-text" x="392" y="253">Q1–Q2</text>
+
+  <!-- Daily → Friday -->
+  <path class="arrow" d="M 680 260 L 755 260" marker-end="url(#arr)"/>
+  <text class="arrow-text" x="690" y="253">status</text>
+
+  <!-- ============ Loop-back: Friday → next Monday (below execution) ============ -->
+  <path class="arrow" d="M 870 300 L 870 340 L 270 340 L 270 305" marker-end="url(#arr)"/>
+  <text class="arrow-text" x="430" y="333">carry-overs · loop back to next Monday ↺</text>
+
+  <!-- ============ VWC ISOLATED (right side) ============ -->
+  <rect class="node-vwc" x="1020" y="220" width="160" height="80" rx="8"/>
+  <text class="node-title" x="1035" y="248">VWC Weekly</text>
+  <text class="node-sub"   x="1035" y="266">Tuesday 08:00 GMT</text>
+  <text class="node-sub"   x="1035" y="282">Teams · isolated track</text>
+  <text class="arrow-text" x="1100" y="312" text-anchor="middle" style="font-style:italic;">Emmanuel + 3</text>
+
+  <!-- ============ Divider ============ -->
+  <line x1="120" y1="400" x2="1180" y2="400" class="divider"/>
+
+  <!-- ============ MONITORS LANE ============ -->
+  <rect class="node-monitor" x="160" y="430" width="220" height="80" rx="8"/>
+  <text class="node-title" x="180" y="458">Portfolio Matrix</text>
+  <text class="node-sub"   x="180" y="476">Quick Kill + 8 dimensions</text>
+  <text class="node-sub"   x="180" y="492">always open · pinned</text>
+
+  <rect class="node-monitor" x="460" y="430" width="220" height="80" rx="8"/>
+  <text class="node-title" x="480" y="458">Top 5 Live</text>
+  <text class="node-sub"   x="480" y="476">live scores · 2-founder ratify</text>
+  <text class="node-sub"   x="480" y="492">always open · pinned</text>
+
+  <rect class="node-monitor" x="760" y="430" width="220" height="80" rx="8"/>
+  <text class="node-title" x="780" y="458">KPI Dashboard</text>
+  <text class="node-sub"   x="780" y="476">target vs actual · trends</text>
+  <text class="node-sub"   x="780" y="492">always open · pinned</text>
+
+  <!-- Footer note -->
+  <text class="arrow-text" x="600" y="555" text-anchor="middle" style="font-style:italic;">Monitors read by every meeting · they update continuously between meetings</text>
+  <text class="arrow-text" x="600" y="572" text-anchor="middle" style="font-style:italic;">Top 5 Live ↔ Bi-monthly Strategic · KPI Dashboard ↔ Monthly Part 1 · Portfolio Matrix ↔ Bi-monthly Strategic</text>
 </svg>
 </div>
 
