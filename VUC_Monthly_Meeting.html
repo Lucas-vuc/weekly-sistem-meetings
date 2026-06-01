@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VUC — Monthly Meeting</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:  #0D1B2A;
+  --gold:  #C9A84C;
+  --gold2: #E8C76A;
+  --slate: #2E4057;
+  --fog:   #F4F6F9;
+  --line:  #DDE2EA;
+  --muted: #8494A8;
+  --white: #FFFFFF;
+  --red:   #B03030;
+  --amber: #C47C15;
+  --green: #1E7A4A;
+  --p-bg:  #DBEAFE; --p-fg: #1E40AF;
+  --s-bg:  #DCFCE7; --s-fg: #15803D;
+  --f-bg:  #EDE9FE; --f-fg: #5B21B6;
+  --g-bg:  #FFFEF7; --g-fg: #92400E;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: #0D1B2A; min-height: 100vh; color: var(--navy); -webkit-font-smoothing: antialiased; }
+.page { max-width: 1100px; margin: 0 auto; background: var(--white); min-height: 100vh; }
+
+/* ── TOPBAR ── */
+.topbar { background: linear-gradient(135deg,#0F0F1E 0%,#1A1A2E 50%,#16213E 100%); border-bottom: 2px solid var(--gold); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.topbar-brand { display: flex; align-items: center; gap: 14px; }
+.topbar-logo { width: 44px; height: 44px; background: rgba(196,154,108,.08); border: 1px solid rgba(196,154,108,.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.topbar-logo svg { width: 30px; height: 30px; }
+.topbar-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -.3px; line-height: 1; }
+.topbar-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 3px; }
+.topbar-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.topbar-date { font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(255,255,255,.55); letter-spacing: .8px; text-transform: uppercase; }
+.btn { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); color: #fff; padding: 7px 14px; border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all .15s; }
+.btn:hover { background: rgba(255,255,255,.14); border-color: var(--gold); }
+.btn.gold { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 700; }
+.btn.gold:hover { background: var(--gold2); }
+.btn.navy { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+/* ── TABS ── */
+.tabs { display: flex; border-bottom: 2px solid var(--line); background: #fafafa; overflow-x: auto; }
+.tab { padding: 14px 22px; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: all .15s; }
+.tab:hover { color: var(--navy); }
+.tab.active { color: var(--navy); border-bottom-color: var(--gold); background: var(--white); }
+.tab-panel { display: none; padding: 28px 40px; }
+.tab-panel.active { display: block; }
+
+/* ── SECTION HEADERS ── */
+.sec { margin-top: 28px; margin-bottom: 6px; display: flex; align-items: baseline; gap: 12px; }
+.sec:first-child { margin-top: 0; }
+.sec-num { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--gold); line-height: 1; }
+.sec-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 1px; }
+.sec-mins { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-left: auto; }
+.sec-rule { height: 2px; background: var(--navy); margin-bottom: 16px; }
+
+/* ── BLOCKS ── */
+.block { background: var(--white); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 14px; overflow: hidden; }
+.block-hdr { background: linear-gradient(135deg,#0D1B2A 0%,#1A1A2E 100%); color: #fff; padding: 11px 18px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.block-title { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+.block-stat { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); letter-spacing: .8px; }
+.block-body { padding: 4px 0; }
+
+/* ── IMPORT BOX ── */
+.import-box { background: linear-gradient(135deg,#EFF6FF 0%,#F0F9FF 100%); border: 1px solid #93C5FD; border-left: 4px solid #3B82F6; border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; }
+.import-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.import-desc { font-size: 12px; color: var(--slate); line-height: 1.5; margin-bottom: 10px; }
+.import-weeks { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.week-slot { background: var(--white); border: 1px dashed #93C5FD; border-radius: 8px; padding: 8px 14px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 6px; }
+.week-slot:hover { border-color: #3B82F6; color: var(--navy); }
+.week-slot.loaded { background: #EFF6FF; border-color: #3B82F6; color: #1E40AF; border-style: solid; }
+.week-slot.loaded::before { content: '✓'; font-weight: 700; }
+.import-textarea { width: 100%; min-height: 70px; padding: 10px; border: 1px solid #93C5FD; border-radius: 6px; background: rgba(255,255,255,.8); font-family: 'DM Mono', monospace; font-size: 11px; outline: none; resize: vertical; display: none; }
+.import-textarea:focus { border-color: #3B82F6; background: #fff; }
+.import-hint { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; margin-top: 8px; }
+
+/* ── STAT CARDS ── */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; text-align: center; }
+.stat-card.gold { background: linear-gradient(135deg,#FFFEF7 0%,#FFF8E8 100%); border-color: var(--gold); }
+.stat-num { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1; }
+.stat-card.gold .stat-num { color: #92400E; }
+.stat-num.green { color: var(--green); }
+.stat-num.red { color: var(--red); }
+.stat-num.amber { color: var(--amber); }
+.stat-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 5px; }
+.stat-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 3px; letter-spacing: .3px; }
+
+/* ── WEEK ACCORDION ── */
+.week-accordion { margin-bottom: 8px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.week-acc-hdr { display: flex; align-items: center; gap: 14px; padding: 12px 18px; background: #fafafa; cursor: pointer; transition: background .15s; }
+.week-acc-hdr:hover { background: #f0f0f0; }
+.week-acc-label { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--navy); }
+.week-acc-dates { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: .5px; }
+.week-acc-stats { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+.week-pill { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 3px; letter-spacing: .4px; }
+.week-pill.done    { background: var(--s-bg); color: var(--s-fg); }
+.week-pill.partial { background: #FEF3C7; color: var(--amber); }
+.week-pill.missed  { background: #FEE2E2; color: var(--red); }
+.week-pill.review  { background: var(--f-bg); color: var(--f-fg); }
+.week-acc-toggle { font-size: 12px; color: var(--muted); transition: transform .2s; }
+.week-acc-toggle.open { transform: rotate(180deg); }
+.week-acc-body { display: none; padding: 14px 18px; border-top: 1px solid var(--line); }
+.week-acc-body.open { display: block; }
+.obj-line { display: grid; grid-template-columns: 80px 1fr 110px; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #f8f8f8; font-size: 12px; }
+.obj-line:last-child { border-bottom: none; }
+.obj-vert-tag { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 3px; letter-spacing: .4px; text-transform: uppercase; text-align: center; }
+.obj-vert-tag.p { background: var(--p-bg); color: var(--p-fg); }
+.obj-vert-tag.s { background: var(--s-bg); color: var(--s-fg); }
+.obj-vert-tag.f { background: var(--f-bg); color: var(--f-fg); }
+.obj-vert-tag.c { background: var(--g-bg); color: var(--g-fg); }
+.obj-text { color: var(--navy); line-height: 1.4; }
+.obj-status-badge { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; padding: 3px 9px; border-radius: 4px; letter-spacing: .5px; text-transform: uppercase; text-align: center; }
+.obj-status-badge.done    { background: var(--s-bg); color: var(--s-fg); }
+.obj-status-badge.review  { background: var(--f-bg); color: var(--f-fg); }
+.obj-status-badge.partial { background: #FEF3C7; color: var(--amber); }
+.obj-status-badge.missed  { background: #FEE2E2; color: var(--red); }
+.obj-status-badge.unmarked{ background: var(--fog); color: var(--muted); }
+
+/* ── DRIFT BAR ── */
+.drift-bar { display: flex; height: 32px; border-radius: 6px; overflow: hidden; margin: 12px 0 6px; }
+.drift-seg { display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 700; color: #fff; letter-spacing: .8px; }
+.drift-seg.q1 { background: linear-gradient(135deg,#DC2626,#991B1B); }
+.drift-seg.q2 { background: linear-gradient(135deg,#3B82F6,#1E40AF); }
+.drift-legend { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+.drift-verdict { margin-top: 10px; padding: 10px 14px; border-radius: 8px; font-size: 12px; line-height: 1.5; }
+.drift-verdict.reactive  { background: #FEF2F2; border-left: 3px solid var(--red);   color: #7F1D1D; }
+.drift-verdict.balanced  { background: #FFFEF7; border-left: 3px solid var(--gold);  color: #6B5634; }
+.drift-verdict.strategic { background: #F0FDF4; border-left: 3px solid var(--green); color: #14532D; }
+
+/* ── FOUNDER BARS ── */
+.founder-row { display: grid; grid-template-columns: 80px 1fr 60px 80px; gap: 14px; align-items: center; padding: 10px 18px; border-bottom: 1px solid #f4f4f4; }
+.founder-row:last-child { border-bottom: none; }
+.founder-name { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+.founder-name.louis { color: var(--p-fg); }
+.founder-name.yasin { color: var(--s-fg); }
+.founder-name.lucas { color: var(--amber); }
+.founder-bar-wrap { height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+.founder-bar-fill { height: 100%; border-radius: 4px; }
+.founder-bar-fill.louis { background: var(--p-fg); }
+.founder-bar-fill.yasin { background: var(--s-fg); }
+.founder-bar-fill.lucas { background: var(--amber); }
+.founder-tasks { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-align: right; }
+.founder-pct { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; text-align: right; }
+.founder-pct.louis { color: var(--p-fg); }
+.founder-pct.yasin { color: var(--s-fg); }
+.founder-pct.lucas { color: var(--amber); }
+
+/* ── MONTHLY OBJECTIVES (§04) ── */
+.mo-dept { margin-bottom: 14px; }
+.mo-dept-hdr { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px 8px 0 0; border: 1px solid var(--line); border-bottom: none; background: #fafafa; }
+.mo-dept-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--navy); }
+.mo-dept-tag { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 3px; letter-spacing: .5px; text-transform: uppercase; }
+.mo-dept-tag.p { background: var(--p-bg); color: var(--p-fg); }
+.mo-dept-tag.s { background: var(--s-bg); color: var(--s-fg); }
+.mo-dept-tag.f { background: var(--f-bg); color: var(--f-fg); }
+.mo-dept-tag.c { background: var(--g-bg); color: var(--g-fg); border: 1px solid #C49A6C; }
+.mo-dept-add { margin-left: auto; background: transparent; border: 1px dashed var(--line); color: var(--muted); padding: 4px 12px; border-radius: 5px; font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; transition: all .15s; }
+.mo-dept-add:hover { border-color: var(--navy); color: var(--navy); }
+.mo-dept-body { border: 1px solid var(--line); border-radius: 0 0 8px 8px; overflow: hidden; }
+.mo-obj-row { display: grid; grid-template-columns: 1fr 90px 90px 36px; gap: 12px; align-items: center; padding: 12px 14px; border-bottom: 1px solid #f8f8f8; }
+.mo-obj-row:last-child { border-bottom: none; }
+.mo-obj-input { width: 100%; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--navy); outline: none; padding: 2px 4px; border-radius: 4px; }
+.mo-obj-input:focus { background: #f8f8f8; }
+.mo-obj-input::placeholder { color: var(--muted); font-style: italic; }
+.mo-owner-sel, .mo-prio-sel { border: 1px solid var(--line); border-radius: 5px; background: var(--white); font-family: 'DM Mono', monospace; font-size: 10px; color: var(--navy); padding: 4px 6px; outline: none; width: 100%; cursor: pointer; }
+.mo-owner-sel:focus, .mo-prio-sel:focus { border-color: var(--gold); }
+.mo-del-btn { background: transparent; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 4px; border-radius: 4px; line-height: 1; transition: all .15s; }
+.mo-del-btn:hover { background: #FEE2E2; color: var(--red); }
+.mo-obj-empty { padding: 16px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--muted); font-style: italic; }
+
+/* ── DECISIONS ── */
+.dec-list { padding: 14px 18px; }
+.dec-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.dec-row:last-child { margin-bottom: 0; }
+.dec-num { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 700; color: var(--gold); min-width: 22px; padding-top: 8px; letter-spacing: .5px; }
+.dec-input { flex: 1; border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--navy); outline: none; resize: none; min-height: 40px; background: #fafafa; }
+.dec-input:focus { border-color: var(--gold); background: #fff; }
+.dec-add-btn { display: block; width: 100%; background: transparent; border: 1px dashed var(--line); border-radius: 6px; padding: 8px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: .5px; cursor: pointer; text-align: center; transition: all .15s; margin-top: 6px; }
+.dec-add-btn:hover { border-color: var(--navy); color: var(--navy); }
+
+/* ── BANNER (no data) ── */
+.no-data-banner { background: linear-gradient(135deg,#FFFEF7 0%,#FFF8E8 100%); border: 1px solid var(--gold); border-left: 4px solid var(--gold); border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; }
+.no-data-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #92400E; margin-bottom: 4px; }
+.no-data-desc { font-size: 12px; color: #6B5634; line-height: 1.6; }
+
+/* ── EXPORT ROW ── */
+.export-row { margin-top: 24px; padding: 16px 20px; background: linear-gradient(135deg,#0D1B2A,#1A1A2E); border-radius: 12px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.export-hint { flex: 1; font-size: 12px; color: rgba(255,255,255,.65); line-height: 1.5; min-width: 200px; }
+.export-hint b { color: #fff; }
+
+/* ── HINT ── */
+.hint { background: #F0FDF4; border-left: 3px solid var(--green); padding: 10px 14px; border-radius: 6px; font-size: 12px; color: #14532D; line-height: 1.5; margin-bottom: 14px; }
+
+/* ── MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(13,27,42,.7); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 24px; }
+.modal-overlay.show { display: flex; }
+.modal { background: var(--white); border-radius: 12px; max-width: 520px; width: 100%; padding: 24px; box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.modal-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+.modal-hint { background: #FFFEF7; border-left: 3px solid var(--gold); padding: 10px 12px; font-size: 12px; color: #6B5634; line-height: 1.5; border-radius: 6px; margin-bottom: 12px; }
+.modal-input { width: 100%; min-height: 130px; padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: #fafafa; font-family: 'DM Mono', monospace; font-size: 11px; outline: none; resize: vertical; }
+.modal-input:focus { border-color: var(--gold); background: #fff; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+
+.footer { background: var(--navy); color: rgba(255,255,255,.4); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; text-align: center; padding: 14px 40px; }
+
+@media (max-width: 768px) {
+  .topbar, .tab-panel, .footer { padding-left: 18px; padding-right: 18px; }
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+  .obj-line { grid-template-columns: 70px 1fr; gap: 8px; }
+  .obj-status-badge { display: none; }
+  .founder-row { grid-template-columns: 70px 1fr 50px; }
+  .founder-pct { display: none; }
+  .mo-obj-row { grid-template-columns: 1fr 80px 36px; }
+  .mo-prio-sel { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">
+      <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+        <g fill="#C49A6C">
+          <path d="M45,67 L33,33 L37,33 L45,57 L53,33 L57,33 Z"/>
+          <path d="M21,42 A24,24 0 0 1 69,42 L65,42 A20,20 0 0 0 25,42 Z"/>
+          <path d="M69,48 A24,24 0 0 1 21,48 L25,48 A20,20 0 0 0 65,48 Z"/>
+        </g>
+      </svg>
+    </div>
+    <div>
+      <div class="topbar-title">VUC — MONTHLY MEETING</div>
+      <div class="topbar-sub">Monthly review &amp; strategic objectives · 60 min</div>
+    </div>
+  </div>
+  <div class="topbar-meta">
+    <span class="topbar-date" id="topbarDate">—</span>
+    <button class="btn" onclick="openImport()">Import Wrap-up</button>
+    <button class="btn gold" onclick="window.print()">Print / PDF</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="sw('scorecard',this)">01 · Scorecard</div>
+  <div class="tab" onclick="sw('weekly',this)">02 · Weekly Review</div>
+  <div class="tab" onclick="sw('execution',this)">03 · Execution Recap</div>
+  <div class="tab" onclick="sw('objectives',this)">04 · Strategic Objectives</div>
+  <div class="tab" onclick="sw('decisions',this)">05 · Decisions</div>
+</div>
+
+<!-- TAB 01: SCORECARD -->
+<div class="tab-panel active" id="tab-scorecard">
+
+  <div id="noDataBanner" class="no-data-banner">
+    <div class="no-data-title">🚀 First Monthly Meeting — Foundational Mode</div>
+    <div class="no-data-desc">No Friday Wrap-ups imported yet. That's expected — this is your first monthly. Skip to <b>Tab 04 (Strategic Objectives)</b> to set the north star for the month ahead. As you run weekly meetings and Friday Reviews, import the Wrap-up JSONs here to unlock the full scorecard.</div>
+  </div>
+
+  <div class="sec"><span class="sec-num">01</span><span class="sec-title">Monthly Scorecard</span><span class="sec-mins">8 MIN</span></div>
+  <div class="sec-rule"></div>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-num" id="scWeeks">0</div>
+      <div class="stat-label">Weeks imported</div>
+      <div class="stat-sub">of 4 possible</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-num" id="scObjPct">—</div>
+      <div class="stat-label">Objectives completion</div>
+      <div class="stat-sub" id="scObjSub">no data</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-num" id="scTaskPct">—</div>
+      <div class="stat-label">Project tasks completion</div>
+      <div class="stat-sub" id="scTaskSub">no data</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="scDrift">—</div>
+      <div class="stat-label">Eisenhower drift</div>
+      <div class="stat-sub" id="scDriftSub">no data</div>
+    </div>
+  </div>
+
+  <!-- Per-project progress -->
+  <div class="block">
+    <div class="block-hdr">
+      <div class="block-title">📋 Project Tasks by Project</div>
+      <div class="block-stat" id="projStatLabel">—</div>
+    </div>
+    <div class="block-body" id="projBreakdown">
+      <div style="padding:24px 18px;font-size:12px;color:var(--muted);font-style:italic">Import Friday Wrap-ups to see breakdown by project.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 02: WEEKLY REVIEW -->
+<div class="tab-panel" id="tab-weekly">
+  <div class="sec"><span class="sec-num">02</span><span class="sec-title">Weekly Objectives Review</span><span class="sec-mins">15 MIN</span></div>
+  <div class="sec-rule"></div>
+  <div class="hint">Review what was committed each week and how it was resolved. Look for patterns — recurring misses, consistently done owners, objectives that keep carrying forward.</div>
+  <div id="weeklyAccordion">
+    <div style="padding:24px 18px;font-size:12px;color:var(--muted);font-style:italic">Import Friday Wrap-ups to review weekly objectives.</div>
+  </div>
+</div>
+
+<!-- TAB 03: EXECUTION RECAP -->
+<div class="tab-panel" id="tab-execution">
+  <div class="sec"><span class="sec-num">03</span><span class="sec-title">Daily Execution Recap</span><span class="sec-mins">10 MIN</span></div>
+  <div class="sec-rule"></div>
+  <div class="hint">Aggregate view of all Q1/Q2 daily tasks logged across the month. Use this to understand workload distribution and whether the team was reactive or strategic.</div>
+
+  <div class="block">
+    <div class="block-hdr">
+      <div class="block-title">👤 Distribution by Person</div>
+      <div class="block-stat" id="founderStatLabel">—</div>
+    </div>
+    <div class="block-body" id="founderBreakdown">
+      <div style="padding:24px 18px;font-size:12px;color:var(--muted);font-style:italic">Import Friday Wrap-ups to see distribution.</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-hdr">
+      <div class="block-title">⚖️ Eisenhower Drift — Monthly</div>
+      <div class="block-stat" id="driftLabel">—</div>
+    </div>
+    <div style="padding:16px 18px" id="driftBody">
+      <div style="font-size:12px;color:var(--muted);font-style:italic">Import Friday Wrap-ups to compute drift.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 04: STRATEGIC OBJECTIVES -->
+<div class="tab-panel" id="tab-objectives">
+  <div class="sec"><span class="sec-num">04</span><span class="sec-title">Monthly Strategic Objectives</span><span class="sec-mins">20 MIN</span></div>
+  <div class="sec-rule"></div>
+  <div class="hint"><b>These are the north star for the month.</b> Each weekly Priority Stack will reference them as a banner. Set 1–3 per vertical. Keep them specific enough to be actionable in 30 days, ambitious enough to matter.</div>
+
+  <div id="moDeptList"></div>
+
+  <div class="export-row">
+    <div class="export-hint"><b>Export Monthly Objectives</b> · The JSON is imported into the first Priority Stack of the month. Weekly meetings will display these as a reference banner throughout the month.</div>
+    <button class="btn gold" onclick="exportMonthly()">📦 Export Monthly JSON</button>
+  </div>
+</div>
+
+<!-- TAB 05: DECISIONS -->
+<div class="tab-panel" id="tab-decisions">
+  <div class="sec"><span class="sec-num">05</span><span class="sec-title">Decisions &amp; Next Steps</span><span class="sec-mins">7 MIN</span></div>
+  <div class="sec-rule"></div>
+  <div class="hint">Capture decisions made in this meeting and define what enters the first Priority Stack of the month.</div>
+
+  <div class="block">
+    <div class="block-hdr"><div class="block-title">✅ Decisions Made</div></div>
+    <div class="dec-list" id="decList"></div>
+    <div style="padding:0 18px 14px"><button class="dec-add-btn" onclick="addDecision()">+ Add decision</button></div>
+  </div>
+
+  <div class="block" style="margin-top:14px">
+    <div class="block-hdr"><div class="block-title">→ Into Monday's Priority Stack</div></div>
+    <div style="padding:14px 18px">
+      <textarea id="mondayNotes" style="width:100%;min-height:90px;border:1px solid var(--line);border-radius:6px;padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--navy);outline:none;resize:vertical;background:#fafafa" placeholder="What specifically enters the first Priority Stack of the month? Carryovers, new project tasks from objectives, blockers to address..."></textarea>
+    </div>
+  </div>
+
+  <div class="export-row" style="margin-top:16px">
+    <div class="export-hint"><b>Export Full Meeting JSON</b> · Includes scorecard data, strategic objectives, decisions, and Monday notes. Archive this as the monthly record.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" style="background:rgba(255,255,255,.08)" onclick="resetMeeting()">Reset</button>
+      <button class="btn gold" onclick="exportFull()">📦 Export Meeting Record</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page -->
+<div class="footer">VUC · Monthly Meeting · Louis · Yasin · Lucas · 60 min</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <div class="modal-title">Import Friday Wrap-up</div>
+    <div class="modal-sub">Weekly data · up to 4 weeks</div>
+    <div class="modal-hint">Open the Friday Review → click <b>Export Friday Wrap-up</b> → paste the JSON below. You can import up to 4 wrap-ups (one per week of the month). Each import adds to the scorecard — it won't overwrite previous weeks.</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap" id="weekSlots"></div>
+    <textarea class="modal-input" id="importInput" placeholder="Paste Friday Wrap-up JSON here..."></textarea>
+    <div class="modal-actions">
+      <button class="btn navy" onclick="closeImport()">Cancel</button>
+      <button class="btn gold" onclick="confirmImport()">Import Week</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+var weeks = [];          // Array of up to 4 friday_wrapup objects
+var monthlyObjs = [];    // Strategic objectives for this month
+var decisions = [];      // Decisions made in this meeting
+var moCounter = 0;
+
+var MO_DEPTS = [
+  {key:'p', label:'Products',    cls:'p'},
+  {key:'s', label:'Services',    cls:'s'},
+  {key:'f', label:'Future',      cls:'f'},
+  {key:'c', label:'VUC General', cls:'c'}
+];
+
+var PROJ_MAP = {
+  p1:'SOL', p2:'VWC Ghana', p3:'Golden Camel', p4:'Xperience Space', p5:'IT/Software'
+};
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function fmtDate(d){
+  var ms = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return ms[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+function esc(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ════════════════════════════════════════════════════════════
+// STORAGE
+// ════════════════════════════════════════════════════════════
+function getStorageKey(){
+  var d = new Date();
+  return 'vuc_monthly_' + d.getFullYear() + '_' + pad(d.getMonth()+1);
+}
+
+function saveState(){
+  try {
+    localStorage.setItem(getStorageKey(), JSON.stringify({
+      weeks: weeks,
+      monthlyObjs: monthlyObjs,
+      decisions: decisions,
+      mondayNotes: document.getElementById('mondayNotes').value
+    }));
+  } catch(e){}
+}
+
+function loadState(){
+  try {
+    var raw = localStorage.getItem(getStorageKey());
+    if(!raw) return;
+    var d = JSON.parse(raw);
+    if(d.weeks) weeks = d.weeks;
+    if(d.monthlyObjs) monthlyObjs = d.monthlyObjs;
+    if(d.decisions) decisions = d.decisions;
+    if(d.mondayNotes) document.getElementById('mondayNotes').value = d.mondayNotes;
+  } catch(e){}
+}
+
+// ════════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════════
+function sw(tab, btn){
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(t){ t.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════════
+function render(){
+  document.getElementById('topbarDate').textContent = fmtDate(new Date());
+  renderScorecard();
+  renderWeeklyReview();
+  renderExecution();
+  renderMonthlyObjs();
+  renderDecisions();
+  // Show/hide no-data banner
+  document.getElementById('noDataBanner').style.display = weeks.length === 0 ? 'block' : 'none';
+}
+
+// ── SCORECARD ──
+function renderScorecard(){
+  var weeksLoaded = weeks.length;
+  document.getElementById('scWeeks').textContent = weeksLoaded;
+
+  if(weeksLoaded === 0){
+    document.getElementById('scObjPct').textContent = '—';
+    document.getElementById('scTaskPct').textContent = '—';
+    document.getElementById('scDrift').textContent = '—';
+    return;
+  }
+
+  // Aggregate objectives across all weeks
+  var totalObjs = 0, scoreObjs = 0;
+  weeks.forEach(function(w){
+    if(w.objectives && w.objectives.details){
+      w.objectives.details.forEach(function(o){
+        totalObjs++;
+        if(o.status === 'done') scoreObjs += 1;
+        else if(o.status === 'review') scoreObjs += 0.75;
+        else if(o.status === 'partial') scoreObjs += 0.4;
+      });
+    }
+  });
+  var objPct = totalObjs ? Math.round(scoreObjs / totalObjs * 100) : 0;
+  document.getElementById('scObjPct').textContent = objPct + '%';
+  document.getElementById('scObjSub').textContent = Math.round(scoreObjs) + ' of ' + totalObjs + ' objectives';
+
+  // Aggregate project tasks
+  var totalTasks = 0, scoreTasks = 0;
+  weeks.forEach(function(w){
+    if(w.projectTasks && w.projectTasks.details){
+      w.projectTasks.details.forEach(function(t){
+        totalTasks++;
+        if(t.status === 'done') scoreTasks += 1;
+        else if(t.status === 'review') scoreTasks += 0.75;
+        else if(t.status === 'partial') scoreTasks += 0.4;
+      });
+    }
+  });
+  var taskPct = totalTasks ? Math.round(scoreTasks / totalTasks * 100) : 0;
+  document.getElementById('scTaskPct').textContent = taskPct + '%';
+  document.getElementById('scTaskSub').textContent = Math.round(scoreTasks) + ' of ' + totalTasks + ' tasks';
+
+  // Drift
+  var q1 = 0, q2 = 0;
+  weeks.forEach(function(w){
+    if(w.tasks && w.tasks.all){
+      w.tasks.all.forEach(function(t){
+        if(t.quad === 'q1') q1++;
+        else if(t.quad === 'q2') q2++;
+      });
+    }
+  });
+  var total = q1 + q2;
+  if(total > 0){
+    var q1Pct = Math.round(q1/total*100);
+    var verdict = q1Pct >= 70 ? 'Reactive' : q1Pct >= 45 ? 'Balanced' : 'Strategic';
+    document.getElementById('scDrift').textContent = verdict;
+    document.getElementById('scDrift').className = 'stat-num ' + (q1Pct >= 70 ? 'red' : q1Pct >= 45 ? 'amber' : 'green');
+    document.getElementById('scDriftSub').textContent = q1Pct + '% urgent tasks';
+  }
+
+  // Project breakdown
+  var projMap = {};
+  weeks.forEach(function(w){
+    if(w.projectTasks && w.projectTasks.details){
+      w.projectTasks.details.forEach(function(t){
+        var pid = t.project || 'other';
+        if(!projMap[pid]) projMap[pid] = {total:0, score:0};
+        projMap[pid].total++;
+        if(t.status === 'done') projMap[pid].score += 1;
+        else if(t.status === 'review') projMap[pid].score += 0.75;
+        else if(t.status === 'partial') projMap[pid].score += 0.4;
+      });
+    }
+  });
+  var html = '';
+  Object.keys(projMap).forEach(function(pid){
+    var p = projMap[pid];
+    var pct = Math.round(p.score / p.total * 100);
+    var name = PROJ_MAP[pid] || pid;
+    html += '<div style="display:grid;grid-template-columns:130px 1fr 50px;gap:14px;align-items:center;padding:10px 18px;border-bottom:1px solid #f4f4f4">';
+    html += '<div style="font-family:DM Mono,monospace;font-size:11px;font-weight:700;color:var(--navy)">' + name + '</div>';
+    html += '<div style="height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#C9A84C,#E8C76A);border-radius:4px"></div></div>';
+    html += '<div style="font-family:Syne,sans-serif;font-size:16px;font-weight:800;color:var(--navy);text-align:right">' + pct + '%</div>';
+    html += '</div>';
+  });
+  document.getElementById('projBreakdown').innerHTML = html ||
+    '<div style="padding:16px 18px;font-size:12px;color:var(--muted);font-style:italic">No project tasks in imported weeks.</div>';
+  document.getElementById('projStatLabel').textContent = Object.keys(projMap).length + ' projects';
+}
+
+// ── WEEKLY REVIEW ──
+function renderWeeklyReview(){
+  var el = document.getElementById('weeklyAccordion');
+  if(weeks.length === 0){
+    el.innerHTML = '<div style="padding:24px 18px;font-size:12px;color:var(--muted);font-style:italic">Import Friday Wrap-ups to review weekly objectives.</div>';
+    return;
+  }
+  var html = '';
+  weeks.forEach(function(w, wi){
+    var objs = (w.objectives && w.objectives.details) || [];
+    var done = objs.filter(function(o){ return o.status==='done'; }).length;
+    var partial = objs.filter(function(o){ return o.status==='partial'; }).length;
+    var review = objs.filter(function(o){ return o.status==='review'; }).length;
+    var missed = objs.filter(function(o){ return o.status==='missed'; }).length;
+
+    html += '<div class="week-accordion">';
+    html += '<div class="week-acc-hdr" onclick="toggleWeek('+wi+')">';
+    html += '<span class="week-acc-label">Week ' + (wi+1) + '</span>';
+    if(w.week) html += '<span class="week-acc-dates">' + esc(w.week) + '</span>';
+    html += '<div class="week-acc-stats">';
+    if(done)    html += '<span class="week-pill done">'   +done+' done</span>';
+    if(review)  html += '<span class="week-pill review">'+review+' review</span>';
+    if(partial) html += '<span class="week-pill partial">'+partial+' partial</span>';
+    if(missed)  html += '<span class="week-pill missed">'+missed+' missed</span>';
+    html += '</div>';
+    html += '<span class="week-acc-toggle" id="wtog-'+wi+'">▼</span>';
+    html += '</div>';
+    html += '<div class="week-acc-body" id="wacc-'+wi+'">';
+    if(objs.length === 0){
+      html += '<div style="font-size:12px;color:var(--muted);font-style:italic">No objectives recorded for this week.</div>';
+    } else {
+      objs.forEach(function(o){
+        var vcls = o.vertical || 'c';
+        html += '<div class="obj-line">';
+        html += '<div class="obj-vert-tag ' + vcls + '">' + ({p:'Products',s:'Services',f:'Future',c:'General'}[vcls]||vcls) + '</div>';
+        html += '<div class="obj-text">' + esc(o.title) + '</div>';
+        html += '<div class="obj-status-badge ' + (o.status||'unmarked') + '">' + (o.status||'unmarked') + '</div>';
+        html += '</div>';
+      });
+    }
+    html += '</div></div>';
+  });
+  el.innerHTML = html;
+}
+
+function toggleWeek(i){
+  var body = document.getElementById('wacc-'+i);
+  var tog = document.getElementById('wtog-'+i);
+  body.classList.toggle('open');
+  tog.classList.toggle('open');
+}
+
+// ── EXECUTION RECAP ──
+function renderExecution(){
+  if(weeks.length === 0) return;
+  // Founder distribution from daily tasks
+  var founders = {louis:{total:0,done:0}, yasin:{total:0,done:0}, lucas:{total:0,done:0}};
+  var q1Total = 0, q2Total = 0;
+  weeks.forEach(function(w){
+    if(w.tasks && w.tasks.all){
+      w.tasks.all.forEach(function(t){
+        if(t.quad === 'q1') q1Total++;
+        if(t.quad === 'q2') q2Total++;
+        if(founders[t.person] && (t.quad === 'q1' || t.quad === 'q2')){
+          founders[t.person].total++;
+          if(t.done) founders[t.person].done++;
+        }
+      });
+    }
+  });
+
+  var grandTotal = Object.values(founders).reduce(function(a,f){ return a+f.total; }, 0);
+  var html = '';
+  ['louis','yasin','lucas'].forEach(function(f){
+    var fd = founders[f];
+    var loadPct = grandTotal ? Math.round(fd.total/grandTotal*100) : 0;
+    var fname = f.charAt(0).toUpperCase()+f.slice(1);
+    html += '<div class="founder-row">';
+    html += '<div class="founder-name '+f+'">'+fname+'</div>';
+    html += '<div class="founder-bar-wrap"><div class="founder-bar-fill '+f+'" style="width:'+loadPct+'%"></div></div>';
+    html += '<div class="founder-tasks">'+fd.total+' tasks</div>';
+    html += '<div class="founder-pct '+f+'">'+(fd.total ? loadPct+'%' : '—')+'</div>';
+    html += '</div>';
+  });
+  document.getElementById('founderBreakdown').innerHTML = html;
+  document.getElementById('founderStatLabel').textContent = grandTotal + ' total Q1+Q2 tasks';
+
+  // Drift
+  var driftEl = document.getElementById('driftBody');
+  var driftLbl = document.getElementById('driftLabel');
+  var total = q1Total + q2Total;
+  if(total === 0){ driftEl.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic">No daily task data in imported weeks.</div>'; return; }
+  var q1Pct = Math.round(q1Total/total*100);
+  var q2Pct = 100-q1Pct;
+  var vCls, vText;
+  if(q1Pct >= 70){ vCls='reactive'; vText='🔥 <b>Reactive month.</b> Most effort went into urgent matters. Evaluate what drove Q1 pressure and whether it can be prevented.'; }
+  else if(q1Pct >= 45){ vCls='balanced'; vText='⚖️ <b>Balanced month.</b> Healthy mix. Maintain this rhythm next month.'; }
+  else { vCls='strategic'; vText='🎯 <b>Strategic month.</b> The team focused on building. Note what enabled this and protect it.'; }
+  var dhtml = '<div class="drift-bar">';
+  if(q1Pct>0) dhtml += '<div class="drift-seg q1" style="width:'+q1Pct+'%">'+(q1Pct>=10?'Q1 · '+q1Pct+'%':'')+'</div>';
+  if(q2Pct>0) dhtml += '<div class="drift-seg q2" style="width:'+q2Pct+'%">'+(q2Pct>=10?'Q2 · '+q2Pct+'%':'')+'</div>';
+  dhtml += '</div>';
+  dhtml += '<div class="drift-legend"><span>Q1 · Urgent+Important ('+q1Total+')</span><span>Q2 · Important ('+q2Total+')</span></div>';
+  dhtml += '<div class="drift-verdict '+vCls+'">'+vText+'</div>';
+  driftEl.innerHTML = dhtml;
+  driftLbl.textContent = q1Pct+'% urgent · '+q2Pct+'% strategic';
+}
+
+// ── MONTHLY OBJECTIVES ──
+function renderMonthlyObjs(){
+  var el = document.getElementById('moDeptList');
+  var html = '';
+  MO_DEPTS.forEach(function(dept){
+    var dObjs = monthlyObjs.filter(function(o){ return o.vertical === dept.key; });
+    html += '<div class="mo-dept">';
+    html += '<div class="mo-dept-hdr">';
+    html += '<span class="mo-dept-tag '+dept.cls+'">'+dept.label+'</span>';
+    html += '<span class="mo-dept-name" style="color:var(--muted);font-size:12px;font-family:\'DM Mono\',monospace">'+dObjs.length+' objective'+(dObjs.length!==1?'s':'')+'</span>';
+    html += '<button class="mo-dept-add" onclick="addMoObj(\''+dept.key+'\')">+ Add objective</button>';
+    html += '</div>';
+    html += '<div class="mo-dept-body">';
+    if(dObjs.length === 0){
+      html += '<div class="mo-obj-empty">No objectives yet for '+dept.label+'. Click "+ Add objective" to define the north star for this vertical.</div>';
+    } else {
+      dObjs.forEach(function(o){
+        html += '<div class="mo-obj-row" data-moid="'+o.id+'">';
+        html += '<input class="mo-obj-input" type="text" value="'+esc(o.title)+'" placeholder="Objective title..." onchange="updateMoObj(\''+o.id+'\',\'title\',this.value)" oninput="saveDeb()">';
+        html += '<select class="mo-owner-sel" onchange="updateMoObj(\''+o.id+'\',\'owner\',this.value)">';
+        ['Louis','Yasin','Lucas','All three'].forEach(function(n){
+          html += '<option value="'+n+'"'+(o.owner===n?' selected':'')+'>'+n+'</option>';
+        });
+        html += '</select>';
+        html += '<select class="mo-prio-sel" onchange="updateMoObj(\''+o.id+'\',\'priority\',this.value)">';
+        ['High','Medium','Low'].forEach(function(p){
+          html += '<option value="'+p+'"'+(o.priority===p?' selected':'')+'>'+p+'</option>';
+        });
+        html += '</select>';
+        html += '<button class="mo-del-btn" onclick="delMoObj(\''+o.id+'\')">✕</button>';
+        html += '</div>';
+      });
+    }
+    html += '</div></div>';
+  });
+  el.innerHTML = html;
+}
+
+function addMoObj(vertical){
+  moCounter++;
+  monthlyObjs.push({ id:'mo'+moCounter, vertical:vertical, title:'', owner:'Louis', priority:'High' });
+  renderMonthlyObjs();
+  // Focus the new input
+  setTimeout(function(){
+    var inputs = document.querySelectorAll('[data-moid="mo'+moCounter+'"] .mo-obj-input');
+    if(inputs.length) inputs[0].focus();
+  }, 50);
+  saveState();
+}
+
+function updateMoObj(id, field, value){
+  var o = monthlyObjs.find(function(x){ return x.id === id; });
+  if(o) o[field] = value;
+  saveState();
+}
+
+function delMoObj(id){
+  monthlyObjs = monthlyObjs.filter(function(o){ return o.id !== id; });
+  renderMonthlyObjs();
+  saveState();
+}
+
+var saveDt;
+function saveDeb(){
+  clearTimeout(saveDt);
+  saveDt = setTimeout(function(){
+    // Sync text inputs back to state
+    document.querySelectorAll('.mo-obj-row').forEach(function(row){
+      var id = row.getAttribute('data-moid');
+      var o = monthlyObjs.find(function(x){ return x.id === id; });
+      if(o){
+        var inp = row.querySelector('.mo-obj-input');
+        if(inp) o.title = inp.value;
+      }
+    });
+    saveState();
+  }, 400);
+}
+
+// ── DECISIONS ──
+function renderDecisions(){
+  var el = document.getElementById('decList');
+  var html = '';
+  decisions.forEach(function(d, i){
+    html += '<div class="dec-row">';
+    html += '<div class="dec-num">'+pad(i+1)+'</div>';
+    html += '<textarea class="dec-input" onchange="decisions['+i+']=this.value;saveState()" rows="2">'+esc(d)+'</textarea>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function addDecision(){
+  decisions.push('');
+  renderDecisions();
+  var textareas = document.querySelectorAll('.dec-input');
+  if(textareas.length) textareas[textareas.length-1].focus();
+  saveState();
+}
+
+// ════════════════════════════════════════════════════════════
+// IMPORT
+// ════════════════════════════════════════════════════════════
+function openImport(){
+  renderWeekSlots();
+  document.getElementById('importInput').value = '';
+  document.getElementById('importModal').classList.add('show');
+  setTimeout(function(){ document.getElementById('importInput').focus(); }, 100);
+}
+function closeImport(){
+  document.getElementById('importModal').classList.remove('show');
+}
+
+function renderWeekSlots(){
+  var el = document.getElementById('weekSlots');
+  var html = '';
+  for(var i=0; i<4; i++){
+    var loaded = weeks[i] !== undefined;
+    html += '<div class="week-slot '+(loaded?'loaded':'')+'">Week '+(i+1)+(loaded?' · '+((weeks[i].week||'').slice(0,10)):'</div>');
+    if(!loaded) html += '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function confirmImport(){
+  var raw = document.getElementById('importInput').value.trim();
+  if(!raw){ alert('Paste a Friday Wrap-up JSON first.'); return; }
+  try {
+    var data = JSON.parse(raw);
+    if(data.type !== 'friday_wrapup') throw new Error('Expected a Friday Wrap-up JSON (type: friday_wrapup). Export it from the Friday Review.');
+    if(weeks.length >= 4){ alert('Already 4 weeks imported — this is a monthly meeting. Start fresh for next month.'); return; }
+    // Avoid duplicates by week date
+    var dup = weeks.some(function(w){ return w.week === data.week; });
+    if(dup){ alert('This week (' + data.week + ') is already imported.'); return; }
+    weeks.push(data);
+    saveState();
+    closeImport();
+    render();
+    alert('✓ Week ' + weeks.length + ' imported: ' + (data.week||'') + '\n' +
+          (data.objectives ? data.objectives.total + ' objectives' : '') + ' · ' +
+          (data.projectTasks ? data.projectTasks.total + ' project tasks' : ''));
+  } catch(e){
+    alert('Import failed: ' + e.message);
+  }
+}
+
+document.getElementById('importModal').addEventListener('click', function(e){
+  if(e.target === this) closeImport();
+});
+
+// ════════════════════════════════════════════════════════════
+// EXPORT
+// ════════════════════════════════════════════════════════════
+function exportMonthly(){
+  // Sync text inputs before export
+  document.querySelectorAll('.mo-obj-row').forEach(function(row){
+    var id = row.getAttribute('data-moid');
+    var o = monthlyObjs.find(function(x){ return x.id === id; });
+    if(o){ var inp = row.querySelector('.mo-obj-input'); if(inp) o.title = inp.value; }
+  });
+
+  var data = {
+    type: 'monthly_objectives',
+    month: new Date().toISOString().slice(0,7),
+    exportedAt: new Date().toISOString(),
+    objectives: monthlyObjs.filter(function(o){ return o.title && o.title.trim(); })
+  };
+  copyJSON(data, '✓ Monthly Objectives exported.\n\nImport this into the first Priority Stack of the month.\nThe weekly meetings will show these as a reference banner.\n\n' + data.objectives.length + ' objectives across ' + MO_DEPTS.length + ' verticals.');
+}
+
+function exportFull(){
+  document.querySelectorAll('.mo-obj-row').forEach(function(row){
+    var id = row.getAttribute('data-moid');
+    var o = monthlyObjs.find(function(x){ return x.id === id; });
+    if(o){ var inp = row.querySelector('.mo-obj-input'); if(inp) o.title = inp.value; }
+  });
+  var decVals = [];
+  document.querySelectorAll('.dec-input').forEach(function(t){ decVals.push(t.value); });
+
+  var data = {
+    type: 'monthly_meeting_record',
+    month: new Date().toISOString().slice(0,7),
+    exportedAt: new Date().toISOString(),
+    weeksImported: weeks.length,
+    monthlyObjectives: monthlyObjs,
+    decisions: decVals.filter(function(d){ return d.trim(); }),
+    mondayNotes: document.getElementById('mondayNotes').value,
+    weeks: weeks
+  };
+  copyJSON(data, '✓ Full Monthly Meeting record exported (' + weeks.length + ' weeks of data).');
+}
+
+function copyJSON(data, msg){
+  var json = JSON.stringify(data, null, 2);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(json).then(function(){ alert(msg); }).catch(function(){ fallback(json, msg); });
+  } else { fallback(json, msg); }
+}
+function fallback(json, msg){
+  var ta = document.createElement('textarea');
+  ta.value = json;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); alert(msg); } catch(e){ alert(json); }
+  document.body.removeChild(ta);
+}
+
+function resetMeeting(){
+  if(!confirm('Reset this monthly meeting? All imported weeks, objectives and decisions will be cleared.')) return;
+  weeks = []; monthlyObjs = []; decisions = [];
+  document.getElementById('mondayNotes').value = '';
+  localStorage.removeItem(getStorageKey());
+  render();
+}
+
+// ════════════════════════════════════════════════════════════
+// AUTO-SAVE on textarea changes
+// ════════════════════════════════════════════════════════════
+document.addEventListener('input', function(e){
+  if(e.target.id === 'mondayNotes') saveState();
+});
+
+// ════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════
+loadState();
+render();
+</script>
+</body>
+</html>

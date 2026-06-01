@@ -787,6 +787,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
   <div class="sl">General company objectives this week &mdash; by department &amp; owner</div>
   <div class="hint"><b>Reviewed by Louis, Yasin, and Lucas every Monday.</b> Click "Edit" to update direction or progress. Click any objective to expand its key results.</div>
 
+  <!-- MONTHLY OBJECTIVES BANNER -->
+  <div id="monthlyBanner" style="display:none;margin-bottom:14px;border:1px solid #C49A6C;border-left:4px solid #C49A6C;border-radius:10px;overflow:hidden">
+    <div onclick="toggleMonthlyBanner()" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(135deg,#FFFEF7,#FFF8E8);cursor:pointer;user-select:none">
+      <span style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:#92400E;letter-spacing:1px;text-transform:uppercase">📌 Monthly Objectives</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:#B08D57;margin-left:auto" id="monthlyBannerSub">— objectives this month</span>
+      <span style="font-size:11px;color:#C49A6C;transition:transform .2s" id="monthlyBannerToggle">▼</span>
+    </div>
+    <div id="monthlyBannerBody" style="display:none;padding:12px 16px;background:#FFFEF7;border-top:1px solid #E8D5A8">
+      <div id="monthlyBannerList"></div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="importMonthlyJSON()" style="background:transparent;border:1px dashed #C49A6C;color:#92400E;padding:5px 12px;border-radius:5px;font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer">Import Monthly JSON</button>
+        <button onclick="clearMonthlyObjs()" style="background:transparent;border:1px dashed #e0e0e0;color:#999;padding:5px 12px;border-radius:5px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;text-transform:uppercase;cursor:pointer">Clear</button>
+      </div>
+    </div>
+  </div>
+  <!-- Monthly JSON import textarea (hidden) -->
+  <div id="monthlyImportBox" style="display:none;margin-bottom:14px;background:#FFFEF7;border:1px solid #C49A6C;border-radius:8px;padding:14px">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#92400E;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Import Monthly Objectives JSON</div>
+    <div style="font-size:11px;color:#6B5634;margin-bottom:8px">Paste the JSON exported from the Monthly Meeting → Tab 04 → Export Monthly JSON.</div>
+    <textarea id="monthlyJsonArea" style="width:100%;min-height:70px;padding:8px;border:1px solid #C49A6C;border-radius:6px;background:#fff;font-family:monospace;font-size:11px;outline:none;resize:vertical" placeholder="Paste monthly_objectives JSON..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button onclick="confirmMonthlyImport()" style="background:#C49A6C;color:#fff;border:none;padding:6px 14px;border-radius:5px;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;cursor:pointer">Load</button>
+      <button onclick="cancelMonthlyImport()" style="background:transparent;border:1px solid #e0e0e0;color:#888;padding:6px 14px;border-radius:5px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer">Cancel</button>
+    </div>
+  </div>
+
   <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap">
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <span style="font-size:11px;color:#888;font-style:italic;align-self:center">Set this week's objectives by department. Completion is reviewed Friday.</span>
@@ -1058,6 +1084,93 @@ function startFresh(){
   reviewConfirmed=true;
   renderP();
 }
+
+// ===== MONTHLY OBJECTIVES BANNER =====
+var monthlyObjectives = [];
+
+function loadMonthlyObjs(){
+  try {
+    var raw = localStorage.getItem('vuc_monthly_objectives');
+    if(!raw) return;
+    var data = JSON.parse(raw);
+    if(data.objectives && Array.isArray(data.objectives)){
+      monthlyObjectives = data.objectives;
+      renderMonthlyBanner();
+    }
+  } catch(e){}
+}
+
+function renderMonthlyBanner(){
+  var banner = document.getElementById('monthlyBanner');
+  var list = document.getElementById('monthlyBannerList');
+  var sub = document.getElementById('monthlyBannerSub');
+  if(!monthlyObjectives || monthlyObjectives.length === 0){
+    banner.style.display = 'none';
+    return;
+  }
+  banner.style.display = 'block';
+  sub.textContent = monthlyObjectives.length + ' objective' + (monthlyObjectives.length !== 1 ? 's' : '') + ' this month';
+  var deptColors = {p:'#1E40AF',s:'#15803D',f:'#5B21B6',c:'#92400E'};
+  var deptLabels = {p:'Products',s:'Services',f:'Future',c:'General'};
+  var html = '';
+  monthlyObjectives.forEach(function(o){
+    var col = deptColors[o.vertical] || '#555';
+    var lbl = deptLabels[o.vertical] || 'VUC';
+    html += '<div style="display:flex;align-items:baseline;gap:10px;padding:5px 0;border-bottom:1px solid #F0E8D0">';
+    html += '<span style="font-family:\'DM Mono\',monospace;font-size:9px;font-weight:700;color:'+col+';min-width:60px;text-transform:uppercase;letter-spacing:.4px">'+lbl+'</span>';
+    html += '<span style="font-size:12px;color:#3A2E1A;line-height:1.4">'+escH(o.title)+'</span>';
+    html += '<span style="font-family:\'DM Mono\',monospace;font-size:9px;color:#B08D57;margin-left:auto;white-space:nowrap">'+escH(o.owner||'')+'</span>';
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+
+function toggleMonthlyBanner(){
+  var body = document.getElementById('monthlyBannerBody');
+  var tog = document.getElementById('monthlyBannerToggle');
+  var open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  tog.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+function importMonthlyJSON(){
+  document.getElementById('monthlyImportBox').style.display = 'block';
+  document.getElementById('monthlyBannerBody').style.display = 'none';
+  setTimeout(function(){ document.getElementById('monthlyJsonArea').focus(); }, 50);
+}
+
+function cancelMonthlyImport(){
+  document.getElementById('monthlyImportBox').style.display = 'none';
+}
+
+function confirmMonthlyImport(){
+  var raw = document.getElementById('monthlyJsonArea').value.trim();
+  if(!raw){ alert('Paste the Monthly Objectives JSON first.'); return; }
+  try {
+    var data = JSON.parse(raw);
+    if(data.type !== 'monthly_objectives') throw new Error('Expected type: monthly_objectives. Export it from the Monthly Meeting → Tab 04.');
+    localStorage.setItem('vuc_monthly_objectives', JSON.stringify(data));
+    monthlyObjectives = data.objectives || [];
+    renderMonthlyBanner();
+    document.getElementById('monthlyImportBox').style.display = 'none';
+    document.getElementById('monthlyJsonArea').value = '';
+    // Auto-open the banner
+    document.getElementById('monthlyBannerBody').style.display = 'block';
+    document.getElementById('monthlyBannerToggle').style.transform = 'rotate(180deg)';
+    alert('✓ ' + monthlyObjectives.length + ' monthly objectives loaded. The banner will appear every Monday as a reference.');
+  } catch(e){
+    alert('Import failed: ' + e.message);
+  }
+}
+
+function clearMonthlyObjs(){
+  if(!confirm('Clear monthly objectives from this view?')) return;
+  monthlyObjectives = [];
+  localStorage.removeItem('vuc_monthly_objectives');
+  renderMonthlyBanner();
+}
+
+function escH(s){ return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
 
 function showInfo(msg){
   var el=document.getElementById('import-info');
@@ -2353,6 +2466,8 @@ window.addEventListener('load', function(){
   var restored = restoreWeeklyState();
   // Always render objectives tab so its content is ready when user navigates there
   renderObj();
+  // Load monthly objectives banner
+  loadMonthlyObjs();
   // Build urgent banner regardless of restore
   setTimeout(function(){
     buildUrgentBanner();
